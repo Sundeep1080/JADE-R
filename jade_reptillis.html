@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JADE REPTILLIS v13 — Band SALT Analyser</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#c9d1d9;font-family:'Courier New',monospace;font-size:12px}
+h1{color:#ffd700;font-size:16px;padding:10px 16px;background:#0d3461;border-bottom:1px solid #ffd700}
+.subtitle{color:#80cbc4;font-size:10px;padding:4px 16px 8px;background:#0d3461}
+
+/* Upload zone */
+#upload-zone{margin:16px;padding:24px;border:2px dashed #40c4ff;border-radius:8px;text-align:center;cursor:pointer;transition:.2s}
+#upload-zone:hover,#upload-zone.drag{background:#0a1a2a;border-color:#ffd700}
+#upload-zone input{display:none}
+#upload-status{margin:8px 16px;padding:8px;background:#1a2332;border-radius:4px;color:#80cbc4;display:none}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;padding:0 16px;background:#0d1117;border-bottom:1px solid #37474f}
+.tab{padding:8px 18px;cursor:pointer;color:#607d8b;border-bottom:3px solid transparent;transition:.15s}
+.tab.active{color:#ffd700;border-bottom-color:#ffd700}
+.tab-content{display:none;padding:12px 16px}
+.tab-content.active{display:block}
+
+/* Summary cards */
+.cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.card{background:#1a2332;border:1px solid #37474f;border-radius:6px;padding:10px 14px;min-width:140px}
+.card-title{color:#607d8b;font-size:10px;margin-bottom:4px}
+.card-val{color:#ffd700;font-size:18px;font-weight:bold}
+.card-sub{color:#80cbc4;font-size:10px}
+
+/* Filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;align-items:center}
+.filters label{color:#80cbc4;font-size:10px}
+.filters select,.filters input{background:#1a2332;color:#c9d1d9;border:1px solid #37474f;border-radius:4px;padding:4px 8px;font-size:11px}
+.btn{background:#0d3461;color:#40c4ff;border:1px solid #40c4ff;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:11px}
+.btn:hover{background:#40c4ff;color:#0d1117}
+.btn-gold{background:#1a1a00;color:#ffd700;border-color:#ffd700}
+.btn-gold:hover{background:#ffd700;color:#0d1117}
+
+/* Trigger table */
+.tbl-wrap{overflow-x:auto;max-height:420px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#0d3461;color:#ffd700;padding:5px 8px;position:sticky;top:0;z-index:2;white-space:nowrap;text-align:left}
+td{padding:4px 8px;border-bottom:1px solid #1e2d3e;white-space:nowrap;cursor:pointer}
+tr:hover td{background:#1e2d3e}
+tr.selected td{background:#0a2a0a!important}
+.badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:bold}
+
+/* Reptile colours */
+.rep-GF{color:#69ff47}.rep-GM{color:#40c4ff}.rep-CROC{color:#80cbc4}
+.rep-COBRA{color:#ff5252}.rep-SENT{color:#ff8c00}.rep-KOMO_UP{color:#ff5252}
+.rep-KOMO_LO{color:#69ff47}.rep-RATTLE{color:#80cbc4}.rep-MON{color:#b39ddb}
+.rep-MOTH{color:#69ff47}.rep-CHAM{color:#90caf9}.rep-SIDE{color:#4fc3f7}
+.rep-IGUA{color:#a5d6a7}.rep-GECK{color:#80cbc4}.rep-PYTH{color:#ef9a9a}
+
+/* Payoff chart */
+#payoff-container{background:#1a2332;border:1px solid #37474f;border-radius:6px;padding:12px;margin-top:12px}
+#payoff-title{color:#ffd700;font-size:12px;margin-bottom:6px}
+#payoff-meta{color:#80cbc4;font-size:10px;margin-bottom:8px;line-height:1.6}
+canvas{display:block;margin:0 auto}
+
+/* Stats table */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.stat-box{background:#1a2332;border:1px solid #37474f;border-radius:6px;padding:10px}
+.stat-box h3{color:#ffd700;font-size:11px;margin-bottom:6px;border-bottom:1px solid #37474f;padding-bottom:4px}
+.stat-row{display:flex;justify-content:space-between;padding:2px 0;font-size:10px}
+.stat-label{color:#80cbc4}.stat-val{color:#c9d1d9}
+
+/* Indicator chart */
+#ind-canvas{display:block;margin:0 auto}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;font-size:10px}
+.leg-item{display:flex;align-items:center;gap:4px}
+.leg-dot{width:10px;height:3px;border-radius:2px}
+
+.no-data{color:#607d8b;padding:24px;text-align:center;font-size:13px}
+</style>
+</head>
+<body>
+<h1>🦎 JADE REPTILLIS v13 — Band SALT Analyser</h1>
+<div class="subtitle">Upload your CSV (^NSEI + ^INDIAVIX) → full trigger history + payoff diagrams for all 15 reptiles</div>
+
+<div id="upload-zone" onclick="document.getElementById('csv-input').click()" 
+     ondragover="event.preventDefault();this.classList.add('drag')"
+     ondragleave="this.classList.remove('drag')"
+     ondrop="handleDrop(event)">
+  <input type="file" id="csv-input" accept=".csv" onchange="handleFile(this.files[0])">
+  <div style="font-size:24px;margin-bottom:8px">📂</div>
+  <div style="color:#40c4ff;font-size:13px">Click or drag your CSV here</div>
+  <div style="color:#607d8b;font-size:10px;margin-top:6px">Columns needed: Date, Symbol, Open, High, Low, Close + ^NSEI and ^INDIAVIX rows</div>
+</div>
+<div id="upload-status"></div>
+
+<div class="tabs" id="tabs" style="display:none">
+  <div class="tab active" onclick="showTab('triggers')">📋 Trigger History</div>
+  <div class="tab" onclick="showTab('payoff')">📈 Payoff Diagram</div>
+  <div class="tab" onclick="showTab('indicators')">📊 Indicator Chart</div>
+  <div class="tab" onclick="showTab('stats')">🔢 Statistics</div>
+</div>
+
+<div id="tab-triggers" class="tab-content active">
+  <div class="cards" id="summary-cards"></div>
+  <div class="filters">
+    <label>Reptile:</label>
+    <select id="flt-reptile" onchange="renderTable()">
+      <option value="">All</option>
+      <option>GF</option><option>GM</option><option>CROC</option><option>COBRA</option>
+      <option>SENT</option><option>KOMO_UP</option><option>KOMO_LO</option>
+      <option>RATTLE</option><option>MON</option><option>MOTH</option>
+      <option>CHAM</option><option>SIDE</option><option>IGUA</option><option>GECK</option><option>PYTH</option>
+    </select>
+    <label>Zone:</label>
+    <select id="flt-zone" onchange="renderTable()">
+      <option value="">All</option>
+      <option>UPPER REJ</option><option>TOP EXTREME</option><option>VALUE AREA</option>
+      <option>BETWEEN</option><option>BOT EXTREME</option><option>LOWER REJ</option>
+    </select>
+    <label>Signal:</label>
+    <select id="flt-signal" onchange="renderTable()">
+      <option value="">All</option>
+      <option>B2</option><option>B1-OS</option><option>B1-MOM</option><option>B3</option>
+      <option>S2</option><option>S1-OS</option><option>S1-MOM</option><option>S3</option>
+    </select>
+    <button class="btn btn-gold" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+  <div class="tbl-wrap">
+    <table id="trigger-table">
+      <thead><tr>
+        <th>#</th><th>Date</th><th>Reptile</th><th>Signal</th><th>Zone</th>
+        <th>CMP</th><th>VIX</th><th>HVP%</th><th>off1</th><th>off2</th><th>off3</th><th>off4</th>
+        <th>Strike 1</th><th>Strike 2</th><th>Strike 3</th><th>Strike 4</th><th>Est Credit ₹</th><th>TP%</th><th>SL Rule</th>
+      </tr></thead>
+      <tbody id="trigger-body"></tbody>
+    </table>
+  </div>
+  <div style="color:#607d8b;font-size:10px;margin-top:6px">Click any row to view payoff diagram</div>
+</div>
+
+<div id="tab-payoff" class="tab-content">
+  <div id="payoff-container">
+    <div id="payoff-title">Select a trigger from the Trigger History tab to view payoff</div>
+    <div id="payoff-meta"></div>
+    <canvas id="payoff-canvas" width="900" height="380"></canvas>
+  </div>
+</div>
+
+<div id="tab-indicators" class="tab-content">
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#ffd700;height:8px;width:8px;border-radius:50%"></div><span>Price (^NSEI)</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#40c4ff"></div><span>HMA Fast</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#ff5252"></div><span>HMA Slow</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#69ff47;height:6px;border-radius:2px"></div><span>VA Hi</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#ff8c00;height:6px;border-radius:2px"></div><span>VA Lo</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#b39ddb"></div><span>Band edges</span></div>
+  </div>
+  <canvas id="ind-canvas" width="1100" height="480"></canvas>
+  <div style="margin-top:12px">
+    <canvas id="smi-canvas" width="1100" height="140"></canvas>
+  </div>
+</div>
+
+<div id="tab-stats" class="tab-content">
+  <div class="stats-grid" id="stats-grid"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// GLOBALS
+// ═══════════════════════════════════════════════════════════
+let nsei = [], vix = [], triggers = [], selectedTrigger = null;
+
+// ═══════════════════════════════════════════════════════════
+// FILE HANDLING
+// ═══════════════════════════════════════════════════════════
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  handleFile(e.dataTransfer.files[0]);
+}
+
+function handleFile(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => parseCSV(e.target.result);
+  reader.readAsText(file);
+}
+
+function status(msg,col='#80cbc4'){
+  const el = document.getElementById('upload-status');
+  el.style.display='block'; el.style.color=col; el.textContent=msg;
+}
+
+function parseCSV(text){
+  status('⏳ Parsing CSV...');
+  const lines = text.trim().split('\n');
+  const hdr = lines[0].split(',').map(h=>h.trim().replace(/"/g,''));
+  const iDate=hdr.indexOf('Date'), iSym=hdr.indexOf('Symbol');
+  const iO=hdr.indexOf('Open'), iH=hdr.indexOf('High');
+  const iL=hdr.indexOf('Low'), iC=hdr.indexOf('Close');
+  const iVol=hdr.indexOf('Volume');
+
+  if(iDate<0||iSym<0||iC<0){status('❌ CSV missing required columns (Date, Symbol, Close)','#ff5252');return;}
+
+  const nseiRows=[], vixRows=[];
+  for(let i=1;i<lines.length;i++){
+    const cols=lines[i].split(',').map(c=>c.trim().replace(/"/g,''));
+    if(cols.length<4) continue;
+    const sym=cols[iSym];
+    const row={
+      date:cols[iDate], open:+cols[iO]||0, high:+cols[iH]||0,
+      low:+cols[iL]||0, close:+cols[iC]||0, volume:iVol>=0?+cols[iVol]||0:0
+    };
+    if(!row.close) continue;
+    if(sym==='NSEI'||sym==='^NSEI') nseiRows.push(row);
+    else if(sym==='INDIAVIX'||sym==='^INDIAVIX') vixRows.push(row);
+  }
+
+  if(nseiRows.length<30){status('❌ Need at least 30 rows of ^NSEI data','#ff5252');return;}
+
+  nseiRows.sort((a,b)=>a.date>b.date?1:-1);
+  vixRows.sort((a,b)=>a.date>b.date?1:-1);
+
+  // Align VIX to NSEI dates
+  const vixMap={};
+  vixRows.forEach(r=>vixMap[r.date]=r.close);
+
+  nsei = nseiRows.map(r=>({...r, vix: vixMap[r.date]||null}));
+
+  // Fill missing VIX by forward-fill
+  let lastVix=15;
+  nsei.forEach(r=>{if(r.vix!==null)lastVix=r.vix; else r.vix=lastVix;});
+
+  status(`✅ Loaded ${nsei.length} NSEI bars  |  VIX coverage: ${vixRows.length} bars`,'#69ff47');
+  runEngine();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MATH HELPERS
+// ═══════════════════════════════════════════════════════════
+function wma(arr, len){
+  // Weighted Moving Average
+  const result=new Array(arr.length).fill(NaN);
+  for(let i=len-1;i<arr.length;i++){
+    let num=0,den=0;
+    for(let j=0;j<len;j++){num+=(len-j)*arr[i-j];den+=len-j;}
+    result[i]=num/den;
+  }
+  return result;
+}
+
+function hma(arr, len){
+  const half=Math.floor(len/2), sqlen=Math.floor(Math.sqrt(len));
+  const wH=wma(arr,half), wF=wma(arr,len);
+  const diff=arr.map((_,i)=>isNaN(wH[i])||isNaN(wF[i])?NaN:2*wH[i]-wF[i]);
+  return wma(diff,sqlen);
+}
+
+function ema(arr,len){
+  const k=2/(len+1), r=new Array(arr.length).fill(NaN);
+  let started=false, val=0;
+  for(let i=0;i<arr.length;i++){
+    if(isNaN(arr[i]))continue;
+    if(!started){val=arr[i];started=true;}
+    else val=arr[i]*k+val*(1-k);
+    r[i]=val;
+  }
+  return r;
+}
+
+function sma(arr,len){
+  const r=new Array(arr.length).fill(NaN);
+  for(let i=len-1;i<arr.length;i++){
+    let s=0; for(let j=0;j<len;j++)s+=arr[i-j]; r[i]=s/len;
+  }
+  return r;
+}
+
+function atr(bars,len){
+  const tr=bars.map((b,i)=>{
+    if(i===0)return b.high-b.low;
+    return Math.max(b.high-b.low,Math.abs(b.high-bars[i-1].close),Math.abs(b.low-bars[i-1].close));
+  });
+  // Wilder smoothing
+  const r=new Array(bars.length).fill(NaN);
+  let sum=0;
+  for(let i=0;i<len&&i<tr.length;i++)sum+=tr[i];
+  if(len<=tr.length){r[len-1]=sum/len;}
+  for(let i=len;i<tr.length;i++){r[i]=(r[i-1]*(len-1)+tr[i])/len;}
+  return r;
+}
+
+function snap(x){return Math.round(x/50)*50;}
+
+function estP(cmp,K,hv,vixClose,dte){
+  const vm=vixClose>18?1.45:vixClose<12?0.65:1.0;
+  const ivMult=1.15;
+  const iv=(hv/100)*vm*ivMult;
+  const tv=Math.sqrt(dte/365);
+  const dist=Math.abs(cmp-K)/cmp;
+  const raw=cmp*iv*tv*Math.exp(-dist*6.5)*0.5;
+  return Math.max(Math.round(raw),1);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAIN ENGINE
+// ═══════════════════════════════════════════════════════════
+const CFG={
+  lookback:100, bands:10, hmaFast:9, hmaSlow:10,
+  smiK:10, smiD:3, smiSm:3, smiBull:40, smiBear:-40,
+  sigWt:0.6, atrLen:14, ivMult:1.15, hvGate:25,
+  sc1:0.5, sc2:1.0, sc3:1.5, sc4:2.0, sc6:3.0,
+  dte:45, dteR:16, tortDte:45, chopB:20, chopX:3
+};
+
+function runEngine(){
+  status('⚙️ Running JADE REPTILLIS engine...','#ffd700');
+  setTimeout(()=>{
+    try{
+      const bars=nsei;
+      const n=bars.length;
+      const closes=bars.map(b=>b.close);
+      const highs=bars.map(b=>b.high);
+      const lows=bars.map(b=>b.low);
+      const vixArr=bars.map(b=>b.vix);
+
+      // ── Indicators ──────────────────────────────────────
+      const hmaF=hma(closes,CFG.hmaFast);
+      const hmaS=hma(closes,CFG.hmaSlow);
+      const atr14=atr(bars,CFG.atrLen);
+
+      // SMI
+      const smiK=CFG.smiK;
+      const smiRng=[], smiMid=[];
+      for(let i=0;i<n;i++){
+        const lo=Math.min(...lows.slice(Math.max(0,i-smiK+1),i+1));
+        const hi=Math.max(...highs.slice(Math.max(0,i-smiK+1),i+1));
+        smiRng.push(hi-lo);
+        smiMid.push(closes[i]-(hi+lo)/2);
+      }
+      const smiDs=ema(ema(smiMid,CFG.smiD),CFG.smiD);
+      const smiHLD=ema(ema(smiRng,CFG.smiD),CFG.smiD);
+      const smiVal=smiDs.map((v,i)=>smiHLD[i]?v/(smiHLD[i]/2)*100:0);
+      const smiSig=ema(smiVal,CFG.smiSm);
+
+      // HV20 and HVP
+      const logR=closes.map((c,i)=>i===0?0:Math.log(c/closes[i-1]));
+      const hv20arr=sma(logR.map(r=>r*r),20).map(v=>isNaN(v)?NaN:Math.sqrt(v*252)*100);
+
+      // HVP: percentile rank of hv20 over 252-bar rolling window
+      const hvPctArr=hv20arr.map((hv,i)=>{
+        if(isNaN(hv))return 50;
+        const win=hv20arr.slice(Math.max(0,i-251),i+1).filter(x=>!isNaN(x));
+        const lo=Math.min(...win), hi=Math.max(...win);
+        return hi>lo?Math.round((hv-lo)/(hi-lo)*100):50;
+      });
+
+      // ── Band engine (runs on rolling lookback window) ──
+      // Store band data per bar
+      const bandData=[];
+      for(let i=0;i<n;i++){
+        const win=Math.min(CFG.lookback,i+1);
+        const wSlice=bars.slice(i-win+1,i+1);
+        const hiDyn=Math.max(...wSlice.map(b=>b.high));
+        const loDyn=Math.min(...wSlice.map(b=>b.low));
+        const nb=CFG.bands;
+        const pRng=hiDyn-loDyn;
+        const bW=pRng/nb;
+        const bBase=loDyn;
+        const bBars=new Array(nb).fill(0);
+        const bHi=[], bLo=[];
+        for(let b=0;b<nb;b++){bHi.push(bBase+bW*(b+1));bLo.push(bBase+bW*b);}
+        // Count closes in each band
+        wSlice.forEach(bar=>{
+          for(let b=0;b<nb;b++){
+            if(bar.close>=bLo[b]&&bar.close<bHi[b]){bBars[b]++;break;}
+            if(b===nb-1&&bar.close>=bHi[nb-1])bBars[nb-1]++;
+          }
+        });
+        // Rank bands by bar count (descending)
+        const ranks=[...Array(nb).keys()].sort((a,b2)=>bBars[b2]-bBars[a]);
+        const r1=ranks[0],r2=ranks[1],r3=ranks[2];
+        const vaHiIdx=Math.max(r1,r2,r3);
+        const vaLoIdx=Math.min(r1,r2,r3);
+        const vaHiP=bHi[vaHiIdx], vaLoP=bLo[vaLoIdx];
+        const vaMidP=(vaHiP+vaLoP)/2;
+        const vaWidth=vaHiP-vaLoP;
+        // Current band
+        let curBand=0;
+        const cmp=closes[i];
+        for(let b=0;b<nb;b++){if(cmp>=bLo[b]&&cmp<bHi[b]){curBand=b;break;} if(b===nb-1)curBand=nb-1;}
+        // Zone booleans
+        const inVA=curBand>=vaLoIdx&&curBand<=vaHiIdx;
+        const aboveVA=curBand>vaHiIdx, belowVA=curBand<vaLoIdx;
+        const inB10=curBand===nb-1, inB9=curBand===nb-2;
+        const inB9or10=inB9||inB10;
+        const inB1=curBand===0, inB2=curBand===1;
+        const inB1or2=inB1||inB2;
+        const btwnVAREJ=!inVA&&!inB9or10&&!inB1or2;
+
+        // Offsets
+        const hv=hv20arr[i]||15;
+        const vm=vixArr[i]>18?1.45:vixArr[i]<12?0.65:1.0;
+        const sigMove=Math.round(cmp*(hv/100)*vm*CFG.ivMult*Math.sqrt(CFG.dte/365));
+        const at=atr14[i]||sigMove*0.5;
+        const baseMove=Math.round(sigMove*CFG.sigWt+at*(1-CFG.sigWt));
+        const off1=Math.max(snap(baseMove*CFG.sc1),snap(at*0.5));
+        const off2=Math.max(snap(baseMove*CFG.sc2),snap(at*1.0));
+        const off3=Math.max(snap(baseMove*CFG.sc3),snap(at*1.5));
+        const off4=Math.max(snap(baseMove*CFG.sc4),snap(at*2.0));
+        const off6=Math.max(snap(baseMove*CFG.sc6),snap(at*3.0));
+
+        bandData.push({
+          i, cmp, bHi, bLo, bBars, ranks, r1, r2, r3,
+          vaHiP, vaLoP, vaMidP, vaWidth, vaHiIdx, vaLoIdx,
+          curBand, inVA, aboveVA, belowVA, inB10, inB9, inB9or10,
+          inB1, inB2, inB1or2, btwnVAREJ, nb,
+          off1, off2, off3, off4, off6, baseMove, at
+        });
+      }
+
+      // ── SALT signals per bar ─────────────────────────────
+      const signals=[];
+      let b2Comp=false, s2Comp=false;
+      let chopTopCnt=0, chopBotCnt=0, lastTopBar=-99, lastBotBar=-99;
+
+      for(let i=2;i<n;i++){
+        const hF=hmaF[i], hS=hmaS[i];
+        const hFp=hmaF[i-1], hSp=hmaS[i-1];
+        if(isNaN(hF)||isNaN(hS))continue;
+        const hmaBull=hF>hS, hmaBear=hF<hS;
+        const hmaFlat=Math.abs(hF-hS)<closes[i]*0.0001;
+        const hmaCrsBull=(hFp<=hSp&&hF>hS);
+        const hmaCrsBear=(hFp>=hSp&&hF<hS);
+        const hmaFDir=hF-hFp;
+        const hmaFPrevDir=hFp-hmaF[i-2];
+        const sv=smiVal[i];
+        const smiBull=sv>CFG.smiBull, smiBear=sv<CFG.smiBear;
+        const smiNeut=!smiBull&&!smiBear;
+        const smiOB=sv>=CFG.smiBull, smiOS=sv<=CFG.smiBear;
+        const smiOBp=smiVal[i-1]>=CFG.smiBull, smiOSp=smiVal[i-1]<=CFG.smiBear;
+        const hv=hv20arr[i]||15;
+        const hvPct=hvPctArr[i];
+        const gatePass=hvPct>=CFG.hvGate;
+        const bd=bandData[i];
+
+        // Chop filter
+        if(hmaCrsBull){
+          chopBotCnt=(i-lastBotBar<CFG.chopB)?chopBotCnt+1:1;
+          lastBotBar=i;
+        }
+        if(hmaCrsBear){
+          chopTopCnt=(i-lastTopBar<CFG.chopB)?chopTopCnt+1:1;
+          lastTopBar=i;
+        }
+        const chopTop=chopTopCnt>=CFG.chopX;
+        const chopBot=chopBotCnt>=CFG.chopX;
+
+        // SALT signals
+        let saltSig=null;
+        if(hmaCrsBull&&smiOS){saltSig='B2';b2Comp=true;}
+        else if(hmaFDir>0&&hmaFPrevDir<=0&&smiOS&&!hmaCrsBull)saltSig='B1-OS';
+        else if(hmaCrsBull&&b2Comp)saltSig='B1-MOM';
+        else if(smiOS&&!smiOSp&&hmaBull&&hmaFDir>0&&b2Comp&&!hmaCrsBull)saltSig='B3';
+        else if(hmaCrsBull&&!smiOS)saltSig='HSE';
+
+        if(hmaCrsBear&&smiOB){saltSig='S2';s2Comp=true;}
+        else if(hmaFDir<0&&hmaFPrevDir>=0&&smiOB&&!hmaCrsBear)saltSig='S1-OS';
+        else if(hmaCrsBear&&s2Comp&&!saltSig)saltSig='S1-MOM';
+        else if(smiOB&&!smiOBp&&hmaBear&&hmaFDir<0&&s2Comp&&!hmaCrsBear&&!saltSig)saltSig='S3';
+        else if(hmaCrsBear&&!smiOB&&!saltSig)saltSig='HLE';
+        if(hmaCrsBear&&smiOB&&!saltSig)saltSig='LE';
+
+        signals.push({
+          i, date:bars[i].date, saltSig,
+          hmaBull, hmaBear, hmaFlat, hmaCrsBull, hmaCrsBear,
+          hmaFDir, hmaFPrevDir, smiBull, smiBear, smiNeut,
+          smiOB, smiOS, hv, hvPct, gatePass,
+          chopTop, chopBot, b2Comp, s2Comp,
+          ...bd
+        });
+      }
+
+      // ── Reptile triggers ────────────────────────────────
+      triggers=[];
+      let gfActive=false, gmActive=false, mothActive=false, komoActive=false, koLoActive=false;
+
+      signals.forEach((s,si)=>{
+        const {i,date,cmp,off1,off2,off3,off4,off6,hvPct,hv,
+               inVA,btwnVAREJ,inB9or10,inB1or2,inB9,inB10,inB1,inB2,
+               vaHiP,vaLoP,vaMidP,vaWidth,bHi,bLo,nb,
+               hmaBull,hmaBear,hmaFlat,hmaCrsBull,hmaCrsBear,
+               smiBull,smiBear,smiNeut,smiOB,smiOS,gatePass,
+               chopTop,chopBot,saltSig,at} = s;
+        const vixClose=bars[i].vix||15;
+
+        // Helper: estimate credit for a spread
+        const ep=(K)=>estP(cmp,K,hv,vixClose,CFG.dte);
+
+        // ── GF GRANDFATHER ──
+        if(inB9or10&&hmaCrsBear&&smiOB&&!gfActive&&!chopTop&&gatePass){
+          const BP=snap(cmp-off4), SP=snap(cmp-off6);
+          const SC=snap(bHi[nb-1]), BC=snap(bHi[nb-1]+off2);
+          const debit=ep(BP)*2-ep(SP)-ep(SC);
+          triggers.push({date,reptile:'GF',signal:saltSig||'S2',zone:'UPPER REJ',cmp,vixClose,hvPct,
+            off1,off2,off3,off4,s1:BP,s2:SP,s3:SC,s4:BC,
+            legs:[{type:'BP',K:BP,qty:2},{type:'SP',K:SP,qty:1},{type:'SC',K:SC,qty:1},{type:'BC',K:BC,qty:1}],
+            credit:-Math.round(debit),tp:'Direction move',sl:'Debit max loss',tp_pct:null,sl_rule:'HMA up + SMI OS'});
+          gfActive=true;
+        }
+        if(gfActive&&inB1&&hmaCrsBull&&smiOS)gfActive=false;
+
+        // ── GM GRANDMOTHER ──
+        if(inB1or2&&hmaCrsBull&&smiOS&&!gmActive&&!chopBot&&gatePass){
+          const BC=snap(cmp+off4), SC=snap(cmp+off6);
+          const SP=snap(bLo[0]), BP=snap(bLo[0]-off2);
+          const debit=ep(BC)*2-ep(SC)-ep(SP);
+          triggers.push({date,reptile:'GM',signal:saltSig||'B2',zone:'LOWER REJ',cmp,vixClose,hvPct,
+            off1,off2,off3,off4,s1:BC,s2:SC,s3:SP,s4:BP,
+            legs:[{type:'BC',K:BC,qty:2},{type:'SC',K:SC,qty:1},{type:'SP',K:SP,qty:1},{type:'BP',K:BP,qty:1}],
+            credit:-Math.round(debit),tp:'Direction move',sl:'Debit max loss',tp_pct:null,sl_rule:'HMA dn + SMI OB'});
+          gmActive=true;
+        }
+        if(gmActive&&inB10&&hmaCrsBear&&smiOB)gmActive=false;
+
+        // ── FAT CROCODILE ──
+        if(inVA&&gatePass){
+          const SC=snap(vaHiP), BC=snap(vaHiP+off2);
+          const SP=snap(vaLoP), BP=snap(vaLoP-off2);
+          const cr=ep(SC)+ep(SP)-ep(BC)-ep(BP);
+          if(cr>0&&(triggers.length===0||triggers[triggers.length-1].reptile!=='CROC'||triggers[triggers.length-1].date!==date)){
+            triggers.push({date,reptile:'CROC',signal:'VA_ENTRY',zone:'VALUE AREA',cmp,vixClose,hvPct,
+              off1,off2,off3,off4,s1:SC,s2:BC,s3:SP,s4:BP,
+              legs:[{type:'SC',K:SC,qty:1},{type:'BC',K:BC,qty:1},{type:'SP',K:SP,qty:1},{type:'BP',K:BP,qty:1}],
+              credit:Math.round(cr),tp:'50% of credit',sl:'VA BREAK',tp_pct:50,sl_rule:'Price closes outside VA'});
+          }
+        }
+
+        // ── KING COBRA ──
+        if(inVA&&hvPct<35&&hmaFlat&&smiNeut&&!mothActive&&gatePass){
+          const SC=snap(vaMidP), SP=snap(vaMidP);
+          const BC=snap(vaMidP+off2), BP=snap(vaMidP-off2);
+          const cr=ep(SC)+ep(SP)-ep(BC)-ep(BP);
+          triggers.push({date,reptile:'COBRA',signal:saltSig||'FLAT',zone:'VALUE AREA',cmp,vixClose,hvPct,
+            off1,off2,off3,off4,s1:SC,s2:SP,s3:BC,s4:BP,
+            legs:[{type:'SC',K:SC,qty:1},{type:'SP',K:SP,qty:1},{type:'BC',K:BC,qty:1},{type:'BP',K:BP,qty:1}],
+            credit:Math.round(cr),tp:'40% of credit',sl:'off2 breach',tp_pct:40,sl_rule:'Price beyond vaMid ± off2'});
+        }
+
+        // ── SENTINEL ──
+        if(!inVA&&gatePass&&!komoActive&&!koLoActive){
+          const SP=snap(cmp-off1), SC=snap(cmp+off1);
+          const BP=snap(cmp-off3), BC=snap(cmp+off3);
+          const cr=ep(SC)+ep(SP)-ep(BC)-ep(BP);
+          if(cr>0){
+            triggers.push({date,reptile:'SENT',signal:saltSig||'GUARD',zone:inB9or10?'UPPER REJ':inB1or2?'BOT EXTREME':'BETWEEN',
+              cmp,vixClose,hvPct,off1,off2,off3,off4,s1:SP,s2:SC,s3:BP,s4:BC,
+              legs:[{type:'SP',K:SP,qty:1},{type:'SC',K:SC,qty:1},{type:'BP',K:BP,qty:1},{type:'BC',K:BC,qty:1}],
+              credit:Math.round(cr),tp:'Expires worthless',sl:'2x credit',tp_pct:null,sl_rule:'Upgrade to Komodo or 2x credit'});
+          }
+        }
+
+        // ── KOMODO UPPER ──
+        if(inB9or10&&hmaBear&&smiBear&&hvPct>35&&gatePass){
+          komoActive=true;
+          const SP=snap(cmp), SC=snap(cmp+off1);
+          const BP=snap(cmp-off3), BC=snap(cmp+off3);
+          const cr=ep(SP)*2+ep(SC)-ep(BP)-ep(BC);
+          triggers.push({date,reptile:'KOMO_UP',signal:saltSig||'S2',zone:'UPPER REJ',cmp,vixClose,hvPct,
+            off1,off2,off3,off4,s1:SP,s2:SC,s3:BP,s4:BC,
+            legs:[{type:'SP',K:SP,qty:2},{type:'SC',K:SC,qty:1},{type:'BP',K:BP,qty:1},{type:'BC',K:BC,qty:1}],
+            credit:Math.round(cr),tp:'50% of credit',sl:'2x credit',tp_pct:50,sl_rule:'HMA flips UP or 2x credit loss'});
+        }else komoActive=false;
+
+        // ── KOMODO LOWER ──
+        if(inB1or2&&hmaBull&&smiBull&&hvPct>35&&gatePass){
+          koLoActive=true;
+          const SC=snap(cmp), SP=snap(cmp-off1);
+          const BP=snap(cmp-off3), BC=snap(cmp+off3);
+          const cr=ep(SC)*2+ep(SP)-ep(BP)-ep(BC);
+          triggers.push({date,reptile:'KOMO_LO',signal:saltSig||'B2',zone:'LOWER REJ',cmp,vixClose,hvPct,
+            off1,off2,off3,off4,s1:SC,s2:SP,s3:BP,s4:BC,
+            legs:[{type:'SC',K:SC,qty:2},{type:'SP',K:SP,qty:1},{type:'BP',K:BP,qty:1},{type:'BC',K:BC,qty:1}],
+            credit:Math.round(cr),tp:'50% of credit',sl:'2x credit',tp_pct:50,sl_rule:'HMA flips DOWN or 2x credit loss'});
+        }else koLoActive=false;
+
+        // ── RATTLESNAKE ──
+        if((inB9or10||inB1or2)&&!komoActive&&!koLoActive&&gatePass){
+          const bull=inB9or10;
+          const BC=snap(cmp+(bull?off1:-off1)), SC2=snap(cmp+(bull?off2:-off2));
+          const BC2=snap(cmp+(bull?off4:-off4)), SP=snap(cmp+(bull?-off1:off1));
+          const cr=ep(SC2)*2-ep(BC)-ep(BC2)+ep(SP);
+          triggers.push({date,reptile:'RATTLE',signal:saltSig||'REJ',zone:bull?'UPPER REJ':'LOWER REJ',
+            cmp,vixClose,hvPct,off1,off2,off3,off4,s1:BC,s2:SC2,s3:BC2,s4:SP,
+            legs:[{type:bull?'BC':'BP',K:BC,qty:1},{type:bull?'SC':'SP',K:SC2,qty:2},
+                  {type:bull?'BC':'BP',K:BC2,qty:1},{type:bull?'SP':'SC',K:SP,qty:1}],
+            credit:Math.round(cr),tp:'Pin at body',sl:'Defined risk',tp_pct:null,sl_rule:'DTE<7 or full Komodo fires'});
+        }
+
+        // ── MONITOR LIZARD ──
+        if(btwnVAREJ&&((hmaBull&&smiBull)||(hmaBear&&smiBear))&&!hmaFlat&&gatePass){
+          const bull=hmaBull&&smiBull;
+          const SC=snap(cmp+(bull?off1:-off1)), BC=snap(cmp+(bull?off2:-off2));
+          const SP=snap(cmp+(bull?-off3:off3)), BP=snap(cmp+(bull?-off4:off4));
+          const cr=ep(SC)+ep(SP)-ep(BC)-ep(BP);
+          triggers.push({date,reptile:'MON',signal:saltSig||(bull?'B2':'S2'),zone:'BETWEEN',
+            cmp,vixClose,hvPct,off1,off2,off3,off4,s1:SC,s2:BC,s3:SP,s4:BP,
+            legs:[{type:'SC',K:SC,qty:1},{type:'BC',K:BC,qty:1},{type:'SP',K:SP,qty:1},{type:'BP',K:BP,qty:1}],
+            credit:Math.round(cr),tp:'40% of credit',sl:'HMA flip',tp_pct:40,sl_rule:'HMA direction flip against trade'});
+        }
+
+        // ── MOTHER LIZARD ──
+        if(btwnVAREJ&&hmaFlat&&smiNeut&&gatePass){
+          mothActive=true;
+          const SC1=snap(cmp+off1),SP1=snap(cmp-off1);
+          const SC2=snap(cmp+off2),SP2=snap(cmp-off2);
+          const BC1=SC2,BP1=SP2;
+          const BC2=snap(cmp+off3),BP2=snap(cmp-off3);
+          const cr=ep(SC1)+ep(SP1)+ep(SC2)+ep(SP2)-ep(BC1)-ep(BP1)-ep(BC2)-ep(BP2);
+          triggers.push({date,reptile:'MOTH',signal:'FLAT',zone:'BETWEEN',
+            cmp,vixClose,hvPct,off1,off2,off3,off4,s1:SC1,s2:SP1,s3:BC2,s4:BP2,
+            legs:[{type:'SC',K:SC1,qty:1},{type:'SP',K:SP1,qty:1},{type:'SC',K:SC2,qty:1},{type:'SP',K:SP2,qty:1},
+                  {type:'BC',K:BC1,qty:1},{type:'BP',K:BP1,qty:1},{type:'BC',K:BC2,qty:1},{type:'BP',K:BP2,qty:1}],
+            credit:Math.round(cr),tp:'45% of credit',sl:'off3 breach',tp_pct:45,sl_rule:'Price beyond CMP ± off3 at entry'});
+        }else mothActive=false;
+
+        // ── CHAMELEON ──
+        if(btwnVAREJ&&((hmaBull&&smiBear)||(hmaBear&&smiBull))&&gatePass){
+          const SP=snap(cmp-off1),SC=snap(cmp+off1);
+          const BP=snap(cmp-off2),BC=snap(cmp+off2);
+          const cr=ep(SP)*3+ep(SC)*3-ep(BP)*2-ep(BC)*2;
+          triggers.push({date,reptile:'CHAM',signal:'CONFLICT',zone:'BETWEEN',
+            cmp,vixClose,hvPct,off1,off2,off3,off4,s1:SP,s2:SC,s3:BP,s4:BC,
+            legs:[{type:'SP',K:SP,qty:3},{type:'SC',K:SC,qty:3},{type:'BP',K:BP,qty:2},{type:'BC',K:BC,qty:2}],
+            credit:Math.round(cr),tp:'40% of credit',sl:'Direction confirms',tp_pct:40,sl_rule:'HMA+SMI both agree direction'});
+        }
+
+        // ── SIDEWINDER ──
+        if(!inVA&&gatePass){
+          const bull=hmaBull||saltSig==='B2'||saltSig==='B3';
+          const SC=snap(cmp+(bull?off1:-off1)), BC=snap(cmp+(bull?off2:-off2));
+          const SP=hvPct>40?snap(cmp+(bull?-off1:off1)):null;
+          const cr=ep(SC)+(SP?ep(SP):0)-(ep(BC)*0.6);
+          triggers.push({date,reptile:'SIDE',signal:saltSig||'BG',zone:'BETWEEN',
+            cmp,vixClose,hvPct,off1,off2,off3,off4,s1:SC,s2:BC,s3:SP||0,s4:0,
+            legs:[{type:bull?'SC':'SP',K:SC,qty:1},{type:bull?'BC':'BP',K:BC,qty:1},
+                  ...(SP?[{type:bull?'SP':'SC',K:SP,qty:1}]:[])],
+            credit:Math.round(cr),tp:'Calendar edge',sl:'HMA reversal',tp_pct:40,sl_rule:'Near leg reversal, close near leg'});
+        }
+
+        // ── IGUANA ──
+        if(inB9&&!gfActive&&gatePass){
+          const SP=snap(bLo[nb-2]), SC=snap(bHi[nb-2]+off1);
+          const BC=snap(bHi[nb-2]+off2), BP=snap(bLo[nb-2]-off2);
+          const cr=ep(SC)+ep(SP)-ep(BC)-ep(BP);
+          triggers.push({date,reptile:'IGUA',signal:'B9_PASSIVE',zone:'TOP EXTREME',
+            cmp,vixClose,hvPct,off1,off2,off3,off4,s1:SP,s2:SC,s3:BC,s4:BP,
+            legs:[{type:'SP',K:SP,qty:1},{type:'SC',K:SC,qty:1},{type:'BC',K:BC,qty:1},{type:'BP',K:BP,qty:1}],
+            credit:Math.round(cr),tp:'50% of credit or GF fires',sl:'HMA dn cross = GF fires',tp_pct:50,sl_rule:'Close Iguana, open GF same bar'});
+        }
+
+        // ── GECKO ──
+        if(inB2&&!gmActive&&gatePass){
+          const SC=snap(bHi[1]), SP=snap(bLo[1]-off1);
+          const BP=snap(bLo[1]-off2), BC=snap(bHi[1]+off2);
+          const cr=ep(SC)+ep(SP)-ep(BP)-ep(BC);
+          triggers.push({date,reptile:'GECK',signal:'B2_PASSIVE',zone:'BOT EXTREME',
+            cmp,vixClose,hvPct,off1,off2,off3,off4,s1:SC,s2:SP,s3:BP,s4:BC,
+            legs:[{type:'SC',K:SC,qty:1},{type:'SP',K:SP,qty:1},{type:'BP',K:BP,qty:1},{type:'BC',K:BC,qty:1}],
+            credit:Math.round(cr),tp:'50% of credit or GM fires',sl:'HMA up cross = GM fires',tp_pct:50,sl_rule:'Close Gecko, open GM same bar'});
+        }
+
+        // ── PYTHON/BOA ──
+        if(!inVA&&hvPct>60&&!komoActive&&!koLoActive&&gatePass){
+          const bull=hmaBull;
+          const SC=snap(cmp+(bull?off1:-off1));
+          const BC=snap(cmp+(bull?off2:-off2));
+          const SP=snap(cmp+(bull?-off2:off2));
+          const spCr=ep(SP);
+          const incomeOn=spCr>=off1*0.3;
+          const cr=ep(SC)*-1+ep(BC)*2+(incomeOn?spCr:0)-ep(SC);
+          triggers.push({date,reptile:'PYTH',signal:saltSig||'HVP>60',zone:'BETWEEN',
+            cmp,vixClose,hvPct,off1,off2,off3,off4,s1:SC,s2:BC,s3:incomeOn?SP:0,s4:0,
+            legs:[{type:bull?'SC':'SP',K:SC,qty:1},{type:bull?'BC':'BP',K:BC,qty:2},
+                  ...(incomeOn?[{type:bull?'SP':'SC',K:SP,qty:1}]:[])],
+            credit:Math.round(ep(SC)+(incomeOn?spCr:0)),
+            tp:'Income 40% + direction unlimited',sl:'HVP drop <50%',tp_pct:40,sl_rule:'IV collapse or Komodo fires'});
+        }
+      });
+
+      // Deduplicate CROC and SENT (keep first per day)
+      const dedup=new Map();
+      const filtered=[];
+      triggers.forEach(t=>{
+        if(t.reptile==='CROC'||t.reptile==='SENT'){
+          const key=t.reptile+t.date;
+          if(!dedup.has(key)){dedup.set(key,true);filtered.push(t);}
+        }else filtered.push(t);
+      });
+      triggers=filtered;
+
+      // Store computed arrays for chart
+      window._eng={hmaF,hmaS,smiVal,smiSig,hv20arr,hvPctArr,bandData,signals,bars:nsei};
+
+      status(`✅ Engine complete — ${triggers.length} triggers found across ${nsei.length} bars`,'#69ff47');
+      document.getElementById('tabs').style.display='flex';
+      ['triggers','payoff','indicators','stats'].forEach(t=>{
+        document.getElementById('tab-'+t).classList.remove('active');
+      });
+      document.getElementById('tab-triggers').classList.add('active');
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.tab')[0].classList.add('active');
+
+      renderSummaryCards();
+      renderTable();
+      renderIndicatorChart();
+      renderStats();
+    }catch(err){status('❌ Engine error: '+err.message,'#ff5252');console.error(err);}
+  },50);
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+const REP_COLORS={
+  GF:'#69ff47',GM:'#40c4ff',CROC:'#80cbc4',COBRA:'#ff5252',SENT:'#ff8c00',
+  KOMO_UP:'#ff5252',KOMO_LO:'#69ff47',RATTLE:'#80cbc4',MON:'#b39ddb',
+  MOTH:'#69ff47',CHAM:'#90caf9',SIDE:'#4fc3f7',IGUA:'#a5d6a7',GECK:'#80cbc4',PYTH:'#ef9a9a'
+};
+const ZONE_COLORS={'UPPER REJ':'#ff5252','TOP EXTREME':'#ff8c00','VALUE AREA':'#40c4ff',
+  'BETWEEN':'#b39ddb','BOT EXTREME':'#ff8c00','LOWER REJ':'#69ff47'};
+
+function renderSummaryCards(){
+  const reps={};
+  triggers.forEach(t=>{reps[t.reptile]=(reps[t.reptile]||0)+1;});
+  const total=triggers.length;
+  const topRep=Object.entries(reps).sort((a,b)=>b[1]-a[1])[0];
+  const avgCredit=Math.round(triggers.filter(t=>t.credit>0).reduce((s,t)=>s+t.credit,0)/Math.max(1,triggers.filter(t=>t.credit>0).length));
+  const days=[...new Set(triggers.map(t=>t.date))].length;
+
+  document.getElementById('summary-cards').innerHTML=`
+    <div class="card"><div class="card-title">TOTAL TRIGGERS</div><div class="card-val">${total}</div><div class="card-sub">${days} unique dates</div></div>
+    <div class="card"><div class="card-title">NSEI BARS</div><div class="card-val">${nsei.length}</div><div class="card-sub">${nsei[0]?.date} → ${nsei[nsei.length-1]?.date}</div></div>
+    <div class="card"><div class="card-title">MOST ACTIVE</div><div class="card-val" style="color:${REP_COLORS[topRep?.[0]]||'#ffd700'}">${topRep?.[0]||'-'}</div><div class="card-sub">${topRep?.[1]||0} times</div></div>
+    <div class="card"><div class="card-title">AVG CREDIT ₹</div><div class="card-val">${avgCredit}</div><div class="card-sub">credit-generating triggers</div></div>
+    <div class="card"><div class="card-title">HVP GATE</div><div class="card-val">${CFG.hvGate}%</div><div class="card-sub">min HVP percentile</div></div>
+  `;
+}
+
+function renderTable(){
+  const repF=document.getElementById('flt-reptile').value;
+  const zoneF=document.getElementById('flt-zone').value;
+  const sigF=document.getElementById('flt-signal').value;
+  const rows=triggers.filter(t=>
+    (!repF||t.reptile===repF)&&
+    (!zoneF||t.zone===zoneF)&&
+    (!sigF||t.signal===sigF)
+  );
+  const tbody=document.getElementById('trigger-body');
+  tbody.innerHTML=rows.map((t,idx)=>`
+    <tr onclick="selectTrigger(${triggers.indexOf(t)})" data-idx="${triggers.indexOf(t)}">
+      <td style="color:#607d8b">${idx+1}</td>
+      <td style="color:#ffd700">${t.date}</td>
+      <td><span class="badge rep-${t.reptile}" style="color:${REP_COLORS[t.reptile]||'#fff'};border:1px solid ${REP_COLORS[t.reptile]||'#fff'}22">${t.reptile}</span></td>
+      <td style="color:#80cbc4">${t.signal||'-'}</td>
+      <td><span style="color:${ZONE_COLORS[t.zone]||'#fff'}">${t.zone}</span></td>
+      <td style="color:#ffd700;font-weight:bold">${Math.round(t.cmp)}</td>
+      <td style="color:#80cbc4">${t.vixClose?.toFixed(1)||'-'}</td>
+      <td style="color:${t.hvPct<35?'#ff5252':t.hvPct>60?'#69ff47':'#80cbc4'}">${t.hvPct}%</td>
+      <td style="color:#607d8b">${t.off1}</td>
+      <td style="color:#607d8b">${t.off2}</td>
+      <td style="color:#607d8b">${t.off3}</td>
+      <td style="color:#607d8b">${t.off4}</td>
+      <td style="color:#c9d1d9">${t.s1||'-'}</td>
+      <td style="color:#c9d1d9">${t.s2||'-'}</td>
+      <td style="color:#c9d1d9">${t.s3||'-'}</td>
+      <td style="color:#c9d1d9">${t.s4||'-'}</td>
+      <td style="color:${t.credit>0?'#69ff47':'#ff5252'};font-weight:bold">${t.credit>0?'+'+t.credit:t.credit}</td>
+      <td style="color:#80cbc4">${t.tp_pct?t.tp_pct+'%':'-'}</td>
+      <td style="color:#607d8b;font-size:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis">${t.sl_rule}</td>
+    </tr>`).join('');
+}
+
+function selectTrigger(idx){
+  selectedTrigger=triggers[idx];
+  document.querySelectorAll('#trigger-body tr').forEach(r=>{
+    r.classList.toggle('selected',+r.dataset.idx===idx);
+  });
+  showTab('payoff');
+  renderPayoff(selectedTrigger);
+}
+
+function renderPayoff(t){
+  const canvas=document.getElementById('payoff-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Title & meta
+  document.getElementById('payoff-title').textContent=
+    `${t.reptile} — ${t.date}  |  CMP: ${Math.round(t.cmp)}  |  Zone: ${t.zone}  |  Signal: ${t.signal}`;
+  document.getElementById('payoff-meta').innerHTML=
+    `Strikes: ${t.legs.map(l=>`${l.type}${l.qty>1?'×'+l.qty:''} @${l.K}`).join('  |  ')} &nbsp;&nbsp; Est Credit: <b style="color:#69ff47">₹${t.credit}</b> &nbsp;&nbsp; TP: <b style="color:#40c4ff">${t.tp}</b> &nbsp;&nbsp; SL: <b style="color:#ff5252">${t.sl_rule}</b>`;
+
+  // Compute payoff
+  const allK=t.legs.map(l=>l.K).filter(k=>k>0);
+  const minK=Math.min(...allK), maxK=Math.max(...allK);
+  const pad=(maxK-minK)*0.5||t.off2*2;
+  const xMin=minK-pad, xMax=maxK+pad;
+  const steps=300;
+  const xs=[], ys=[];
+  for(let i=0;i<=steps;i++){
+    const price=xMin+i*(xMax-xMin)/steps;
+    let pnl=0;
+    t.legs.forEach(leg=>{
+      if(!leg.K||leg.K===0)return;
+      const intrinsic=leg.type==='BC'||leg.type==='SC'?
+        Math.max(0,price-leg.K):Math.max(0,leg.K-price);
+      const sign=(leg.type==='BC'||leg.type==='BP')?1:-1;
+      pnl+=sign*intrinsic*leg.qty;
+    });
+    // Add premium received/paid
+    pnl+=t.credit;
+    xs.push(price); ys.push(pnl);
+  }
+
+  const yMin=Math.min(...ys), yMax=Math.max(...ys);
+  const yPad=(yMax-yMin)*0.15||100;
+  const yl=yMin-yPad, yh=yMax+yPad;
+
+  // Coordinate mappers
+  const px=x=>Math.round((x-xMin)/(xMax-xMin)*(W-80)+40);
+  const py=y=>Math.round(H-40-(y-yl)/(yh-yl)*(H-60));
+
+  // Background
+  ctx.fillStyle='#1a2332'; ctx.fillRect(0,0,W,H);
+
+  // Zero line
+  const y0=py(0);
+  ctx.strokeStyle='#37474f'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(40,y0); ctx.lineTo(W-40,y0); ctx.stroke();
+  ctx.fillStyle='#607d8b'; ctx.font='10px Courier New'; ctx.textAlign='right';
+  ctx.fillText('0',38,y0+4);
+
+  // Profit/loss zones
+  // Fill profit zone green
+  ctx.save();
+  ctx.beginPath();
+  xs.forEach((x,i)=>{
+    const py_=py(ys[i]);
+    if(i===0)ctx.moveTo(px(x),py_);
+    else ctx.lineTo(px(x),py_);
+  });
+  ctx.lineTo(px(xs[xs.length-1]),y0);
+  ctx.lineTo(px(xs[0]),y0);
+  ctx.closePath();
+  ctx.fillStyle='rgba(105,255,71,0.06)'; ctx.fill();
+
+  // Fill loss zone red
+  ctx.beginPath();
+  xs.forEach((x,i)=>{const py_=py(Math.min(ys[i],0));if(i===0)ctx.moveTo(px(x),py_);else ctx.lineTo(px(x),py_);});
+  ctx.lineTo(px(xs[xs.length-1]),y0); ctx.lineTo(px(xs[0]),y0); ctx.closePath();
+  ctx.fillStyle='rgba(255,82,82,0.08)'; ctx.fill();
+  ctx.restore();
+
+  // Grid lines
+  ctx.strokeStyle='#1e2d3e'; ctx.lineWidth=0.5;
+  for(let i=0;i<=5;i++){
+    const yv=yl+(yh-yl)*i/5;
+    const yp=py(yv);
+    ctx.beginPath(); ctx.moveTo(40,yp); ctx.lineTo(W-40,yp); ctx.stroke();
+    ctx.fillStyle='#607d8b'; ctx.font='9px Courier New'; ctx.textAlign='right';
+    ctx.fillText(Math.round(yv),38,yp+3);
+  }
+
+  // Strike vertical lines
+  allK.forEach(K=>{
+    const xp=px(K);
+    ctx.strokeStyle='rgba(255,215,0,0.3)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(xp,40); ctx.lineTo(xp,H-40); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#ffd700'; ctx.font='9px Courier New'; ctx.textAlign='center';
+    ctx.fillText(K,xp,35);
+  });
+
+  // CMP line
+  const cmpp=px(t.cmp);
+  ctx.strokeStyle='rgba(64,196,255,0.6)'; ctx.lineWidth=1.5; ctx.setLineDash([4,2]);
+  ctx.beginPath(); ctx.moveTo(cmpp,40); ctx.lineTo(cmpp,H-40); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#40c4ff'; ctx.font='10px Courier New'; ctx.textAlign='center';
+  ctx.fillText('CMP',cmpp,H-25);
+
+  // TP line
+  if(t.tp_pct&&t.credit>0){
+    const tpLevel=t.credit*t.tp_pct/100;
+    const tpY=py(tpLevel);
+    ctx.strokeStyle='rgba(105,255,71,0.5)'; ctx.lineWidth=1; ctx.setLineDash([5,3]);
+    ctx.beginPath(); ctx.moveTo(40,tpY); ctx.lineTo(W-40,tpY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#69ff47'; ctx.textAlign='left';
+    ctx.fillText(`TP ${t.tp_pct}%  ₹${Math.round(tpLevel)}`,42,tpY-3);
+  }
+
+  // Main P&L curve
+  ctx.strokeStyle=REP_COLORS[t.reptile]||'#ffd700';
+  ctx.lineWidth=2.5; ctx.setLineDash([]);
+  ctx.beginPath();
+  xs.forEach((x,i)=>{
+    const xp=px(x), yp=py(ys[i]);
+    if(i===0)ctx.moveTo(xp,yp); else ctx.lineTo(xp,yp);
+  });
+  ctx.stroke();
+
+  // Max profit / max loss annotations
+  const maxPnl=Math.max(...ys), minPnl=Math.min(...ys);
+  const maxIdx=ys.indexOf(maxPnl), minIdx=ys.indexOf(minPnl);
+  ctx.fillStyle='#69ff47'; ctx.font='bold 11px Courier New'; ctx.textAlign='center';
+  if(maxPnl>0&&!isNaN(xs[maxIdx]))ctx.fillText(`MAX ₹${Math.round(maxPnl)}`,px(xs[maxIdx]),py(maxPnl)-10);
+  ctx.fillStyle='#ff5252';
+  if(minPnl<0&&!isNaN(xs[minIdx]))ctx.fillText(`MAX LOSS ₹${Math.round(minPnl)}`,px(xs[minIdx]),py(minPnl)+18);
+
+  // Breakeven markers
+  for(let i=1;i<ys.length;i++){
+    if((ys[i-1]<=0&&ys[i]>0)||(ys[i-1]>=0&&ys[i]<0)){
+      const bex=xs[i-1]+(xs[i]-xs[i-1])*(-ys[i-1]/(ys[i]-ys[i-1]));
+      const bxp=px(bex);
+      ctx.fillStyle='#ffd700'; ctx.beginPath(); ctx.arc(bxp,y0,4,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#ffd700'; ctx.font='9px Courier New'; ctx.textAlign='center';
+      ctx.fillText(Math.round(bex),bxp,y0-8);
+    }
+  }
+
+  // X axis labels
+  ctx.fillStyle='#607d8b'; ctx.font='9px Courier New'; ctx.textAlign='center';
+  for(let i=0;i<=6;i++){
+    const xv=xMin+i*(xMax-xMin)/6;
+    ctx.fillText(Math.round(xv),px(xv),H-10);
+  }
+  // Axis labels
+  ctx.fillStyle='#80cbc4'; ctx.font='10px Courier New'; ctx.textAlign='center';
+  ctx.fillText('NIFTY Price at Expiry →',W/2,H-2);
+  ctx.save(); ctx.translate(12,H/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('P&L ₹ (per lot basis)',0,0); ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INDICATOR CHART
+// ═══════════════════════════════════════════════════════════
+function renderIndicatorChart(){
+  const eng=window._eng;
+  if(!eng)return;
+  const {hmaF,hmaS,smiVal,bandData,bars}=eng;
+  const n=bars.length;
+  const canvas=document.getElementById('ind-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#1a2332'; ctx.fillRect(0,0,W,H);
+
+  const closes=bars.map(b=>b.close);
+  const allPrices=closes.filter(x=>!isNaN(x));
+  const pMin=Math.min(...allPrices)*0.995, pMax=Math.max(...allPrices)*1.005;
+  const pad=40;
+  const px=(i)=>pad+(i/(n-1))*(W-pad*2);
+  const py=(v)=>pad+(1-(v-pMin)/(pMax-pMin))*(H-pad*2);
+
+  // Band shading for latest bar
+  const latestBd=bandData[n-1];
+  if(latestBd){
+    latestBd.bLo.forEach((lo,b)=>{
+      const hi=latestBd.bHi[b];
+      const isVA=(b>=latestBd.vaLoIdx&&b<=latestBd.vaHiIdx);
+      const isTop=(b>=latestBd.nb-2);
+      const isBot=(b<=1);
+      ctx.fillStyle=isVA?'rgba(64,196,255,0.04)':isTop?'rgba(255,82,82,0.04)':isBot?'rgba(105,255,71,0.04)':'transparent';
+      ctx.fillRect(pad,py(hi),W-pad*2,py(lo)-py(hi));
+    });
+    // VA lines
+    ctx.strokeStyle='rgba(105,255,71,0.5)'; ctx.lineWidth=1; ctx.setLineDash([4,2]);
+    ctx.beginPath(); ctx.moveTo(pad,py(latestBd.vaHiP)); ctx.lineTo(W-pad,py(latestBd.vaHiP)); ctx.stroke();
+    ctx.strokeStyle='rgba(255,140,0,0.5)';
+    ctx.beginPath(); ctx.moveTo(pad,py(latestBd.vaLoP)); ctx.lineTo(W-pad,py(latestBd.vaLoP)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Trigger markers
+  triggers.forEach(t=>{
+    const bi=bars.findIndex(b=>b.date===t.date);
+    if(bi<0)return;
+    const x=px(bi), y=py(bars[bi].close);
+    ctx.fillStyle=REP_COLORS[t.reptile]||'#ffd700';
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=REP_COLORS[t.reptile]||'#ffd700';
+    ctx.font='8px Courier New'; ctx.textAlign='center';
+    ctx.fillText(t.reptile,x,y-8);
+  });
+
+  // Price line
+  ctx.strokeStyle='rgba(255,215,0,0.7)'; ctx.lineWidth=1.5; ctx.setLineDash([]);
+  ctx.beginPath();
+  closes.forEach((c,i)=>{if(!isNaN(c)){const x=px(i),y=py(c);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}});
+  ctx.stroke();
+
+  // HMA Fast
+  ctx.strokeStyle='#40c4ff'; ctx.lineWidth=1.5;
+  ctx.beginPath(); let first=true;
+  hmaF.forEach((v,i)=>{if(!isNaN(v)){const x=px(i),y=py(v);if(first){ctx.moveTo(x,y);first=false;}else ctx.lineTo(x,y);}});
+  ctx.stroke();
+
+  // HMA Slow
+  ctx.strokeStyle='#ff5252'; ctx.lineWidth=1.5;
+  ctx.beginPath(); first=true;
+  hmaS.forEach((v,i)=>{if(!isNaN(v)){const x=px(i),y=py(v);if(first){ctx.moveTo(x,y);first=false;}else ctx.lineTo(x,y);}});
+  ctx.stroke();
+
+  // Date labels
+  ctx.fillStyle='#607d8b'; ctx.font='9px Courier New'; ctx.textAlign='center';
+  const step=Math.floor(n/8);
+  for(let i=0;i<n;i+=step){ctx.fillText(bars[i].date.slice(5),px(i),H-5);}
+
+  // Price labels
+  ctx.fillStyle='#607d8b'; ctx.textAlign='right';
+  for(let i=0;i<=5;i++){const v=pMin+(pMax-pMin)*i/5;ctx.fillText(Math.round(v),pad-4,py(v)+3);}
+
+  // SMI chart
+  const sc=document.getElementById('smi-canvas');
+  const sc2=sc.getContext('2d');
+  const SW=sc.width, SH=sc.height;
+  sc2.clearRect(0,0,SW,SH);
+  sc2.fillStyle='#1a2332'; sc2.fillRect(0,0,SW,SH);
+
+  const sMin=-100,sMax=100;
+  const spy=v=>pad+(1-(v-sMin)/(sMax-sMin))*(SH-pad*1.5);
+  const spx=i=>pad+(i/(n-1))*(SW-pad*2);
+
+  // OB/OS zones
+  sc2.fillStyle='rgba(255,82,82,0.08)';
+  sc2.fillRect(pad,spy(CFG.smiBull),SW-pad*2,spy(100)-spy(CFG.smiBull));
+  sc2.fillStyle='rgba(105,255,71,0.08)';
+  sc2.fillRect(pad,spy(0),SW-pad*2,spy(CFG.smiBear)-spy(0));
+
+  // Zero and threshold lines
+  [0,CFG.smiBull,CFG.smiBear].forEach(lv=>{
+    sc2.strokeStyle='#37474f'; sc2.lineWidth=0.5; sc2.setLineDash([2,2]);
+    sc2.beginPath(); sc2.moveTo(pad,spy(lv)); sc2.lineTo(SW-pad,spy(lv)); sc2.stroke();
+    sc2.setLineDash([]);
+    sc2.fillStyle='#607d8b'; sc2.font='9px Courier New'; sc2.textAlign='right';
+    sc2.fillText(lv,pad-4,spy(lv)+3);
+  });
+
+  // SMI line
+  sc2.strokeStyle='#b39ddb'; sc2.lineWidth=1.5;
+  sc2.beginPath(); first=true;
+  smiVal.forEach((v,i)=>{if(!isNaN(v)){const x=spx(i),y=spy(Math.max(-100,Math.min(100,v)));if(first){sc2.moveTo(x,y);first=false;}else sc2.lineTo(x,y);}});
+  sc2.stroke();
+
+  sc2.fillStyle='#607d8b'; sc2.font='9px Courier New'; sc2.textAlign='left';
+  sc2.fillText('SMI',pad+2,SH-5);
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════
+function renderStats(){
+  const byRep={};
+  triggers.forEach(t=>{
+    if(!byRep[t.reptile])byRep[t.reptile]={count:0,credits:[],zones:{}};
+    byRep[t.reptile].count++;
+    if(t.credit>0)byRep[t.reptile].credits.push(t.credit);
+    byRep[t.reptile].zones[t.zone]=(byRep[t.reptile].zones[t.zone]||0)+1;
+  });
+
+  const html=Object.entries(byRep).sort((a,b)=>b[1].count-a[1].count).map(([rep,d])=>{
+    const avgCr=d.credits.length?Math.round(d.credits.reduce((s,v)=>s+v,0)/d.credits.length):0;
+    const topZone=Object.entries(d.zones).sort((a,b)=>b[1]-a[1])[0];
+    return `<div class="stat-box">
+      <h3 style="color:${REP_COLORS[rep]||'#ffd700'}">${rep}</h3>
+      <div class="stat-row"><span class="stat-label">Triggers</span><span class="stat-val">${d.count}</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Credit ₹</span><span class="stat-val" style="color:#69ff47">${avgCr||'N/A'}</span></div>
+      <div class="stat-row"><span class="stat-label">Top Zone</span><span class="stat-val" style="color:${ZONE_COLORS[topZone?.[0]]||'#fff'}">${topZone?.[0]||'-'}</span></div>
+      <div class="stat-row"><span class="stat-label">Credit triggers</span><span class="stat-val">${d.credits.length}</span></div>
+    </div>`;
+  }).join('');
+  document.getElementById('stats-grid').innerHTML=html||'<div class="no-data">No triggers yet</div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════
+function showTab(name){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  const idx={triggers:0,payoff:1,indicators:2,stats:3}[name];
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+}
+
+function exportCSV(){
+  const rows=[['Date','Reptile','Signal','Zone','CMP','VIX','HVP%','off1','off2','off3','off4','S1','S2','S3','S4','Credit','TP%','SL_Rule']];
+  triggers.forEach(t=>rows.push([t.date,t.reptile,t.signal,t.zone,Math.round(t.cmp),
+    t.vixClose?.toFixed(1),t.hvPct,t.off1,t.off2,t.off3,t.off4,t.s1,t.s2,t.s3,t.s4,t.credit,t.tp_pct||'',t.sl_rule]));
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='jade_reptillis_triggers.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
