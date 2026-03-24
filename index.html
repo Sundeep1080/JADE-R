@@ -7,27 +7,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#060d14;--bg2:#0a1520;--bg3:#0f1e2e;--bg4:#142435;
-  --border:#1a3048;--border2:#1e3a58;
-  --gold:#f0c040;--gold2:#ffd700;--gold-dim:#8a6e20;
-  --cyan:#38d9f5;--cyan2:#40c4ff;--cyan-dim:#1a5a70;
-  --green:#4dff91;--green2:#00e676;--green-dim:#1a4a2a;
-  --red:#ff4444;--red2:#ff6b6b;--red-dim:#4a1a1a;
-  --orange:#ff8c00;--orange-dim:#4a2a00;
-  --purple:#c084fc;--purple-dim:#3a1a6a;
-  --white:#e2eaf4;--muted:#4a6a8a;--muted2:#2a4a6a;
+  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#f7f9fc;--bg4:#eef2f7;
+  --border:#d0dae8;--border2:#b8c8de;
+  --gold:#b8860b;--gold2:#c8960b;--gold-dim:#e8d090;
+  --cyan:#0077aa;--cyan2:#0088cc;--cyan-dim:#cce8f4;
+  --green:#1a7a3a;--green2:#228844;--green-dim:#d4f0dc;
+  --red:#cc2222;--red2:#dd3333;--red-dim:#fde8e8;
+  --orange:#c05800;--orange-dim:#fde8d0;
+  --purple:#6600cc;--purple-dim:#ede8f8;
+  --white:#1a2233;--muted:#6680a0;--muted2:#8899bb;
   --font-mono:'Share Tech Mono',monospace;
   --font-ui:'Rajdhani',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--white);font-family:var(--font-ui)}
-body{display:flex;flex-direction:column;overflow:hidden}
+body{display:flex;flex-direction:column;overflow:hidden;background:#f0f4f8}
 
-/* ── SCANLINE EFFECT ── */
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
+/* scanline removed for light theme */
 
 /* ── HEADER ── */
-#hdr{flex-shrink:0;display:flex;align-items:center;gap:16px;padding:8px 16px;background:linear-gradient(90deg,#060d14 0%,#0a1a2a 50%,#060d14 100%);border-bottom:1px solid var(--gold-dim)}
+#hdr{flex-shrink:0;display:flex;align-items:center;gap:16px;padding:8px 16px;background:linear-gradient(90deg,#1a2e48 0%,#0d3461 50%,#1a2e48 100%);border-bottom:2px solid var(--gold2)}
 #hdr-logo{font-family:var(--font-mono);color:var(--gold);font-size:13px;letter-spacing:3px}
 #hdr-logo span{color:var(--cyan);font-size:10px;display:block;letter-spacing:6px;margin-top:1px}
 #hdr-status{margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--muted)}
@@ -37,7 +36,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── UPLOAD ── */
 #upload-wrap{flex-shrink:0;padding:6px 16px}
-#drop-zone{border:1px dashed var(--cyan-dim);border-radius:4px;padding:10px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:.2s;background:var(--bg2)}
+#drop-zone{border:2px dashed #b8c8de;border-radius:6px;padding:10px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:.2s;background:#fff}
 #drop-zone:hover,#drop-zone.drag{border-color:var(--cyan);background:var(--bg3)}
 #drop-zone input{display:none}
 #drop-icon{font-size:20px}
@@ -47,10 +46,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .4s}
 
 /* ── NAV TABS ── */
-#nav{flex-shrink:0;display:flex;gap:0;padding:0 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
-.nav-tab{padding:8px 20px;font-family:var(--font-mono);font-size:10px;letter-spacing:2px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:.15s;user-select:none}
+#nav{flex-shrink:0;display:flex;gap:0;padding:0 16px;background:#fff;border-bottom:2px solid var(--border2)}
+.nav-tab{padding:8px 20px;font-family:var(--font-mono);font-size:10px;letter-spacing:2px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;transition:.15s;user-select:none}
 .nav-tab:hover{color:var(--white)}
-.nav-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.nav-tab.active{color:#0d3461;border-bottom-color:#0d3461;font-weight:700}
 
 /* ── MAIN AREA ── */
 #main{flex:1;overflow:hidden;display:flex;flex-direction:column}
@@ -63,24 +62,26 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── CURRENT DATE PANEL ── */
 #cdp{flex-shrink:0;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:stretch}
-.cdp-block{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:6px 12px;min-width:110px}
-.cdp-lbl{font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:2px}
+.cdp-block{background:#fff;border:1px solid var(--border);border-radius:4px;padding:6px 12px;min-width:110px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.cdp-lbl{font-family:var(--font-mono);font-size:8px;color:#6680a0;letter-spacing:2px;margin-bottom:2px;text-transform:uppercase}
 .cdp-val{font-family:var(--font-mono);font-size:15px;font-weight:600;color:var(--gold)}
 .cdp-sub{font-size:9px;color:var(--muted);margin-top:1px}
 .cdp-sep{width:1px;background:var(--border);margin:4px 0}
 
 /* ── BAND TABLE ── */
-#band-panel{flex-shrink:0;padding:8px 16px 4px;border-bottom:1px solid var(--border)}
-#band-title{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:3px;margin-bottom:6px}
+#band-panel{flex-shrink:0;padding:8px 16px 4px;border-bottom:2px solid var(--border2);background:#fff}
+#band-title{font-family:var(--font-mono);font-size:9px;color:#0d3461;letter-spacing:3px;margin-bottom:6px;font-weight:bold}
 #band-grid{display:flex;gap:2px;align-items:flex-end}
-.band-cell{flex:1;border-radius:2px;padding:3px 4px;border:1px solid var(--border);font-family:var(--font-mono);font-size:9px;cursor:default;transition:.1s;position:relative}
-.band-cell.current{border-color:var(--gold)!important;box-shadow:0 0 6px rgba(240,192,64,.3)}
-.band-cell.va{background:rgba(56,217,245,.06);border-color:var(--cyan-dim)}
-.band-cell.rank1{background:rgba(77,255,145,.12);border-color:var(--green)}
-.band-cell.rank2{background:rgba(77,255,145,.07);border-color:rgba(77,255,145,.4)}
-.band-cell.rank3{background:rgba(77,255,145,.04);border-color:rgba(77,255,145,.2)}
-.band-cell.top2{background:rgba(255,68,68,.06);border-color:var(--red-dim)}
-.band-cell.bot2{background:rgba(0,230,118,.06);border-color:var(--green-dim)}
+.band-cell{flex:1;border-radius:3px;padding:4px 5px;border:1px solid var(--border);font-family:var(--font-mono);font-size:9px;cursor:default;transition:.1s;position:relative;background:#f7f9fc}
+.band-cell.current{border:3px solid #b8860b!important;box-shadow:0 0 8px rgba(184,134,11,.4);background:#fffbe6!important}
+.band-cell.prev{border:2px dashed #6680a0!important;background:#f0f4f8!important}
+.band-cell.va{background:#e8f4ff;border-color:#0077aa;border-width:1.5px}
+.band-cell.rank1{background:#1a7a3a;border-color:#1a7a3a;color:#fff}
+.band-cell.rank1 .bc-num,.band-cell.rank1 .bc-hi,.band-cell.rank1 .bc-cnt{color:#fff!important}
+.band-cell.rank2{background:#d4f0dc;border-color:#1a7a3a;border-width:2px}
+.band-cell.rank3{background:#e8f8ee;border-color:#4daa60;border-width:1.5px}
+.band-cell.top2:not(.rank1):not(.rank2):not(.rank3){background:#fde8e8;border-color:#cc2222}
+.band-cell.bot2:not(.rank1):not(.rank2):not(.rank3){background:#d4f0dc;border-color:#1a7a3a}
 .bc-num{color:var(--muted);font-size:8px}
 .bc-hi{color:var(--gold2);font-size:8px}
 .bc-lo{color:var(--muted);font-size:8px}
@@ -89,16 +90,16 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── SUMMARY ROW ── */
 #summary-row{flex-shrink:0;display:flex;gap:8px;padding:6px 16px;flex-wrap:wrap}
-.sum-card{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:5px 12px;flex:1;min-width:100px}
+.sum-card{background:#fff;border:1px solid var(--border);border-radius:4px;padding:5px 12px;flex:1;min-width:100px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .sum-label{font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:1px}
 .sum-val{font-family:var(--font-mono);font-size:16px;font-weight:700;margin-top:1px}
 .sum-sub{font-size:9px;color:var(--muted);font-family:var(--font-mono)}
 
 /* ── FILTER BAR ── */
-#filter-bar{flex-shrink:0;display:flex;gap:8px;padding:6px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+#filter-bar{flex-shrink:0;display:flex;gap:8px;padding:6px 16px;background:#fff;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
 .flt-group{display:flex;align-items:center;gap:4px}
 .flt-lbl{font-family:var(--font-mono);font-size:9px;color:var(--muted)}
-select,input[type=text]{background:var(--bg3);color:var(--white);border:1px solid var(--border2);border-radius:2px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;outline:none}
+select,input[type=text],input[type=number]{background:#fff;color:#1a2233;border:1px solid var(--border2);border-radius:2px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;outline:none}
 select:focus,input:focus{border-color:var(--cyan)}
 .btn{padding:4px 14px;border-radius:2px;font-family:var(--font-mono);font-size:9px;letter-spacing:1px;cursor:pointer;transition:.15s;border:1px solid}
 .btn-cyan{background:var(--bg3);color:var(--cyan);border-color:var(--cyan);}.btn-cyan:hover{background:var(--cyan);color:var(--bg)}
@@ -110,23 +111,24 @@ select:focus,input:focus{border-color:var(--cyan)}
 #tbl-wrap::-webkit-scrollbar{width:4px;height:4px}
 #tbl-wrap::-webkit-scrollbar-thumb{background:var(--border2)}
 table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:10px}
-thead th{background:var(--bg2);color:var(--gold);padding:5px 8px;position:sticky;top:0;z-index:5;white-space:nowrap;font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--gold-dim);cursor:pointer;user-select:none}
+thead th{background:#1a2e48;color:#ffd700;padding:5px 8px;position:sticky;top:0;z-index:5;white-space:nowrap;font-size:9px;letter-spacing:1px;border-bottom:2px solid #ffd700;cursor:pointer;user-select:none}
 thead th:hover{color:var(--gold2)}
-tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:.1s}
-tbody tr:hover td{background:var(--bg3)!important}
-tbody tr.sel td{background:rgba(77,255,145,.05)!important;border-bottom-color:var(--green)!important}
-td{padding:4px 8px;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;background:#fff}
+tbody tr:hover td{background:#eef4ff!important}
+tbody tr td{vertical-align:middle}
+tbody tr.sel td{background:#d4f0dc!important;border-bottom-color:var(--green)!important}
+td{padding:4px 8px;white-space:nowrap;color:#1a2233}
 .pill{display:inline-block;padding:1px 7px;border-radius:2px;font-size:9px;letter-spacing:1px;border:1px solid}
 
 /* rep colors */
-.r-GF{color:#4dff91;border-color:#4dff9144}.r-GM{color:#40c4ff;border-color:#40c4ff44}
-.r-CROC{color:#80cbc4;border-color:#80cbc444}.r-COBRA{color:#ff4444;border-color:#ff444444}
-.r-SENT{color:#ff8c00;border-color:#ff8c0044}.r-KOMO_UP{color:#ff6b6b;border-color:#ff6b6b44}
-.r-KOMO_LO{color:#69ff47;border-color:#69ff4744}.r-RATTLE{color:#b2dfdb;border-color:#b2dfdb44}
-.r-MON{color:#c084fc;border-color:#c084fc44}.r-MOTH{color:#80ff80;border-color:#80ff8044}
-.r-CHAM{color:#90caf9;border-color:#90caf944}.r-SIDE{color:#4fc3f7;border-color:#4fc3f744}
-.r-IGUA{color:#a5d6a7;border-color:#a5d6a744}.r-GECK{color:#80cbc4;border-color:#80cbc444}
-.r-PYTH{color:#ef9a9a;border-color:#ef9a9a44}
+.r-GF{color:#1a7a3a;border-color:#1a7a3a;background:#f0faf4}.r-GM{color:#0077aa;border-color:#0077aa;background:#f0f8ff}
+.r-CROC{color:#0d5c7a;border-color:#0d5c7a;background:#f0f8fb}.r-COBRA{color:#cc2222;border-color:#cc2222;background:#fff0f0}
+.r-SENT{color:#c05800;border-color:#c05800;background:#fff8f0}.r-KOMO_UP{color:#cc2222;border-color:#cc2222;background:#fff0f0}
+.r-KOMO_LO{color:#1a7a3a;border-color:#1a7a3a;background:#f0faf4}.r-RATTLE{color:#2a8a7a;border-color:#2a8a7a;background:#f0faf8}
+.r-MON{color:#6600cc;border-color:#6600cc;background:#f8f0ff}.r-MOTH{color:#228844;border-color:#228844;background:#f0f8f0}
+.r-CHAM{color:#0055cc;border-color:#0055cc;background:#f0f4ff}.r-SIDE{color:#0066aa;border-color:#0066aa;background:#f0f8ff}
+.r-IGUA{color:#2a7a44;border-color:#2a7a44;background:#f0faf4}.r-GECK{color:#2a7a44;border-color:#2a7a44;background:#f0faf8}
+.r-PYTH{color:#aa2222;border-color:#aa2222;background:#fff0f0}
 
 /* ── PAYOFF PAGE ── */
 #payoff-page{padding:10px 16px;gap:10px}
@@ -139,21 +141,21 @@ td{padding:4px 8px;white-space:nowrap}
 .leg-chip.buy{border-color:var(--green);color:var(--green)}
 .leg-chip.sell{border-color:var(--red);color:var(--red)}
 #payoff-metrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.pm-box{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:5px 12px;min-width:90px}
+.pm-box{background:#f7f9fc;border:1px solid var(--border);border-radius:3px;padding:5px 12px;min-width:90px}
 .pm-lbl{font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:1px}
 .pm-val{font-family:var(--font-mono);font-size:14px;font-weight:700;margin-top:1px}
 
 /* Greeks */
 #greeks-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.greek-box{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:5px 10px;font-family:var(--font-mono)}
+.greek-box{background:#f7f9fc;border:1px solid var(--border);border-radius:3px;padding:5px 10px;font-family:var(--font-mono)}
 .greek-sym{font-size:11px;color:var(--purple)}
 .greek-val{font-size:13px;font-weight:700;margin-top:1px}
 .greek-lbl{font-size:8px;color:var(--muted);margin-top:1px}
 
-#canvas-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:8px}
+#canvas-wrap{background:#fff;border:1px solid var(--border2);border-radius:4px;padding:10px;margin-top:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 #payoff-canvas{display:block}
 
-#no-payoff{display:flex;align-items:center;justify-content:center;height:300px;font-family:var(--font-mono);color:var(--muted);font-size:12px;letter-spacing:2px}
+#no-payoff{display:flex;align-items:center;justify-content:center;height:300px;font-family:var(--font-mono);color:#6680a0;font-size:12px;letter-spacing:2px}
 
 /* ── INDICATOR PAGE ── */
 #ind-page{padding:10px 16px;gap:8px}
@@ -161,15 +163,15 @@ td{padding:4px 8px;white-space:nowrap}
 .ind-legend{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--font-mono);font-size:9px}
 .il{display:flex;align-items:center;gap:4px}
 .il-dot{width:16px;height:2px;border-radius:1px}
-#ind-canvas-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px}
-#smi-canvas-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px;margin-top:6px}
-#band-timeline-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px;margin-top:6px}
+#ind-canvas-wrap{background:#fff;border:1px solid var(--border);border-radius:4px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+#smi-canvas-wrap{background:#fff;border:1px solid var(--border);border-radius:4px;padding:8px;margin-top:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+#band-timeline-wrap{background:#fff;border:1px solid var(--border);border-radius:4px;padding:8px;margin-top:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 canvas{display:block}
 
 /* ── STATS PAGE ── */
 #stats-page{padding:10px 16px}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 14px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:4px;padding:10px 14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .stat-card h3{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
 .stat-row{display:flex;justify-content:space-between;padding:2px 0;font-family:var(--font-mono);font-size:10px}
 .sl{color:var(--muted)}.sv{color:var(--white)}
@@ -184,7 +186,7 @@ canvas{display:block}
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:2px;gap:8px}
 
 /* scrollbar */
-*{scrollbar-width:thin;scrollbar-color:var(--border2) var(--bg)}
+*{scrollbar-width:thin;scrollbar-color:#b8c8de #f0f4f8}
 </style>
 </head>
 <body>
@@ -856,112 +858,313 @@ function computeExits(){
 
   TRIGGERS.forEach(t=>{
     const startBar=t.barIdx;
-    const maxBars=Math.min(n-1, startBar+C.dte); // max hold = dte days
+    // Max scan = min(dte, remaining bars in dataset)
+    const maxScan=Math.min(n-1, startBar+C.dte);
 
-    // TP target in NIFTY points
-    const tpPts = t.tp_pct && t.credit>0 ? t.credit * t.tp_pct/100 : null;
+    let exitBar=maxScan, exitReason='DTE EXPIRY';
 
-    let exitBar=maxBars, exitReason='DTE EXPIRY';
-
-    for(let i=startBar+1; i<=maxBars; i++){
+    for(let i=startBar+1; i<=maxScan; i++){
       const bd=bandArr[i];
-      const hF=hmaF[i], hS=hmaS[i], hFp=hmaF[i-1], hSp=hmaS[i-1];
-      if(isNaN(hF)||isNaN(hS))continue;
-      const hmaCrsBull=hFp<=hSp&&hF>hS, hmaCrsBear=hFp>=hSp&&hF<hS;
-      const sv=smiVal[i];
+      const hF=hmaF[i], hS=hmaS[i], hFp=hmaF[i-1]||hF, hSp=hmaS[i-1]||hS;
+      if(isNaN(hF)||isNaN(hS)) continue;
+      const hmaCrsBull=(hFp<=hSp)&&(hF>hS);
+      const hmaCrsBear=(hFp>=hSp)&&(hF<hS);
+      const hmaBull=hF>hS, hmaBear=hF<hS;
+      const sv=smiVal[i]||0;
       const smiOB=sv>=C.smiBull, smiOS=sv<=C.smiBear;
       const c=cl[i];
-
       let exited=false;
 
-      if(t.reptile==='GF'){
-        // Close: in B1 + HMA crosses UP + SMI OS
-        if(bd.inB1&&hmaCrsBull&&smiOS){exitBar=i;exitReason='B1+HMA↑+SMI OS (GF close)';exited=true;}
-      } else if(t.reptile==='GM'){
-        if(bd.inB10&&hmaCrsBear&&smiOB){exitBar=i;exitReason='B10+HMA↓+SMI OB (GM close)';exited=true;}
-      } else if(t.reptile==='CROC'){
-        // VA break on close
-        if(!bd.inVA){exitBar=i;exitReason='VA BREAK — Death Roll';exited=true;}
-        else if(tpPts&&t.credit-c>=tpPts){exitBar=i;exitReason='TP '+t.tp_pct+'%';exited=true;}
-      } else if(t.reptile==='COBRA'){
-        // off2 breach from vaMid at entry
-        const vaMidEntry=t.vaHi-(t.vaHi-t.vaLo)/2;
-        if(c>vaMidEntry+t.off2||c<vaMidEntry-t.off2){exitBar=i;exitReason='off2 BREACH';exited=true;}
-        else if(tpPts&&(i-startBar)>=5){exitBar=i;exitReason='TP '+t.tp_pct+'%';exited=true;}
-      } else if(t.reptile==='KOMO_UP'){
-        // HMA crosses UP = rejection failed
-        if(hmaCrsBull){exitBar=i;exitReason='HMA FLIPPED UP — rejection failed';exited=true;}
-      } else if(t.reptile==='KOMO_LO'){
-        if(hmaCrsBear){exitBar=i;exitReason='HMA FLIPPED DOWN — rejection failed';exited=true;}
-      } else if(t.reptile==='MON'){
-        // HMA flips against trade direction
-        const bull=t.signal==='B2'||t.signal==='B3'||t.signal==='B1-OS'||t.signal==='B1-MOM';
-        if(bull&&hmaCrsBear){exitBar=i;exitReason='HMA FLIP — bear';exited=true;}
-        else if(!bull&&hmaCrsBull){exitBar=i;exitReason='HMA FLIP — bull';exited=true;}
-      } else if(t.reptile==='MOTH'||t.reptile==='CHAM'){
-        // HMA turns directional (flat ends)
-        if(hmaCrsBull||hmaCrsBear){exitBar=i;exitReason='HMA DIRECTIONAL — flat ends';exited=true;}
-      } else if(t.reptile==='IGUA'){
-        // GF fires same bar = HMA dn cross in B9
-        if(bd.inB9&&hmaCrsBear){exitBar=i;exitReason='GF FIRES — close Iguana';exited=true;}
-      } else if(t.reptile==='GECK'){
-        if(bd.inB2&&hmaCrsBull){exitBar=i;exitReason='GM FIRES — close Gecko';exited=true;}
-      } else if(t.reptile==='RATTLE'){
-        // DTE < 7 bars or directional move of off2
-        if(i-startBar>=C.dte-7){exitBar=i;exitReason='DTE < 7d';exited=true;}
-      } else if(t.reptile==='SIDE'){
-        // Near leg expires at 21 bars
-        if(i-startBar>=21){exitBar=i;exitReason='NEAR LEG EXPIRY (21d)';exited=true;}
-      } else if(t.reptile==='SENT'){
-        // Komodo fires or VA entry
-        if(bd.inVA){exitBar=i;exitReason='VA ENTRY — Croc takes over';exited=true;}
-        else if(bd.inB9or10&&!bd.inVA){exitBar=i;exitReason='UPGRADED TO KOMODO';exited=true;}
-      } else if(t.reptile==='PYTH'){
-        if(hmaCrsBull||hmaCrsBear){exitBar=i;exitReason='HMA FLIP — close Python';exited=true;}
+      // ── Entry flags stored at trigger time ───────────────────────
+      const entryVaMid=(t.vaHi+t.vaLo)/2;
+
+      switch(t.reptile){
+
+        case 'GF':
+          // Pine: gfClsTrig = gfActive AND inB1 AND hmaCrsBull AND smiOS
+          if(bd.inB1 && hmaCrsBull && smiOS){
+            exitBar=i; exitReason='B1+HMA↑+SMI OS'; exited=true;
+          }
+          // Also exit if price reaches B1 (NEAR CLOSE phase) even without full signal
+          else if(bd.inB1 && hmaBull){
+            exitBar=i; exitReason='NEAR CLOSE B1+HMA bull'; exited=true;
+          }
+          break;
+
+        case 'GM':
+          // Pine: gmClsTrig = gmActive AND inB10 AND hmaCrsBear AND smiOB
+          if(bd.inB10 && hmaCrsBear && smiOB){
+            exitBar=i; exitReason='B10+HMA↓+SMI OB'; exited=true;
+          }
+          else if(bd.inB10 && hmaBear){
+            exitBar=i; exitReason='NEAR CLOSE B10+HMA bear'; exited=true;
+          }
+          break;
+
+        case 'CROC':
+          // SL: price closes outside VA — Death Roll
+          if(!bd.inVA){
+            exitBar=i; exitReason='VA BREAK (Death Roll)'; exited=true;
+          }
+          break;
+
+        case 'COBRA':
+          // SL: price beyond vaMid ± off2 at entry
+          if(c > entryVaMid + t.off2 || c < entryVaMid - t.off2){
+            exitBar=i; exitReason='off2 BREACH'; exited=true;
+          }
+          break;
+
+        case 'KOMO_UP':
+          // SL1: HMA crosses UP (rejection fails — price going up not down)
+          if(hmaCrsBull){
+            exitBar=i; exitReason='HMA↑ CROSS — rejection failed'; exited=true;
+          }
+          // SL2: price moves UP more than off2 from entry (2× credit proxy)
+          else if(c > t.cmp + t.off2){
+            exitBar=i; exitReason='PRICE BREACH off2 above entry'; exited=true;
+          }
+          break;
+
+        case 'KOMO_LO':
+          if(hmaCrsBear){
+            exitBar=i; exitReason='HMA↓ CROSS — rejection failed'; exited=true;
+          }
+          else if(c < t.cmp - t.off2){
+            exitBar=i; exitReason='PRICE BREACH off2 below entry'; exited=true;
+          }
+          break;
+
+        case 'MON':{
+          // Determine direction from stored legs: if first leg is SC above CMP = bull trade
+          const firstLeg=t.legs[0];
+          const isBull=firstLeg && (firstLeg.t==='SC') && (firstLeg.K > t.cmp);
+          // SL: HMA flips against direction
+          if(isBull && hmaCrsBear){
+            exitBar=i; exitReason='HMA↓ FLIP against bull trade'; exited=true;
+          } else if(!isBull && hmaCrsBull){
+            exitBar=i; exitReason='HMA↑ FLIP against bear trade'; exited=true;
+          }
+          // Also SL: price breaches SP strike (now at off3)
+          const spLeg=t.legs.find(l=>l.t==='SP');
+          if(spLeg && c < spLeg.K && !exited){
+            exitBar=i; exitReason='SP BREACH'; exited=true;
+          }
+          break;
+        }
+
+        case 'MOTH':
+          // SL: HMA turns directional (flat condition ends)
+          if(hmaCrsBull || hmaCrsBear){
+            exitBar=i; exitReason='HMA DIRECTIONAL (flat ends)'; exited=true;
+          }
+          // SL2: price beyond off3
+          if(!exited && (c > t.cmp + t.off3 || c < t.cmp - t.off3)){
+            exitBar=i; exitReason='off3 BREACH'; exited=true;
+          }
+          break;
+
+        case 'CHAM':
+          // SL: HMA+SMI both agree direction (conflict resolved)
+          if(hmaCrsBull || hmaCrsBear){
+            exitBar=i; exitReason='DIRECTION CONFIRMED — conflict resolved'; exited=true;
+          }
+          break;
+
+        case 'IGUA':
+          // Exit: HMA crosses DOWN in B9 = GF fires
+          if(hmaCrsBear){
+            exitBar=i; exitReason='HMA↓ in B9 — GF fires'; exited=true;
+          }
+          // Also exit if price leaves B9 (moved to B10 = GF territory)
+          else if(bd.inB10){
+            exitBar=i; exitReason='PRICE MOVED TO B10'; exited=true;
+          }
+          break;
+
+        case 'GECK':
+          if(hmaCrsBull){
+            exitBar=i; exitReason='HMA↑ in B2 — GM fires'; exited=true;
+          }
+          else if(bd.inB1){
+            exitBar=i; exitReason='PRICE MOVED TO B1'; exited=true;
+          }
+          break;
+
+        case 'RATTLE':
+          // Exit at DTE - 7 (i.e. 38 bars after entry for 45d dte)
+          if(i-startBar >= C.dte-7){
+            exitBar=i; exitReason='DTE-7 EXPIRY'; exited=true;
+          }
+          break;
+
+        case 'SENT':
+          // Exit: VA entry (Croc takes over) OR HMA cross fires Komodo
+          if(bd.inVA){
+            exitBar=i; exitReason='VA ENTRY — upgrade to CROC'; exited=true;
+          } else if(bd.inB9or10 && hmaCrsBear){
+            exitBar=i; exitReason='UPGRADED TO KOMO_UP'; exited=true;
+          } else if(bd.inB1or2 && hmaCrsBull){
+            exitBar=i; exitReason='UPGRADED TO KOMO_LO'; exited=true;
+          }
+          break;
+
+        case 'SIDE':
+          // Near leg expires at 21 bars
+          if(i-startBar >= 21){
+            exitBar=i; exitReason='NEAR LEG EXPIRY (21d)'; exited=true;
+          }
+          break;
+
+        case 'PYTH':
+          // Exit: HMA flip against direction
+          const pythBull=t.legs.find(l=>l.t==='BC');
+          if(pythBull && hmaCrsBear){
+            exitBar=i; exitReason='HMA↓ FLIP — close Python'; exited=true;
+          } else if(!pythBull && hmaCrsBull){
+            exitBar=i; exitReason='HMA↑ FLIP — close Python'; exited=true;
+          }
+          break;
       }
 
-      if(exited)break;
+      if(exited) break;
     }
+
+    // ── P&L CALCULATION ──────────────────────────────────────────
+    // Principle: P&L is in NIFTY INDEX POINTS (not rupees directly)
+    // For options spreads: credit received is the max profit in points.
+    // Max loss = wing width (off1 or off2) minus credit received.
+    // TP exit = realised % of credit. SL exit = partial or full wing loss.
+    // For directional (GF/GM): NIFTY move from entry to exit × delta proxy.
 
     const entryCmp=t.cmp;
     const exitCmp=bars[exitBar].cl;
     const holdBars=exitBar-startBar;
-    // P&L in NIFTY points: for credit spreads +ve credit = profit at expiry/TP
-    // For directional (GF/GM): profit = move in correct direction
+    const maxLoss=Math.round(t.off1); // conservative: spread width ≈ off1
+    const credit=t.credit||0;
     let pnlPts=0;
+
     if(t.reptile==='GF'){
-      // Bear position: entry CMP - exit CMP = profit if price fell
-      pnlPts=Math.round(entryCmp-exitCmp);
+      // Directional: NIFTY fell from entry to exit = profit
+      // BP2x gains: each 1pt fall = +2pts premium, but delta < 1 early
+      // Approximate delta of BP2x near off4 strike ≈ 0.35 per lot
+      // Use: P&L = (entryCmp - exitCmp) × 0.35 as NIFTY-equivalent points
+      const move=entryCmp-exitCmp; // +ve if price fell (profit)
+      pnlPts=Math.round(move*0.35);
+
     } else if(t.reptile==='GM'){
-      pnlPts=Math.round(exitCmp-entryCmp);
-    } else {
-      // For spreads: use credit as proxy. TP = credit kept. SL = credit lost.
-      // Estimate P&L as: if exit reason is TP = +tp_pct% of credit
-      // if exit reason is breach = negative (lose credit + spread)
-      if(exitReason.includes('TP')&&t.credit>0){
-        pnlPts=Math.round(t.credit*((t.tp_pct||50)/100));
-      } else if(exitReason.includes('BREACH')||exitReason.includes('FLIP')||exitReason.includes('DEATH')){
-        // Rough loss estimate: lose the credit + spread
-        pnlPts=-(Math.round(t.off2||t.off1||200));
-      } else if(exitReason.includes('EXPIRY')){
-        // At expiry, if price stayed within bands = full credit kept
-        const finalBd=bandArr[exitBar];
-        const stayed=t.reptile==='CROC'?finalBd.inVA:
-                     t.reptile==='COBRA'?Math.abs(bars[exitBar].cl-t.cmp)<t.off2:true;
-        pnlPts=stayed?t.credit:Math.round(-t.off1);
+      const move=exitCmp-entryCmp; // +ve if price rose (profit)
+      pnlPts=Math.round(move*0.35);
+
+    } else if(t.reptile==='CROC'){
+      if(exitReason.includes('Death Roll') || exitReason.includes('VA BREAK')){
+        // Loss: lose credit + lose on the short that got breached
+        // Wing protects at off2 so max loss ≈ off2 - credit
+        pnlPts=Math.round(-(t.off2-credit));
       } else {
-        pnlPts=t.credit>0?Math.round(t.credit*0.4):0;
+        // Held inside VA: full credit kept at DTE
+        pnlPts=credit;
       }
+
+    } else if(t.reptile==='COBRA'){
+      if(exitReason.includes('BREACH')){
+        // Loss: off2 spread - credit
+        pnlPts=Math.round(-(t.off2-credit));
+      } else {
+        // TP or expiry: full credit
+        pnlPts=credit;
+      }
+
+    } else if(t.reptile==='KOMO_UP'||t.reptile==='KOMO_LO'){
+      if(exitReason.includes('BREACH')||exitReason.includes('failed')){
+        // 2× credit loss rule: lose approximately 2× credit
+        pnlPts=Math.round(-credit*2);
+      } else {
+        // TP 50%: keep 50% of credit
+        pnlPts=Math.round(credit*(t.tp_pct||50)/100);
+      }
+
+    } else if(t.reptile==='MON'){
+      if(exitReason.includes('FLIP')||exitReason.includes('BREACH')){
+        // SL: lose credit + partial spread loss ≈ off1
+        pnlPts=Math.round(-(maxLoss));
+      } else {
+        pnlPts=Math.round(credit*(t.tp_pct||40)/100);
+      }
+
+    } else if(t.reptile==='MOTH'){
+      if(exitReason.includes('BREACH')||exitReason.includes('DIRECTIONAL')){
+        // off3 breach: lose credit + off1 spread
+        pnlPts=Math.round(-(maxLoss));
+      } else {
+        pnlPts=Math.round(credit*(t.tp_pct||45)/100);
+      }
+
+    } else if(t.reptile==='CHAM'){
+      if(exitReason.includes('DIRECTION')){
+        pnlPts=Math.round(credit*(t.tp_pct||40)/100);
+      } else {
+        pnlPts=Math.round(credit*(t.tp_pct||40)/100);
+      }
+
+    } else if(t.reptile==='IGUA'||t.reptile==='GECK'){
+      if(exitReason.includes('FIRES')||exitReason.includes('B10')||exitReason.includes('B1')){
+        // Positive: this is the intended exit (upgrade to GF/GM)
+        pnlPts=Math.round(credit*0.5);
+      } else {
+        pnlPts=Math.round(credit*(t.tp_pct||50)/100);
+      }
+
+    } else if(t.reptile==='SENT'){
+      if(exitReason.includes('UPGRADED')){
+        // Sentinel upgraded: partial theta earned
+        pnlPts=Math.round(credit*0.3*holdBars/C.dte);
+      } else {
+        pnlPts=Math.round(credit*0.5);
+      }
+
+    } else if(t.reptile==='RATTLE'){
+      // At expiry: if price moved directionally from entry, check if near body strike
+      const bodyLeg=t.legs.find(l=>l.q===2);
+      const bodyK=bodyLeg?bodyLeg.K:t.cmp;
+      const atPin=Math.abs(exitCmp-bodyK) < (t.off1||200)*0.5;
+      if(atPin){
+        // Near pin = max profit
+        pnlPts=credit+Math.round(t.off1);
+      } else {
+        // Away from pin: smaller profit from income leg or partial credit
+        pnlPts=Math.round(credit*0.4);
+      }
+
+    } else if(t.reptile==='SIDE'){
+      // Calendar edge: near leg decayed faster if IV held
+      // Approximate: 60% of credit as realistic calendar P&L
+      pnlPts=Math.round(credit*0.6);
+
+    } else if(t.reptile==='PYTH'){
+      // Directional: if HMA flipped after a move, P&L = NIFTY move
+      const move=Math.abs(exitCmp-entryCmp);
+      if(exitReason.includes('FLIP')&&move>t.off2){
+        // Big move = long gamma profit
+        pnlPts=Math.round((move-t.off1)*0.5); // rough gamma P&L
+      } else {
+        pnlPts=Math.round(credit*0.4);
+      }
+
+    } else {
+      pnlPts=Math.round(credit*(t.tp_pct||40)/100);
     }
 
     t.exitDate=bars[exitBar].date;
     t.exitCmp=Math.round(exitCmp);
     t.exitReason=exitReason;
     t.pnlPts=pnlPts;
-    t.pnlRs=pnlPts*LOT();
+    t.pnlRs=Math.round(pnlPts*LOT());
     t.holdBars=holdBars;
   });
 }
+
+
 
 // ══════════════════════════════════════════════════════════
 // UI SHOW
@@ -1022,11 +1225,15 @@ function renderBandTable(){
   const maxBars=Math.max(...bBars);
   const grid=document.getElementById('band-grid');
   grid.innerHTML='';
-  // Render B10 to B1 — exact Pine column order: B10 left to B1 right (descending)
+  // Get previous bar band for prev indicator
+  const prevBd=ENG.bandArr[ENG.bandArr.length-2]||bd;
+  const prevBandIdx=prevBd.curBand;
+  // Render B10 down to B1
   for(let b=nb-1;b>=0;b--){
     const isR1=b===r1, isR2=b===r2, isR3=b===r3;
     const isVA=b>=vaLoIdx&&b<=vaHiIdx;
     const isTop2=b>=nb-2, isBot2=b<=1, isCur=b===curBand;
+    const isPrev=b===prevBandIdx&&b!==curBand;
     const pct=maxBars>0?bBars[b]/maxBars*100:0;
     const mtp=bd.bMTP?bd.bMTP[b]:Math.round((bd.bLo[b]+bd.bHi[b])/2);
     let cls='band-cell';
@@ -1037,21 +1244,25 @@ function renderBandTable(){
     else if(isTop2)cls+=' top2';
     else if(isBot2)cls+=' bot2';
     if(isCur)cls+=' current';
-    const tag=isR1?'<span class="bc-tag" style="background:rgba(77,255,145,.3);color:var(--green)">R1</span>':
-               isR2?'<span class="bc-tag" style="background:rgba(77,255,145,.15);color:var(--green)">R2</span>':
-               isR3?'<span class="bc-tag" style="background:rgba(77,255,145,.08);color:var(--green)">R3</span>':
-               isCur?'<span class="bc-tag" style="background:rgba(240,192,64,.3);color:var(--gold)">▶</span>':'';
-    const fillCol=isR1?'var(--green)':isR2?'rgba(77,255,145,.6)':isR3?'rgba(77,255,145,.3)':isVA?'var(--cyan)':'var(--muted2)';
+    if(isPrev)cls+=' prev';
+    const tag=isR1?'<span class="bc-tag" style="background:#1a7a3a;color:#fff;font-weight:700">★R1</span>':
+               isR2?'<span class="bc-tag" style="background:#4daa60;color:#fff">R2</span>':
+               isR3?'<span class="bc-tag" style="background:#88cc99;color:#1a4a2a">R3</span>':
+               isCur?'<span class="bc-tag" style="background:#b8860b;color:#fff;font-weight:700">▶CMP</span>':
+               isPrev?'<span class="bc-tag" style="background:#6680a0;color:#fff">PRV</span>':'';
+    const fillCol=isR1?'#1a7a3a':isR2?'#4daa60':isR3?'#88cc99':isVA?'#0077aa':isTop2?'#cc2222':'#b8c8de';
+    const rankNumColor=isR1?'#fff':isR2?'#1a7a3a':isR3?'#2a7a44':isCur?'#b8860b':isVA?'#0077aa':isTop2?'#cc2222':'#6680a0';
     const rangeK=`${(bLo[b]/1000).toFixed(1)}-${(bHi[b]/1000).toFixed(1)}k`;
     const mtpStr=fmtN(Math.round(mtp));
-    grid.innerHTML+=`<div class="${cls}" style="height:${Math.max(44,44+pct*0.4)}px">
+    const bandH=Math.max(52, 52+pct*0.5);
+    grid.innerHTML+=`<div class="${cls}" style="height:${bandH}px">
       ${tag}
-      <div class="bc-num" style="color:var(--gold);font-weight:700">B${b+1}</div>
-      <div class="bc-hi" style="font-size:7px;color:var(--muted)">${rangeK}</div>
-      <div style="color:var(--cyan);font-size:8px">MTP:${mtpStr}</div>
-      <div class="bc-cnt" style="color:${isR1?'var(--green)':isVA?'var(--cyan)':'var(--muted)'}">${bBars[b]}b</div>
-      <div style="height:3px;background:var(--border);margin-top:2px;border-radius:1px">
-        <div style="height:100%;width:${pct}%;background:${fillCol};border-radius:1px"></div>
+      <div class="bc-num" style="color:${rankNumColor};font-weight:700;font-size:10px">B${b+1}</div>
+      <div style="font-size:7px;color:#6680a0;margin-top:1px">${rangeK}</div>
+      <div style="color:#0077aa;font-size:8px;margin-top:1px">MTP:${mtpStr}</div>
+      <div style="color:${rankNumColor};font-size:9px;font-weight:700;margin-top:2px">${bBars[b]}b</div>
+      <div style="height:4px;background:#e0e8f0;margin-top:3px;border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${fillCol};border-radius:2px"></div>
       </div>
     </div>`;
   }
@@ -1082,8 +1293,8 @@ function renderSummaryCards(){
 // TRIGGER TABLE — newest first
 // ══════════════════════════════════════════════════════════
 const COLS=['#','DATE','REPTILE','SIGNAL','ZONE','CMP','VIX','HVP%','OFF1','OFF2','S1','S2','S3','S4','CREDIT','LOT CR','TP%','EXIT DATE','EXIT CMP','HOLD(d)','P&L PTS','P&L ₹','EXIT REASON'];
-const RC={GF:'#4dff91',GM:'#40c4ff',CROC:'#80cbc4',COBRA:'#ff4444',SENT:'#ff8c00',KOMO_UP:'#ff6b6b',KOMO_LO:'#69ff47',RATTLE:'#b2dfdb',MON:'#c084fc',MOTH:'#80ff80',CHAM:'#90caf9',SIDE:'#4fc3f7',IGUA:'#a5d6a7',GECK:'#80cbc4',PYTH:'#ef9a9a'};
-const ZC={'UPPER REJ':'var(--red)','TOP EXTREME':'var(--orange)','VALUE AREA':'var(--cyan)','BETWEEN':'var(--purple)','BOT EXTREME':'var(--orange)','LOWER REJ':'var(--green)'};
+const RC={GF:'#1a7a3a',GM:'#0077aa',CROC:'#0d5c7a',COBRA:'#cc2222',SENT:'#c05800',KOMO_UP:'#cc2222',KOMO_LO:'#1a7a3a',RATTLE:'#2a8a7a',MON:'#6600cc',MOTH:'#228844',CHAM:'#0055cc',SIDE:'#0066aa',IGUA:'#2a7a44',GECK:'#2a7a44',PYTH:'#aa2222'};
+const ZC={'UPPER REJ':'#cc2222','TOP EXTREME':'#c05800','VALUE AREA':'#0077aa','BETWEEN':'#6600cc','BOT EXTREME':'#c05800','LOWER REJ':'#1a7a3a'};
 
 function renderTable(){
   const rf=$$('f-rep').value, zf=$$('f-zone').value, sf=$$('f-sig').value;
@@ -1228,7 +1439,7 @@ function renderPayoff(t){
   const ctx=cv.getContext('2d');
   const W=cv.width, H=cv.height;
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#0a1520'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
 
   const yPad=(Math.max(Math.abs(maxPnl),Math.abs(minPnl))*0.18)||1000;
   const yl=minPnl-yPad, yh=maxPnl+yPad;
@@ -1238,23 +1449,23 @@ function renderPayoff(t){
   const y0=py(0);
 
   // Grid
-  ctx.strokeStyle='#1a3048'; ctx.lineWidth=0.5;
+  ctx.strokeStyle='#e0e8f0'; ctx.lineWidth=0.5;
   for(let i=0;i<=5;i++){
     const yv=yl+(yh-yl)*i/5, yp=py(yv);
     ctx.beginPath();ctx.moveTo(L,yp);ctx.lineTo(R,yp);ctx.stroke();
-    ctx.fillStyle='#4a6a8a';ctx.font='9px Share Tech Mono';ctx.textAlign='right';
+    ctx.fillStyle='#6680a0';ctx.font='9px Share Tech Mono';ctx.textAlign='right';
     ctx.fillText((yv>=0?'+':'')+fmtN(Math.round(yv)),L-3,yp+3);
   }
   for(let i=0;i<=8;i++){
     const xv=xMin+i*(xMax-xMin)/8;
     const xp=px(xv);
     ctx.beginPath();ctx.moveTo(xp,T2);ctx.lineTo(xp,B);ctx.stroke();
-    ctx.fillStyle='#4a6a8a';ctx.font='9px Share Tech Mono';ctx.textAlign='center';
+    ctx.fillStyle='#6680a0';ctx.font='9px Share Tech Mono';ctx.textAlign='center';
     ctx.fillText(fmtN(Math.round(xv)),xp,B+12);
   }
 
   // Zero line
-  ctx.strokeStyle='#2a4a6a'; ctx.lineWidth=1;
+  ctx.strokeStyle='#c0d0e8'; ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(L,y0);ctx.lineTo(R,y0);ctx.stroke();
   ctx.fillStyle='#4a6a8a';ctx.font='9px Share Tech Mono';ctx.textAlign='right';
   ctx.fillText('0',L-3,y0+3);
@@ -1264,13 +1475,13 @@ function renderPayoff(t){
   const path=new Path2D();
   xs.forEach((x,i)=>{const xp=px(x),yp2=py(ys[i]);i===0?path.moveTo(xp,yp2):path.lineTo(xp,yp2);});
   path.lineTo(px(xs[xs.length-1]),y0);path.lineTo(px(xs[0]),y0);path.closePath();
-  ctx.fillStyle='rgba(77,255,145,0.07)';ctx.fill(path);
+  ctx.fillStyle='rgba(26,122,58,0.10)';ctx.fill(path);
 
   // Loss fill
   const path2=new Path2D();
   xs.forEach((x,i)=>{const xp=px(x),yp2=py(Math.min(ys[i],0));i===0?path2.moveTo(xp,yp2):path2.lineTo(xp,yp2);});
   path2.lineTo(px(xs[xs.length-1]),y0);path2.lineTo(px(xs[0]),y0);path2.closePath();
-  ctx.fillStyle='rgba(255,68,68,0.07)';ctx.fill(path2);
+  ctx.fillStyle='rgba(204,34,34,0.10)';ctx.fill(path2);
   ctx.restore();
 
   // Strike lines
@@ -1327,7 +1538,7 @@ function renderPayoff(t){
   }
 
   // Axis labels
-  ctx.fillStyle='#4a6a8a';ctx.font='9px Share Tech Mono';ctx.textAlign='center';
+  ctx.fillStyle='#6680a0';ctx.font='9px Share Tech Mono';ctx.textAlign='center';
   ctx.fillText('NIFTY PRICE AT EXPIRY →',L+(R-L)/2,H-2);
   ctx.save();ctx.translate(12,T2+(B-T2)/2);ctx.rotate(-Math.PI/2);
   ctx.fillText(`P&L ₹ (LOT SIZE ${lot})`,0,0);ctx.restore();
@@ -1346,7 +1557,7 @@ function renderIndicatorChart(){
   cv.width=W;cv.height=H;
   const ctx=cv.getContext('2d');
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#0a1520';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
 
   const allP=cl.filter(x=>!isNaN(x));
   const pMin=Math.min(...allP)*0.994,pMax=Math.max(...allP)*1.006;
@@ -1368,7 +1579,7 @@ function renderIndicatorChart(){
   ctx.setLineDash([4,3]);
   ctx.strokeStyle='rgba(77,255,145,0.4)';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(L,py(lbd.vaHiP));ctx.lineTo(R,py(lbd.vaHiP));ctx.stroke();
-  ctx.strokeStyle='rgba(255,140,0,0.4)';
+  ctx.strokeStyle='#cc2222';
   ctx.beginPath();ctx.moveTo(L,py(lbd.vaLoP));ctx.lineTo(R,py(lbd.vaLoP));ctx.stroke();
   ctx.setLineDash([]);
 
@@ -1380,19 +1591,21 @@ function renderIndicatorChart(){
   TRIGGERS.forEach(t=>{
     const bi=t.barIdx;if(bi<0||bi>=n)return;
     const x=px(bi),y=py(bars[bi].cl);
-    ctx.fillStyle=RC[t.reptile]||'#ffd700';
-    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();
+    const col=RC[t.reptile]||'#b8860b';
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;
+    ctx.fillStyle=col;
+    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();ctx.stroke();
   });
 
   // Price
-  ctx.strokeStyle='rgba(240,192,64,0.8)';ctx.lineWidth=1.5;
+  ctx.strokeStyle='#1a2233';ctx.lineWidth=1.5;
   ctx.beginPath();cl.forEach((c,i)=>{if(!isNaN(c)){const x=px(i),y=py(c);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}});ctx.stroke();
 
   // HMA
-  ctx.strokeStyle='#38d9f5';ctx.lineWidth=1.5;
+  ctx.strokeStyle='#0077aa';ctx.lineWidth=2;
   ctx.beginPath();let f=true;
   hmaF.forEach((v,i)=>{if(!isNaN(v)){const x=px(i),y=py(v);f?ctx.moveTo(x,y):ctx.lineTo(x,y);f=false;}});ctx.stroke();
-  ctx.strokeStyle='#ff4444';ctx.lineWidth=1.5;ctx.beginPath();f=true;
+  ctx.strokeStyle='#cc2222';ctx.lineWidth=2;ctx.beginPath();f=true;
   hmaS.forEach((v,i)=>{if(!isNaN(v)){const x=px(i),y=py(v);f?ctx.moveTo(x,y):ctx.lineTo(x,y);f=false;}});ctx.stroke();
 
   // Date labels
@@ -1404,27 +1617,27 @@ function renderIndicatorChart(){
   const sc=document.getElementById('smi-canvas');
   const SH=100;sc.width=W;sc.height=SH;
   const sc2=sc.getContext('2d');sc2.clearRect(0,0,W,SH);
-  sc2.fillStyle='#0a1520';sc2.fillRect(0,0,W,SH);
+  sc2.fillStyle='#ffffff';sc2.fillRect(0,0,W,SH);
   const sMin=-110,sMax=110;
   const spy=v=>8+(1-(v-sMin)/(sMax-sMin))*(SH-16);
-  sc2.fillStyle='rgba(255,68,68,0.07)';sc2.fillRect(L,spy(C.smiBull),R-L,spy(110)-spy(C.smiBull));
-  sc2.fillStyle='rgba(77,255,145,0.07)';sc2.fillRect(L,spy(0),R-L,spy(C.smiBear)-spy(0));
+  sc2.fillStyle='rgba(204,34,34,0.08)';sc2.fillRect(L,spy(C.smiBull),R-L,spy(110)-spy(C.smiBull));
+  sc2.fillStyle='rgba(26,122,58,0.08)';sc2.fillRect(L,spy(0),R-L,spy(C.smiBear)-spy(0));
   [0,C.smiBull,C.smiBear].forEach(lv=>{
-    sc2.strokeStyle='#1a3048';sc2.lineWidth=0.5;sc2.setLineDash([2,2]);
+    sc2.strokeStyle='#e0e8f0';sc2.lineWidth=0.5;sc2.setLineDash([2,2]);
     sc2.beginPath();sc2.moveTo(L,spy(lv));sc2.lineTo(R,spy(lv));sc2.stroke();
     sc2.setLineDash([]);
-    sc2.fillStyle='#4a6a8a';sc2.font='8px Share Tech Mono';sc2.textAlign='right';
+    sc2.fillStyle='#6680a0';sc2.font='8px Share Tech Mono';sc2.textAlign='right';
     sc2.fillText(lv,L-3,spy(lv)+3);
   });
-  sc2.strokeStyle='#c084fc';sc2.lineWidth=1.5;sc2.beginPath();f=true;
+  sc2.strokeStyle='#6600cc';sc2.lineWidth=1.5;sc2.beginPath();f=true;
   smiVal.forEach((v,i)=>{if(!isNaN(v)){const x=px(i),y=spy(Math.max(-100,Math.min(100,v)));f?sc2.moveTo(x,y):sc2.lineTo(x,y);f=false;}});sc2.stroke();
-  sc2.fillStyle='#4a6a8a';sc2.font='8px Share Tech Mono';sc2.textAlign='left';sc2.fillText('SMI',L+3,SH-3);
+  sc2.fillStyle='#6680a0';sc2.font='8px Share Tech Mono';sc2.textAlign='left';sc2.fillText('SMI',L+3,SH-3);
 
   // Band timeline
   const bt=document.getElementById('bt-canvas');
   const BTH=80;bt.width=W;bt.height=BTH;
   const bt2=bt.getContext('2d');bt2.clearRect(0,0,W,BTH);
-  bt2.fillStyle='#0a1520';bt2.fillRect(0,0,W,BTH);
+  bt2.fillStyle='#f7f9fc';bt2.fillRect(0,0,W,BTH);
   const bTW=(R-L)/n;
   bandArr.forEach((bd,i)=>{
     const x=L+i*bTW;
@@ -1433,10 +1646,10 @@ function renderIndicatorChart(){
     const yFrac=1-bd.curBand/(bd.nb-1);
     const y=8+yFrac*(BTH-16);
     bt2.fillStyle=col;bt2.fillRect(x,8,Math.max(1,bTW-0.5),BTH-16);
-    bt2.fillStyle='rgba(255,255,255,0.6)';bt2.beginPath();bt2.arc(x+bTW/2,y,1.5,0,Math.PI*2);bt2.fill();
+    bt2.fillStyle='rgba(0,0,0,0.5)';bt2.beginPath();bt2.arc(x+bTW/2,y,1.5,0,Math.PI*2);bt2.fill();
   });
   // Band labels on right
-  bt2.fillStyle='#4a6a8a';bt2.font='7px Share Tech Mono';bt2.textAlign='left';
+  bt2.fillStyle='#6680a0';bt2.font='7px Share Tech Mono';bt2.textAlign='left';
   ['B10','B5','B1'].forEach((lbl,i)=>{bt2.fillText(lbl,3,8+i*(BTH-16)/2+3);});
 }
 
