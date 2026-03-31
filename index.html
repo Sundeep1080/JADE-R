@@ -3,340 +3,278 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JADE REPTILLIS v13 — Analyser</title>
+<title>JADE SUPREMA v15 — Band SALT Analyser</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#f7f9fc;--bg4:#eef2f7;
+  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#f7f9fc;
   --border:#d0dae8;--border2:#b8c8de;
-  --gold:#b8860b;--gold2:#c8960b;--gold-dim:#e8d090;
-  --cyan:#0077aa;--cyan2:#0088cc;--cyan-dim:#cce8f4;
-  --green:#1a7a3a;--green2:#228844;--green-dim:#d4f0dc;
-  --red:#cc2222;--red2:#dd3333;--red-dim:#fde8e8;
-  --orange:#c05800;--orange-dim:#fde8d0;
-  --purple:#6600cc;--purple-dim:#ede8f8;
-  --white:#1a2233;--muted:#6680a0;--muted2:#8899bb;
+  --navy:#0d3461;--navy2:#1a2e48;
+  --gold:#b8860b;--gold2:#c8960b;
+  --cyan:#0077aa;--cyan2:#0088cc;
+  --green:#1a7a3a;--green2:#228844;--green-lt:#d4f0dc;
+  --red:#cc2222;--red2:#dd3333;--red-lt:#fde8e8;
+  --orange:#c05800;--orange-lt:#fff0e0;
+  --purple:#6600cc;--purple-lt:#ede8f8;
+  --muted:#6680a0;--muted2:#8899bb;--white:#1a2233;
   --font-mono:'Share Tech Mono',monospace;
   --font-ui:'Rajdhani',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--white);font-family:var(--font-ui)}
-body{display:flex;flex-direction:column;overflow:hidden;background:#f0f4f8}
+body{display:flex;flex-direction:column;overflow:hidden}
 
-/* scanline removed for light theme */
+/* HEADER */
+#hdr{flex-shrink:0;display:flex;align-items:center;gap:12px;padding:7px 14px;
+  background:linear-gradient(90deg,#0d3461 0%,#1a4080 50%,#0d3461 100%);
+  border-bottom:2px solid var(--gold2)}
+#hdr-logo{font-family:var(--font-mono);color:#ffd700;font-size:13px;letter-spacing:3px}
+#hdr-logo span{color:#80cbc4;font-size:9px;display:block;letter-spacing:5px;margin-top:1px}
+.hdr-pill{padding:2px 9px;border-radius:2px;font-family:var(--font-mono);font-size:9px;letter-spacing:1px}
+#hdr-status{margin-left:auto;font-family:var(--font-mono);font-size:10px;color:#80cbc4}
+#hdr-status.ok{color:#4dff91}
+#hdr-status.err{color:#ff5252}
 
-/* ── HEADER ── */
-#hdr{flex-shrink:0;display:flex;align-items:center;gap:16px;padding:8px 16px;background:linear-gradient(90deg,#1a2e48 0%,#0d3461 50%,#1a2e48 100%);border-bottom:2px solid var(--gold2)}
-#hdr-logo{font-family:var(--font-mono);color:var(--gold);font-size:13px;letter-spacing:3px}
-#hdr-logo span{color:var(--cyan);font-size:10px;display:block;letter-spacing:6px;margin-top:1px}
-#hdr-status{margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--muted)}
-#hdr-status.ok{color:var(--green)}
-#hdr-status.err{color:var(--red)}
-.hdr-badge{padding:2px 10px;border-radius:2px;font-size:10px;font-family:var(--font-mono);letter-spacing:1px}
-
-/* ── UPLOAD ── */
-#upload-wrap{flex-shrink:0;padding:6px 16px}
-#drop-zone{border:2px dashed #b8c8de;border-radius:6px;padding:10px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:.2s;background:#fff}
-#drop-zone:hover,#drop-zone.drag{border-color:var(--cyan);background:var(--bg3)}
+/* UPLOAD */
+#upload-wrap{flex-shrink:0;padding:5px 14px}
+#drop-zone{border:2px dashed var(--border2);border-radius:5px;padding:8px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.2s;background:#fff}
+#drop-zone:hover,#drop-zone.drag{background:#eef4ff;border-color:var(--cyan)}
 #drop-zone input{display:none}
-#drop-icon{font-size:20px}
-#drop-text{font-family:var(--font-mono);font-size:11px;color:var(--cyan)}
-#drop-sub{font-size:9px;color:var(--muted);margin-top:2px}
-#progress-bar{height:2px;background:var(--bg3);overflow:hidden;border-radius:1px;margin-top:4px}
+#progress-bar{height:2px;background:var(--bg3);border-radius:1px;margin-top:3px;overflow:hidden}
 #progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .4s}
+#hvp-warn{display:none;background:rgba(192,88,0,.1);border:1px solid #c05800;border-radius:3px;
+  padding:4px 10px;font-family:var(--font-mono);font-size:9px;color:#c05800;margin:3px 14px 0}
 
-/* ── NAV TABS ── */
-#nav{flex-shrink:0;display:flex;gap:0;padding:0 16px;background:#fff;border-bottom:2px solid var(--border2)}
-.nav-tab{padding:8px 20px;font-family:var(--font-mono);font-size:10px;letter-spacing:2px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;transition:.15s;user-select:none}
+/* NAV */
+#nav{flex-shrink:0;display:flex;padding:0 14px;background:#fff;border-bottom:2px solid var(--border2);display:none}
+.nav-tab{padding:7px 18px;font-family:var(--font-mono);font-size:10px;letter-spacing:2px;cursor:pointer;
+  color:var(--muted);border-bottom:3px solid transparent;transition:.15s;user-select:none}
 .nav-tab:hover{color:var(--white)}
-.nav-tab.active{color:#0d3461;border-bottom-color:#0d3461;font-weight:700}
+.nav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
 
-/* ── MAIN AREA ── */
+/* MAIN */
 #main{flex:1;overflow:hidden;display:flex;flex-direction:column}
 .page{display:none;flex:1;overflow:hidden;flex-direction:column}
 .page.active{display:flex}
-.scroll{overflow-y:auto;overflow-x:hidden;flex:1}
+.scroll{overflow-y:auto;flex:1}
 .scroll::-webkit-scrollbar{width:4px}
-.scroll::-webkit-scrollbar-track{background:var(--bg)}
-.scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.scroll::-webkit-scrollbar-thumb{background:var(--border2)}
 
-/* ── CURRENT DATE PANEL ── */
-#cdp{flex-shrink:0;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:stretch}
-.cdp-block{background:#fff;border:1px solid var(--border);border-radius:4px;padding:6px 12px;min-width:110px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.cdp-lbl{font-family:var(--font-mono);font-size:8px;color:#6680a0;letter-spacing:2px;margin-bottom:2px;text-transform:uppercase}
-.cdp-val{font-family:var(--font-mono);font-size:15px;font-weight:600;color:var(--gold)}
-.cdp-sub{font-size:9px;color:var(--muted);margin-top:1px}
-.cdp-sep{width:1px;background:var(--border);margin:4px 0}
+/* CURRENT DATE PANEL */
+#cdp{flex-shrink:0;padding:6px 14px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;display:none}
+.cdp-block{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:5px 10px;min-width:100px}
+.cdp-lbl{font-family:var(--font-mono);font-size:7px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:1px}
+.cdp-val{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--navy)}
+.cdp-sub{font-size:9px;color:var(--muted);font-family:var(--font-mono)}
+.cdp-block.active-now{background:var(--green-lt);border-color:var(--green)}
+.cdp-block.warn{background:var(--red-lt);border-color:var(--red)}
+.cdp-block.caution{background:var(--orange-lt);border-color:var(--orange)}
 
-/* ── BAND TABLE ── */
-#band-panel{flex-shrink:0;padding:8px 16px 4px;border-bottom:2px solid var(--border2);background:#fff}
-#band-title{font-family:var(--font-mono);font-size:9px;color:#0d3461;letter-spacing:3px;margin-bottom:6px;font-weight:bold}
+/* GATE ROW */
+#gate-row{flex-shrink:0;padding:4px 14px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;display:none}
+.gate-pill{padding:2px 10px;border-radius:10px;font-family:var(--font-mono);font-size:9px;font-weight:700}
+.gate-pass{background:var(--green-lt);color:var(--green);border:1px solid var(--green)}
+.gate-fail{background:var(--red-lt);color:var(--red);border:1px solid var(--red)}
+.gate-warn{background:var(--orange-lt);color:var(--orange);border:1px solid var(--orange)}
+.gate-info{background:#eef4ff;color:var(--navy);border:1px solid var(--border2)}
+
+/* BAND TABLE */
+#band-panel{flex-shrink:0;padding:6px 14px 4px;border-bottom:2px solid var(--border2);background:#fff;display:none}
+#band-title{font-family:var(--font-mono);font-size:8px;color:var(--navy);letter-spacing:3px;margin-bottom:5px;font-weight:bold}
 #band-grid{display:flex;gap:2px;align-items:flex-end}
-.band-cell{flex:1;border-radius:3px;padding:4px 5px;border:1px solid var(--border);font-family:var(--font-mono);font-size:9px;cursor:default;transition:.1s;position:relative;background:#f7f9fc}
-.band-cell.current{border:3px solid #b8860b!important;box-shadow:0 0 8px rgba(184,134,11,.4);background:#fffbe6!important}
-.band-cell.prev{border:2px dashed #6680a0!important;background:#f0f4f8!important}
-.band-cell.va{background:#e8f4ff;border-color:#0077aa;border-width:1.5px}
-.band-cell.rank1{background:#1a7a3a;border-color:#1a7a3a;color:#fff}
-.band-cell.rank1 .bc-num,.band-cell.rank1 .bc-hi,.band-cell.rank1 .bc-cnt{color:#fff!important}
-.band-cell.rank2{background:#d4f0dc;border-color:#1a7a3a;border-width:2px}
+.band-cell{flex:1;border-radius:3px;padding:4px 4px 3px;border:1px solid var(--border);font-family:var(--font-mono);font-size:9px;cursor:default;transition:.1s;position:relative;background:#f7f9fc;min-width:40px}
+.band-cell.current{border:3px solid var(--gold)!important;box-shadow:0 0 8px rgba(184,134,11,.4);background:#fffbe6!important}
+.band-cell.prev{border:2px dashed var(--muted)!important;background:#f0f4f8!important}
+.band-cell.rej1{background:var(--red-lt);border-color:var(--red);border-width:2px}
+.band-cell.rej2{background:#fff4f0;border-color:#e06040;border-width:1.5px}
+.band-cell.va{background:#e8f4ff;border-color:var(--cyan)}
+.band-cell.rank1{background:var(--green);border-color:var(--green);color:#fff}
+.band-cell.rank1 *{color:#fff!important}
+.band-cell.rank2{background:var(--green-lt);border-color:var(--green);border-width:2px}
 .band-cell.rank3{background:#e8f8ee;border-color:#4daa60;border-width:1.5px}
-.band-cell.top2:not(.rank1):not(.rank2):not(.rank3){background:#fde8e8;border-color:#cc2222}
-.band-cell.bot2:not(.rank1):not(.rank2):not(.rank3){background:#d4f0dc;border-color:#1a7a3a}
-.bc-num{color:var(--muted);font-size:8px}
-.bc-hi{color:var(--gold2);font-size:8px}
-.bc-lo{color:var(--muted);font-size:8px}
-.bc-cnt{color:var(--cyan);font-size:9px;font-weight:bold}
-.bc-tag{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:7px;padding:0 3px;border-radius:1px;white-space:nowrap}
+.bc-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+  font-size:7px;padding:0 3px;border-radius:1px;white-space:nowrap;font-weight:700}
 
-/* ── SUMMARY ROW ── */
-#summary-row{flex-shrink:0;display:flex;gap:8px;padding:6px 16px;flex-wrap:wrap}
-.sum-card{background:#fff;border:1px solid var(--border);border-radius:4px;padding:5px 12px;flex:1;min-width:100px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.sum-label{font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:1px}
-.sum-val{font-family:var(--font-mono);font-size:16px;font-weight:700;margin-top:1px}
+/* SUMMARY CARDS */
+#summary-row{flex-shrink:0;display:flex;gap:6px;padding:5px 14px;flex-wrap:wrap;display:none}
+.sum-card{background:#fff;border:1px solid var(--border);border-radius:4px;padding:5px 10px;flex:1;min-width:90px}
+.sum-label{font-family:var(--font-mono);font-size:7px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.sum-val{font-family:var(--font-mono);font-size:15px;font-weight:700;margin-top:1px}
 .sum-sub{font-size:9px;color:var(--muted);font-family:var(--font-mono)}
 
-/* ── FILTER BAR ── */
-#filter-bar{flex-shrink:0;display:flex;gap:8px;padding:6px 16px;background:#fff;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
-.flt-group{display:flex;align-items:center;gap:4px}
+/* FILTER BAR */
+#filter-bar{flex-shrink:0;display:flex;gap:6px;padding:5px 14px;background:#fff;
+  border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;display:none}
 .flt-lbl{font-family:var(--font-mono);font-size:9px;color:var(--muted)}
-select,input[type=text],input[type=number]{background:#fff;color:#1a2233;border:1px solid var(--border2);border-radius:2px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;outline:none}
-select:focus,input:focus{border-color:var(--cyan)}
-.btn{padding:4px 14px;border-radius:2px;font-family:var(--font-mono);font-size:9px;letter-spacing:1px;cursor:pointer;transition:.15s;border:1px solid}
-.btn-cyan{background:var(--bg3);color:var(--cyan);border-color:var(--cyan);}.btn-cyan:hover{background:var(--cyan);color:var(--bg)}
-.btn-gold{background:var(--bg3);color:var(--gold);border-color:var(--gold);}.btn-gold:hover{background:var(--gold);color:var(--bg)}
-#lot-input{width:60px}
+select,input[type=number]{background:#fff;color:var(--white);border:1px solid var(--border2);
+  border-radius:2px;padding:3px 6px;font-family:var(--font-mono);font-size:10px;outline:none}
+.btn{padding:3px 12px;border-radius:2px;font-family:var(--font-mono);font-size:9px;
+  letter-spacing:1px;cursor:pointer;transition:.15s;border:1px solid}
+.btn-navy{background:var(--bg3);color:var(--navy);border-color:var(--navy)}.btn-navy:hover{background:var(--navy);color:#fff}
+.btn-gold{background:var(--bg3);color:var(--gold);border-color:var(--gold)}.btn-gold:hover{background:var(--gold);color:#fff}
 
-/* ── TRIGGER TABLE ── */
+/* TABLE */
 #tbl-wrap{flex:1;overflow:auto}
 #tbl-wrap::-webkit-scrollbar{width:4px;height:4px}
 #tbl-wrap::-webkit-scrollbar-thumb{background:var(--border2)}
 table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:10px}
-thead th{background:#1a2e48;color:#ffd700;padding:5px 8px;position:sticky;top:0;z-index:5;white-space:nowrap;font-size:9px;letter-spacing:1px;border-bottom:2px solid #ffd700;cursor:pointer;user-select:none}
-thead th:hover{color:var(--gold2)}
+thead th{background:var(--navy);color:#ffd700;padding:5px 7px;position:sticky;top:0;z-index:5;
+  white-space:nowrap;font-size:8px;letter-spacing:1px;border-bottom:2px solid #ffd700;cursor:pointer;user-select:none}
+thead th:hover{color:#fff}
 tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;background:#fff}
 tbody tr:hover td{background:#eef4ff!important}
-tbody tr td{vertical-align:middle}
-tbody tr.sel td{background:#d4f0dc!important;border-bottom-color:var(--green)!important}
-td{padding:4px 8px;white-space:nowrap;color:#1a2233}
-.pill{display:inline-block;padding:1px 7px;border-radius:2px;font-size:9px;letter-spacing:1px;border:1px solid}
+tbody tr.sel td{background:var(--green-lt)!important;border-bottom-color:var(--green)!important}
+td{padding:4px 7px;white-space:nowrap;color:var(--white);vertical-align:middle}
+.pill{display:inline-block;padding:1px 6px;border-radius:2px;font-size:8px;letter-spacing:1px;border:1px solid}
+/* Layer pills */
+.l-L1A{color:#0077aa;border-color:#0077aa;background:#e8f4ff}
+.l-L1B{color:#0055aa;border-color:#0055aa;background:#e8eeff}
+.l-L1C{color:#6600cc;border-color:#6600cc;background:var(--purple-lt)}
+.l-L2{color:#cc2222;border-color:#cc2222;background:var(--red-lt)}
+.l-L3{color:#c05800;border-color:#c05800;background:var(--orange-lt)}
+.l-L4{color:#1a7a3a;border-color:#1a7a3a;background:var(--green-lt)}
+.l-GF{color:#1a7a3a;border-color:#1a7a3a;background:var(--green-lt)}
+.l-GM{color:#0077aa;border-color:#0077aa;background:#e8f4ff}
+.l-COBRA{color:#cc2222;border-color:#cc2222;background:var(--red-lt)}
+.l-PYTH{color:#aa2222;border-color:#aa2222;background:var(--red-lt)}
+.l-BATMAN{color:#6600cc;border-color:#6600cc;background:var(--purple-lt)}
+.l-L0{color:var(--muted);border-color:var(--muted);background:var(--bg3)}
 
-/* rep colors */
-.r-GF{color:#1a7a3a;border-color:#1a7a3a;background:#f0faf4}.r-GM{color:#0077aa;border-color:#0077aa;background:#f0f8ff}
-.r-CROC{color:#0d5c7a;border-color:#0d5c7a;background:#f0f8fb}.r-COBRA{color:#cc2222;border-color:#cc2222;background:#fff0f0}
-.r-SENT{color:#c05800;border-color:#c05800;background:#fff8f0}.r-KOMO_UP{color:#cc2222;border-color:#cc2222;background:#fff0f0}
-.r-KOMO_LO{color:#1a7a3a;border-color:#1a7a3a;background:#f0faf4}.r-RATTLE{color:#2a8a7a;border-color:#2a8a7a;background:#f0faf8}
-.r-MON{color:#6600cc;border-color:#6600cc;background:#f8f0ff}.r-MOTH{color:#228844;border-color:#228844;background:#f0f8f0}
-.r-CHAM{color:#0055cc;border-color:#0055cc;background:#f0f4ff}.r-SIDE{color:#0066aa;border-color:#0066aa;background:#f0f8ff}
-.r-IGUA{color:#2a7a44;border-color:#2a7a44;background:#f0faf4}.r-GECK{color:#2a7a44;border-color:#2a7a44;background:#f0faf8}
-.r-PYTH{color:#aa2222;border-color:#aa2222;background:#fff0f0}
-
-/* ── PAYOFF PAGE ── */
-#payoff-page{padding:10px 16px;gap:10px}
-#payoff-header{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
-#payoff-title-block{flex:1}
-#payoff-rep{font-family:var(--font-mono);font-size:22px;font-weight:700}
-#payoff-date{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:2px}
-#payoff-legs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.leg-chip{padding:3px 10px;border-radius:3px;font-family:var(--font-mono);font-size:10px;border:1px solid var(--border2);background:var(--bg3)}
-.leg-chip.buy{border-color:var(--green);color:var(--green)}
-.leg-chip.sell{border-color:var(--red);color:var(--red)}
-#payoff-metrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.pm-box{background:#f7f9fc;border:1px solid var(--border);border-radius:3px;padding:5px 12px;min-width:90px}
-.pm-lbl{font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:1px}
-.pm-val{font-family:var(--font-mono);font-size:14px;font-weight:700;margin-top:1px}
-
-/* Greeks */
-#greeks-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.greek-box{background:#f7f9fc;border:1px solid var(--border);border-radius:3px;padding:5px 10px;font-family:var(--font-mono)}
+/* PAYOFF PAGE */
+#pg-payoff{overflow-y:auto;padding:10px 14px;gap:8px}
+#payoff-header{display:flex;gap:8px;flex-wrap:wrap}
+#payoff-rep{font-family:var(--font-mono);font-size:20px;font-weight:700}
+#payoff-date{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:2px}
+#payoff-legs{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.leg-chip{padding:2px 9px;border-radius:3px;font-family:var(--font-mono);font-size:9px;border:1px solid var(--border2)}
+.leg-chip.buy{border-color:var(--green);color:var(--green);background:var(--green-lt)}
+.leg-chip.sell{border-color:var(--red);color:var(--red);background:var(--red-lt)}
+#payoff-metrics{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pm-box{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:4px 10px;min-width:80px}
+.pm-lbl{font-family:var(--font-mono);font-size:7px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.pm-val{font-family:var(--font-mono);font-size:13px;font-weight:700;margin-top:1px}
+#greeks-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.greek-box{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:4px 9px;font-family:var(--font-mono)}
 .greek-sym{font-size:11px;color:var(--purple)}
-.greek-val{font-size:13px;font-weight:700;margin-top:1px}
-.greek-lbl{font-size:8px;color:var(--muted);margin-top:1px}
+.greek-val{font-size:12px;font-weight:700;margin-top:1px}
+.greek-lbl{font-size:7px;color:var(--muted);margin-top:1px}
+#canvas-wrap{background:#fff;border:1px solid var(--border2);border-radius:4px;padding:8px;margin-top:7px}
+#no-payoff{display:flex;align-items:center;justify-content:center;height:280px;
+  font-family:var(--font-mono);color:var(--muted);font-size:11px;letter-spacing:2px}
 
-#canvas-wrap{background:#fff;border:1px solid var(--border2);border-radius:4px;padding:10px;margin-top:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-#payoff-canvas{display:block}
-
-#no-payoff{display:flex;align-items:center;justify-content:center;height:300px;font-family:var(--font-mono);color:#6680a0;font-size:12px;letter-spacing:2px}
-
-/* ── INDICATOR PAGE ── */
-#ind-page{padding:10px 16px;gap:8px}
-#ind-controls{display:flex;gap:8px;align-items:center}
-.ind-legend{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--font-mono);font-size:9px}
+/* INDICATOR PAGE */
+#pg-indicators{overflow-y:auto;padding:8px 14px;gap:7px}
+.ind-legend{display:flex;gap:10px;flex-wrap:wrap;font-family:var(--font-mono);font-size:9px;color:var(--muted)}
 .il{display:flex;align-items:center;gap:4px}
-.il-dot{width:16px;height:2px;border-radius:1px}
-#ind-canvas-wrap{background:#fff;border:1px solid var(--border);border-radius:4px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-#smi-canvas-wrap{background:#fff;border:1px solid var(--border);border-radius:4px;padding:8px;margin-top:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-#band-timeline-wrap{background:#fff;border:1px solid var(--border);border-radius:4px;padding:8px;margin-top:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-canvas{display:block}
+.il-dot{width:14px;height:2px;border-radius:1px}
+.canvas-card{background:#fff;border:1px solid var(--border);border-radius:4px;padding:7px}
+.canvas-card-title{font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:5px}
 
-/* ── STATS PAGE ── */
-#stats-page{padding:10px 16px}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
-.stat-card{background:#fff;border:1px solid var(--border);border-radius:4px;padding:10px 14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.stat-card h3{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
-.stat-row{display:flex;justify-content:space-between;padding:2px 0;font-family:var(--font-mono);font-size:10px}
+/* STATS PAGE */
+#pg-stats{overflow-y:auto;padding:8px 14px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:7px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:4px;padding:9px 12px}
+.stat-card h3{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;margin-bottom:7px;
+  padding-bottom:4px;border-bottom:1px solid var(--border)}
+.stat-row{display:flex;justify-content:space-between;padding:2px 0;font-family:var(--font-mono);font-size:9px}
 .sl{color:var(--muted)}.sv{color:var(--white)}
-.bar-row{margin-top:4px}
-.bar-bg{background:var(--border);border-radius:1px;height:4px;margin-top:2px}
-.bar-fill{height:100%;border-radius:1px}
+.bar-bg{background:var(--border);border-radius:1px;height:4px;margin-top:3px}
+.bar-fill{height:100%;border-radius:1px;transition:width .3s}
 
-/* ── HVP WARNING ── */
-#hvp-warn{display:none;background:rgba(255,140,0,.1);border:1px solid var(--orange-dim);border-radius:3px;padding:5px 12px;font-family:var(--font-mono);font-size:9px;color:var(--orange);margin:4px 16px 0}
+/* PORTFOLIO PANEL */
+#port-panel{flex-shrink:0;padding:5px 14px;border-bottom:1px solid var(--border);background:#fff;display:none}
+#port-text{font-family:var(--font-mono);font-size:10px}
 
-/* ── EMPTY STATE ── */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:2px;gap:8px}
-
-/* scrollbar */
-*{scrollbar-width:thin;scrollbar-color:#b8c8de #f0f4f8}
+*{scrollbar-width:thin;scrollbar-color:var(--border2) var(--bg)}
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
 <div id="hdr">
-  <div id="hdr-logo">
-    🦎 JADE REPTILLIS v13
-    <span>BAND SALT ANALYSER</span>
-  </div>
-  <div class="hdr-badge" style="background:rgba(56,217,245,.1);color:var(--cyan);border:1px solid var(--cyan-dim)">15 REPTILES</div>
-  <div class="hdr-badge" style="background:rgba(240,192,64,.1);color:var(--gold);border:1px solid var(--gold-dim)">NIFTY 50</div>
-  <div id="hdr-status" style="margin-left:auto">AWAITING DATA</div>
+  <div id="hdr-logo">⚡ JADE SUPREMA v15<span>BAND SALT OPTIONS STRATEGY</span></div>
+  <div class="hdr-pill" style="background:rgba(0,119,170,.15);color:#0088cc;border:1px solid #0077aa">L1A·L1B·L1C</div>
+  <div class="hdr-pill" style="background:rgba(204,34,34,.12);color:#cc2222;border:1px solid #cc2222">L2·DRL·FL</div>
+  <div class="hdr-pill" style="background:rgba(192,88,0,.12);color:#c05800;border:1px solid #c05800">L3·JRC</div>
+  <div class="hdr-pill" style="background:rgba(26,122,58,.12);color:#1a7a3a;border:1px solid #1a7a3a">L4·JTC</div>
+  <div id="hdr-status">AWAITING DATA</div>
 </div>
 
-<!-- UPLOAD -->
 <div id="upload-wrap">
   <div id="drop-zone" onclick="document.getElementById('fi').click()"
        ondragover="event.preventDefault();this.classList.add('drag')"
        ondragleave="this.classList.remove('drag')"
        ondrop="onDrop(event)">
     <input type="file" id="fi" accept=".csv" onchange="onFile(this.files[0])">
-    <div id="drop-icon">📂</div>
+    <div style="font-size:20px">📂</div>
     <div>
-      <div id="drop-text">Click or drag your CSV here</div>
-      <div id="drop-sub">Needs: Date, Symbol, Open, High, Low, Close — with NSEI and INDIAVIX rows</div>
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--cyan)">Click or drag CSV — needs NSEI + INDIAVIX rows</div>
+      <div style="font-size:9px;color:var(--muted)">Columns: Date, Symbol, Open, High, Low, Close</div>
     </div>
   </div>
   <div id="progress-bar"><div id="progress-fill"></div></div>
 </div>
-<div id="hvp-warn">⚠ HVP percentile calculated on &lt;252 bars — ranks are relative to available history only</div>
+<div id="hvp-warn">⚠ HVP percentile based on &lt;252 bars of history — ranks relative to available data only</div>
 
-<!-- NAV -->
-<div id="nav" style="display:none">
+<div id="nav">
   <div class="nav-tab active" onclick="goTab('triggers')">TRIGGERS</div>
   <div class="nav-tab" onclick="goTab('payoff')">PAYOFF</div>
   <div class="nav-tab" onclick="goTab('indicators')">INDICATORS</div>
   <div class="nav-tab" onclick="goTab('stats')">STATISTICS</div>
 </div>
 
-<!-- MAIN -->
 <div id="main">
 
-  <!-- ═══ TRIGGERS PAGE ═══ -->
+  <!-- TRIGGERS PAGE -->
   <div class="page active" id="pg-triggers">
-
-    <!-- Current date analysis -->
-    <div id="cdp" style="display:none">
-      <div class="cdp-block">
-        <div class="cdp-lbl">LATEST DATE</div>
-        <div class="cdp-val" id="cdp-date">—</div>
-      </div>
-      <div class="cdp-block">
-        <div class="cdp-lbl">NIFTY CMP</div>
-        <div class="cdp-val" id="cdp-cmp">—</div>
-        <div class="cdp-sub" id="cdp-chg">—</div>
-      </div>
-      <div class="cdp-block">
-        <div class="cdp-lbl">INDIA VIX</div>
-        <div class="cdp-val" id="cdp-vix">—</div>
-        <div class="cdp-sub" id="cdp-vixenv">—</div>
-      </div>
-      <div class="cdp-block">
-        <div class="cdp-lbl">HV20</div>
-        <div class="cdp-val" id="cdp-hv">—</div>
-      </div>
-      <div class="cdp-block">
-        <div class="cdp-lbl">HVP%</div>
-        <div class="cdp-val" id="cdp-hvp">—</div>
-        <div class="cdp-sub" id="cdp-gate">—</div>
-      </div>
-      <div class="cdp-block">
-        <div class="cdp-lbl">ZONE</div>
-        <div class="cdp-val" id="cdp-zone">—</div>
-        <div class="cdp-sub" id="cdp-band">—</div>
-      </div>
-      <div class="cdp-block">
-        <div class="cdp-lbl">off1/off2/off3</div>
-        <div class="cdp-val" style="font-size:12px" id="cdp-offs">—</div>
-      </div>
-      <div class="cdp-block">
-        <div class="cdp-lbl">SALT SIGNAL</div>
-        <div class="cdp-val" id="cdp-salt">—</div>
-        <div class="cdp-sub" id="cdp-saltprev">—</div>
-      </div>
-    </div>
-
-    <!-- Band table -->
-    <div id="band-panel" style="display:none">
-      <div id="band-title">◈ BAND STRUCTURE — LATEST BAR (10 BANDS, 100-BAR LOOKBACK)</div>
+    <div id="cdp"></div>
+    <div id="gate-row"></div>
+    <div id="band-panel">
+      <div id="band-title">◈ BAND STRUCTURE — v15 REJ = LEAST-TRADED BANDS | VA = TOP-3 TRADED</div>
       <div id="band-grid"></div>
     </div>
-
-    <!-- Summary cards -->
-    <div id="summary-row" style="display:none" id="sum-row"></div>
-
-    <!-- Filter bar -->
-    <div id="filter-bar" style="display:none">
-      <div class="flt-group"><span class="flt-lbl">REPTILE</span>
-        <select id="f-rep" onchange="renderTable()">
-          <option value="">ALL</option>
-          <option>GF</option><option>GM</option><option>CROC</option><option>COBRA</option>
-          <option>SENT</option><option>KOMO_UP</option><option>KOMO_LO</option>
-          <option>RATTLE</option><option>MON</option><option>MOTH</option>
-          <option>CHAM</option><option>SIDE</option><option>IGUA</option><option>GECK</option><option>PYTH</option>
-        </select>
-      </div>
-      <div class="flt-group"><span class="flt-lbl">ZONE</span>
-        <select id="f-zone" onchange="renderTable()">
-          <option value="">ALL</option>
-          <option>UPPER REJ</option><option>TOP EXTREME</option><option>VALUE AREA</option>
-          <option>BETWEEN</option><option>BOT EXTREME</option><option>LOWER REJ</option>
-        </select>
-      </div>
-      <div class="flt-group"><span class="flt-lbl">SIGNAL</span>
-        <select id="f-sig" onchange="renderTable()">
-          <option value="">ALL</option>
-          <option>B2</option><option>B1-OS</option><option>B1-MOM</option><option>B3</option>
-          <option>S2</option><option>S1-OS</option><option>S1-MOM</option><option>S3</option>
-          <option>GUARD</option><option>VA_ENTRY</option><option>FLAT</option><option>CONFLICT</option>
-        </select>
-      </div>
-      <div class="flt-group"><span class="flt-lbl">LOT SIZE</span>
-        <input type="number" id="lot-input" value="65" min="1" onchange="if(selectedTrigger)renderPayoff(selectedTrigger)">
-      </div>
-      <button class="btn btn-gold" onclick="exportCSV()">⬇ EXPORT CSV</button>
+    <div id="port-panel"><div id="port-text"></div></div>
+    <div id="summary-row"></div>
+    <div id="filter-bar">
+      <span class="flt-lbl">LAYER</span>
+      <select id="f-rep" onchange="renderTable()">
+        <option value="">ALL</option>
+        <option>L1A</option><option>L1B</option><option>L1C</option>
+        <option>L2</option><option>L3</option><option>L4</option>
+        <option>GF</option><option>GM</option><option>COBRA</option>
+        <option>PYTH</option><option>BATMAN</option><option>L0</option>
+      </select>
+      <span class="flt-lbl">ZONE</span>
+      <select id="f-zone" onchange="renderTable()">
+        <option value="">ALL</option>
+        <option>VALUE AREA</option><option>REJ ZONE</option>
+        <option>ABOVE VA</option><option>BELOW VA</option><option>BETWEEN</option>
+      </select>
+      <span class="flt-lbl">SIGNAL</span>
+      <select id="f-sig" onchange="renderTable()">
+        <option value="">ALL</option>
+        <option>B2</option><option>B1-OS</option><option>B1-MOM</option><option>B3</option>
+        <option>S2</option><option>S1-OS</option><option>S1-MOM</option><option>S3</option>
+      </select>
+      <span class="flt-lbl">LOT</span>
+      <input type="number" id="lot-input" value="75" min="1" style="width:55px" onchange="if(selT)renderPayoff(selT)">
+      <button class="btn btn-gold" onclick="exportCSV()">⬇ EXPORT</button>
       <span id="tbl-count" style="font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-left:auto"></span>
     </div>
-
-    <div id="tbl-wrap" style="display:none">
+    <div id="tbl-wrap">
       <table id="tbl">
         <thead><tr id="tbl-hdr"></tr></thead>
         <tbody id="tbl-body"></tbody>
       </table>
     </div>
-
-    <div class="empty" id="tbl-empty" style="display:none">
-      <div>🦎</div><div>UPLOAD CSV TO BEGIN</div>
-    </div>
   </div>
 
-  <!-- ═══ PAYOFF PAGE ═══ -->
-  <div class="page" id="pg-payoff" style="overflow-y:auto;padding:12px 16px;gap:10px">
-    <div id="no-payoff">← SELECT A TRIGGER FROM THE TRIGGER HISTORY TAB</div>
+  <!-- PAYOFF PAGE -->
+  <div class="page" id="pg-payoff" style="overflow-y:auto;padding:10px 14px;gap:8px">
+    <div id="no-payoff">← SELECT A TRIGGER FROM TRIGGER HISTORY TAB</div>
     <div id="payoff-content" style="display:none">
       <div id="payoff-header">
-        <div id="payoff-title-block">
-          <div id="payoff-rep"></div>
-          <div id="payoff-date"></div>
-        </div>
+        <div><div id="payoff-rep"></div><div id="payoff-date"></div></div>
       </div>
       <div id="payoff-legs"></div>
       <div id="payoff-metrics"></div>
@@ -345,89 +283,102 @@ canvas{display:block}
     </div>
   </div>
 
-  <!-- ═══ INDICATOR PAGE ═══ -->
-  <div class="page" id="pg-indicators" style="overflow-y:auto;padding:10px 16px;gap:8px">
+  <!-- INDICATORS PAGE -->
+  <div class="page" id="pg-indicators" style="overflow-y:auto;padding:8px 14px;gap:7px">
     <div class="ind-legend">
-      <div class="il"><div class="il-dot" style="background:var(--gold)"></div>NIFTY</div>
-      <div class="il"><div class="il-dot" style="background:var(--cyan)"></div>HMA FAST</div>
-      <div class="il"><div class="il-dot" style="background:var(--red)"></div>HMA SLOW</div>
-      <div class="il"><div class="il-dot" style="background:var(--green);height:1px"></div>VA HI</div>
-      <div class="il"><div class="il-dot" style="background:var(--orange);height:1px"></div>VA LO</div>
-      <div class="il"><div class="il-dot" style="width:8px;height:8px;border-radius:50%;background:var(--gold)"></div>TRIGGER</div>
+      <div class="il"><div class="il-dot" style="background:#1a2233;width:20px;height:1.5px"></div>NIFTY</div>
+      <div class="il"><div class="il-dot" style="background:#0077aa"></div>HMA FAST</div>
+      <div class="il"><div class="il-dot" style="background:#cc2222"></div>HMA SLOW</div>
+      <div class="il"><div class="il-dot" style="background:#1a7a3a;height:1px"></div>VA HI</div>
+      <div class="il"><div class="il-dot" style="background:#cc2222;height:1px"></div>VA LO</div>
+      <div class="il"><div class="il-dot" style="width:8px;height:8px;border-radius:50%;background:#b8860b"></div>TRIGGER</div>
     </div>
-    <div id="ind-canvas-wrap"><canvas id="ind-canvas"></canvas></div>
-    <div id="smi-canvas-wrap"><canvas id="smi-canvas"></canvas></div>
-    <div id="band-timeline-wrap">
-      <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:6px">◈ BAND POSITION TIMELINE — WHICH BAND EACH DAY</div>
+    <div class="canvas-card">
+      <div class="canvas-card-title">NIFTY PRICE + HMA + BAND ZONES</div>
+      <canvas id="ind-canvas"></canvas>
+    </div>
+    <div class="canvas-card">
+      <div class="canvas-card-title">SMI OSCILLATOR</div>
+      <canvas id="smi-canvas"></canvas>
+    </div>
+    <div class="canvas-card">
+      <div class="canvas-card-title">HVP PERCENTILE + GATES</div>
+      <canvas id="hvp-canvas"></canvas>
+    </div>
+    <div class="canvas-card">
+      <div class="canvas-card-title">BAND POSITION TIMELINE</div>
       <canvas id="bt-canvas"></canvas>
     </div>
   </div>
 
-  <!-- ═══ STATS PAGE ═══ -->
-  <div class="page" id="pg-stats" style="overflow-y:auto;padding:10px 16px">
-    <div class="stats-grid" id="stats-grid">
-      <div class="empty">UPLOAD CSV TO SEE STATISTICS</div>
-    </div>
+  <!-- STATS PAGE -->
+  <div class="page" id="pg-stats" style="overflow-y:auto;padding:8px 14px">
+    <div class="stats-grid" id="stats-grid"></div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════
-// CONFIG — exact Pine script values
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// CONFIG — exact v15 Pine defaults
+// ═══════════════════════════════════════════════════════
 const C={
   lookback:252, bands:10, hmaFast:9, hmaSlow:10,
   smiK:10, smiD:3, smiSm:3, smiBull:40, smiBear:-40,
-  sigWt:0.6, atrLen:14, ivMult:1.15, hvGate:25,
+  sigWt:0.6, atrLen:14, ivPrem:1.15,
   sc1:0.5, sc2:1.0, sc3:1.5, sc4:2.0, sc6:3.0,
-  dte:45, dteR:16, tortDte:45,
+  dte:32, dteR:16, dteLong:90, tortDte:45, l0dte:45,
+  tgtDelta:0.16,
+  hvFloor:35,    // hard gate — no premium selling below
+  hvRatio:50,    // ratio gate — 2x allowed above
+  minCr:50,      // min net credit pts
+  calHVThr:40,   // calendar HV threshold
+  rangeConf:5,   // range confirm bars
   chopB:20, chopX:3
 };
-const LOT=()=>+(document.getElementById('lot-input')?.value||65);
+const LOT=()=>+(document.getElementById('lot-input')?.value||75);
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // STATE
-// ══════════════════════════════════════════════════════════
-let BARS=[], TRIGGERS=[], ENG={}, selectedTrigger=null, sortCol=-1, sortAsc=false;
+// ═══════════════════════════════════════════════════════
+let BARS=[], TRIGGERS=[], ENG={}, selT=null;
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // FILE HANDLING
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function onDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag');onFile(e.dataTransfer.files[0]);}
 function onFile(f){if(!f)return;const r=new FileReader();r.onload=e=>parseCSV(e.target.result);r.readAsText(f);}
-function setStatus(msg,cls=''){const el=document.getElementById('hdr-status');el.textContent=msg;el.className=cls;}
-function setProgress(p){document.getElementById('progress-fill').style.width=p+'%';}
+function setStatus(m,c=''){const el=document.getElementById('hdr-status');el.textContent=m;el.className=c;}
+function setProg(p){document.getElementById('progress-fill').style.width=p+'%';}
 
 function parseCSV(txt){
-  setStatus('PARSING…','');setProgress(10);
+  setStatus('PARSING…','');setProg(10);
   const lines=txt.trim().split('\n');
   const hdr=lines[0].split(',').map(s=>s.trim().replace(/"/g,''));
   const iD=hdr.indexOf('Date'),iSym=hdr.indexOf('Symbol');
   const iO=hdr.indexOf('Open'),iH=hdr.indexOf('High'),iL=hdr.indexOf('Low'),iC=hdr.indexOf('Close');
   if(iD<0||iSym<0||iC<0){setStatus('CSV MISSING COLUMNS','err');return;}
-  const nseiR=[],vixR=[];
+  const nsR=[],vxR=[];
   for(let i=1;i<lines.length;i++){
     const c=lines[i].split(',').map(s=>s.trim().replace(/"/g,''));
     if(c.length<5)continue;
     const sym=c[iSym],row={date:c[iD],o:+c[iO]||0,h:+c[iH]||0,l:+c[iL]||0,cl:+c[iC]||0};
     if(!row.cl)continue;
-    if(sym==='NSEI'||sym==='^NSEI')nseiR.push(row);
-    else if(sym==='INDIAVIX'||sym==='^INDIAVIX')vixR.push(row);
+    if(sym==='NSEI'||sym==='^NSEI')nsR.push(row);
+    else if(sym==='INDIAVIX'||sym==='^INDIAVIX')vxR.push(row);
   }
-  if(nseiR.length<30){setStatus('NEED ≥30 NSEI ROWS','err');return;}
-  nseiR.sort((a,b)=>a.date>b.date?1:-1);
-  vixR.sort((a,b)=>a.date>b.date?1:-1);
-  const vixMap={};vixR.forEach(r=>vixMap[r.date]=r.cl);
-  let lastV=15;
-  BARS=nseiR.map(r=>{const v=vixMap[r.date]||null;if(v!==null)lastV=v;else r._vfill=true;return{...r,vix:v!==null?v:lastV};});
-  setProgress(30);
-  setStatus('RUNNING ENGINE…','');
-  setTimeout(()=>runEngine(),20);
+  if(nsR.length<30){setStatus('NEED ≥30 NSEI ROWS','err');return;}
+  nsR.sort((a,b)=>a.date>b.date?1:-1);
+  vxR.sort((a,b)=>a.date>b.date?1:-1);
+  const vxMap={};vxR.forEach(r=>vxMap[r.date]=r.cl);
+  let lv=15;
+  BARS=nsR.map(r=>{const v=vxMap[r.date]||null;if(v!==null)lv=v;return{...r,vix:v!==null?v:lv};});
+  setProg(30);setStatus('RUNNING ENGINE…','');
+  setTimeout(()=>runEngine(),30);
 }
 
-// ══════════════════════════════════════════════════════════
-// MATH
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// MATH — exact Pine formulas
+// ═══════════════════════════════════════════════════════
 function wma(a,len){
   const r=new Array(a.length).fill(NaN);
   for(let i=len-1;i<a.length;i++){let n=0,d=0;for(let j=0;j<len;j++){n+=(len-j)*a[i-j];d+=len-j;}r[i]=n/d;}
@@ -450,64 +401,198 @@ function sma(a,len){
   return r;
 }
 function wilder(a,len){
-  const r=new Array(a.length).fill(NaN);
-  let sum=0,cnt=0;
-  for(let i=0;i<a.length;i++){
-    if(isNaN(a[i]))continue;
-    cnt++;sum+=a[i];
-    if(cnt<len)continue;
-    if(cnt===len){r[i]=sum/len;}
-    else r[i]=(r[i-1]*(len-1)+a[i])/len;
-  }
+  const r=new Array(a.length).fill(NaN);let sum=0,cnt=0;
+  for(let i=0;i<a.length;i++){if(isNaN(a[i]))continue;cnt++;sum+=a[i];
+    if(cnt<len)continue;if(cnt===len){r[i]=sum/len;}else r[i]=(r[i-1]*(len-1)+a[i])/len;}
   return r;
 }
 function calcATR(bars,len){
   const tr=bars.map((b,i)=>i===0?b.h-b.l:Math.max(b.h-b.l,Math.abs(b.h-bars[i-1].cl),Math.abs(b.l-bars[i-1].cl)));
   return wilder(tr,len);
 }
-function snap(x){return Math.round(x/50)*50;}
-function estP(cmp,K,hv,vix,dte){
-  const vm=vix>18?1.45:vix<12?0.65:1.0;
-  const iv=(hv/100)*vm*C.ivMult;
+
+// v15 uses snap25 not snap50
+function snap25(x){return Math.round(x/25)*25;}
+function snap50(x){return Math.round(x/50)*50;}
+
+// estP — same formula, uses ivPrem
+function estP(cmp,K,hv,vm,dte){
+  const iv=(hv/100)*vm*C.ivPrem;
   const tv=Math.sqrt(dte/365);
   const dist=Math.abs(cmp-K)/cmp;
   return Math.max(Math.round(cmp*iv*tv*Math.exp(-dist*6.5)*0.5),1);
 }
-// Black-Scholes N(d)
-function ncdf(x){return .5*(1+Math.sign(x)*Math.sqrt(1-Math.exp(-2/Math.PI*x*x))*(1-(2/(Math.PI+0.147*x*x))/(1+2/(Math.PI+0.147*x*x))));}
-function bsGreeks(S,K,T,r,sigma,isCall){
+
+// calcOtm — v15 version with skew adjustment
+function calcOtm(K,isCall,S,hv,dte,vm){
+  const moneyness=Math.abs(K-S)/S;
+  const distDecay=Math.exp(-moneyness*8);
+  const skewAdj=isCall&&K>S?1.1:!isCall&&K<S?1.05:0.85;
+  const tv=Math.sqrt(dte/365);
+  const baseAtmPr=S*(hv/100)*tv*vm;
+  return Math.round(baseAtmPr*distDecay*skewAdj*0.5);
+}
+
+// calcDelta — Black-Scholes N(d1)
+function calcDelta(S,K,iv,T,isCall){
+  if(T<=0)return isCall?(S>K?1:0):-(S<K?1:0);
+  const ivT=iv*Math.sqrt(Math.max(T,0.0001));
+  if(ivT<=0)return 0;
+  const d1=(Math.log(S/K)+0.5*iv*iv*T)/ivT;
+  const neg=d1<0; const z=neg?-d1:d1;
+  const t_=1/(1+0.2316419*z);
+  const poly=t_*(0.319381530+t_*(-0.356563782+t_*(1.781477937+t_*(-1.821255978+t_*1.330274429))));
+  const cdf=1-(1/Math.sqrt(2*Math.PI))*Math.exp(-z*z/2)*poly;
+  const nd1=neg?1-cdf:cdf;
+  return isCall?nd1:nd1-1;
+}
+
+// findDeltaStrike — binary search
+function findDeltaStrike(S,iv,T,tgt,isCall){
+  let lo=S*0.70,hi=S*1.30,mid=S;
+  for(let i=0;i<30;i++){
+    mid=(lo+hi)/2;
+    const d=Math.abs(calcDelta(S,mid,iv,T,isCall));
+    if(d>tgt){if(isCall)lo=mid;else hi=mid;}
+    else{if(isCall)hi=mid;else lo=mid;}
+  }
+  return snap25(mid);
+}
+
+// jadeTest
+function jadeTest(income_cr,spread_width){
+  const passes=income_cr>=spread_width;
+  return{passes,shortfall:passes?0:spread_width-income_cr};
+}
+function creditOk(net_cr){return net_cr>=C.minCr;}
+
+// Black-Scholes Greeks for payoff
+function bsGreeks(S,K,T,sigma,isCall){
   if(T<=0)return{delta:isCall?(S>K?1:0):-(S<K?1:0),gamma:0,theta:0,vega:0};
-  const d1=(Math.log(S/K)+(r+sigma*sigma/2)*T)/(sigma*Math.sqrt(T));
+  const d1=(Math.log(S/K)+(sigma*sigma/2)*T)/(sigma*Math.sqrt(T));
   const d2=d1-sigma*Math.sqrt(T);
-  const Nd1=ncdf(d1),Nd2=ncdf(d2);
-  const nd1=Math.exp(-d1*d1/2)/Math.sqrt(2*Math.PI);
-  const delta=isCall?Nd1:Nd1-1;
-  const gamma=nd1/(S*sigma*Math.sqrt(T));
-  const theta=isCall?
-    (-(S*nd1*sigma)/(2*Math.sqrt(T))-r*K*Math.exp(-r*T)*Nd2)/365:
-    (-(S*nd1*sigma)/(2*Math.sqrt(T))+r*K*Math.exp(-r*T)*(1-Nd2))/365;
-  const vega=S*nd1*Math.sqrt(T)/100;
+  function ncdf(x){const neg=x<0;const z=Math.abs(x);const t=1/(1+0.2316419*z);const p=t*(0.319381530+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429))));const c=1-(1/Math.sqrt(2*Math.PI))*Math.exp(-z*z/2)*p;return neg?1-c:c;}
+  const nd1=ncdf(d1);
+  const nd2=ncdf(d2);
+  const npd1=Math.exp(-d1*d1/2)/Math.sqrt(2*Math.PI);
+  const delta=isCall?nd1:nd1-1;
+  const gamma=npd1/(S*sigma*Math.sqrt(T));
+  const theta=isCall?(-(S*npd1*sigma)/(2*Math.sqrt(T)))/365:(-(S*npd1*sigma)/(2*Math.sqrt(T)))/365;
+  const vega=S*npd1*Math.sqrt(T)/100;
   return{delta,gamma,theta,vega};
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// BAND ENGINE — exact v15 Pine logic
+// ═══════════════════════════════════════════════════════
+function computeBandData(bars){
+  const n=bars.length;
+  const cl=bars.map(b=>b.cl),hi=bars.map(b=>b.h),lo=bars.map(b=>b.l);
+  const bandArr=[];
+
+  for(let i=0;i<n;i++){
+    const win=Math.min(C.lookback,i+1);
+    const ws=bars.slice(i-win+1,i+1);
+    // Pine: range from HIGH/LOW
+    const hiD=Math.max(...ws.map(b=>b.h)), loD=Math.min(...ws.map(b=>b.l));
+    const nb=C.bands, bW=(hiD-loD)/nb, bBase=loD;
+    const bBars=new Array(nb).fill(0), bHi=[], bLo=[];
+    for(let b=0;b<nb;b++){bHi.push(bBase+bW*(b+1));bLo.push(bBase+bW*b);}
+
+    // Pine: c >= bLo AND c <= bHi — both inclusive
+    ws.forEach(bar=>{
+      const c=bar.cl;
+      for(let b=0;b<nb;b++){if(c>=bLo[b]&&c<=bHi[b]){bBars[b]++;break;}}
+    });
+
+    // MTP: 10 sub-bands
+    const bMTP=bLo.map((lo2,b)=>{
+      const sbSz=bW/10,sbC=new Array(10).fill(0);
+      ws.forEach(bar=>{
+        const c=bar.cl;
+        if(c>=bLo[b]&&c<=bHi[b]){const si=Math.min(9,Math.floor((c-bLo[b])/sbSz));if(si>=0)sbC[si]++;}
+      });
+      const maxI=sbC.indexOf(Math.max(...sbC));
+      return lo2+maxI*sbSz+sbSz/2;
+    });
+
+    // Pine bubble sort descending
+    const ranks=[...Array(nb).keys()];
+    for(let i2=0;i2<nb-1;i2++)for(let j=0;j<nb-1-i2;j++){
+      if(bBars[ranks[j]]<bBars[ranks[j+1]]){const t=ranks[j];ranks[j]=ranks[j+1];ranks[j+1]=t;}
+    }
+    const r1=ranks[0],r2=ranks[1],r3=ranks[2];
+
+    // v15 KEY: rejZ1/rejZ2 = LEAST TRADED bands (bottom of rank)
+    const rejZ1=ranks[nb-1];
+    const rejZ2=ranks[nb-2];
+
+    const vaHiIdx=Math.max(r1,r2,r3), vaLoIdx=Math.min(r1,r2,r3);
+    const vaHiP=bHi[vaHiIdx], vaLoP=bLo[vaLoIdx];
+    const vaMidP=(vaHiP+vaLoP)/2, vaWidth=vaHiP-vaLoP;
+
+    // CMP band: both inclusive
+    let curBand=nb-1;
+    for(let b=0;b<nb;b++){if(cl[i]>=bLo[b]&&cl[i]<=bHi[b]){curBand=b;break;}}
+
+    const inVA=curBand>=vaLoIdx&&curBand<=vaHiIdx;
+    const aboveVA=curBand>vaHiIdx, belowVA=curBand<vaLoIdx;
+    const inREJ=curBand===rejZ1||curBand===rejZ2;
+    const inB10=curBand===nb-1, inB9=curBand===nb-2;
+    const inB9or10=inB9||inB10;
+    const inB1=curBand===0, inB2=curBand===1;
+    const inB1or2=inB1||inB2;
+    const btwnVAREJ=!inVA&&!inREJ;
+
+    // rangeConf: rolling rcConf bars of closes within VA
+    const rcSlice=cl.slice(Math.max(0,i-C.rangeConf+1),i+1);
+    const rcHi=Math.max(...rcSlice), rcLo=Math.min(...rcSlice);
+    const rangeConf=rcHi<=vaHiP&&rcLo>=vaLoP;
+
+    const vaRatio=vaHiP>vaLoP?(cl[i]-vaLoP)/(vaHiP-vaLoP):0.5;
+    const vaPosBear=vaRatio>0.66, vaPosBull=vaRatio<0.33;
+
+    // Offsets — v15 uses snap25
+    const hv=ENG.hv20?.[i]||15, vx=bars[i].vix||15;
+    const vm=vx>18?1.45:vx<12?0.65:1.0;
+    const at=ENG.atr14?.[i]||100;
+    const effIV=hv*vm;
+    const sigMove=Math.round(cl[i]*(effIV/100)*Math.sqrt(C.dte/365));
+    const baseMove=Math.round(sigMove*C.sigWt+at*(1-C.sigWt));
+    const off1=Math.max(snap50(baseMove*C.sc1),snap50(at*0.5));
+    const off2=Math.max(snap50(baseMove*C.sc2),snap50(at*1.0));
+    const off3=Math.max(snap50(baseMove*C.sc3),snap50(at*1.5));
+    const off4=Math.max(snap50(baseMove*C.sc4),snap50(at*2.0));
+    const off6=Math.max(snap50(baseMove*C.sc6),snap50(at*3.0));
+
+    bandArr.push({i,cmp:cl[i],bHi,bLo,bBars,bMTP,ranks,r1,r2,r3,
+      rejZ1,rejZ2,vaHiIdx,vaLoIdx,vaHiP,vaLoP,vaMidP,vaWidth,
+      curBand,nb,inVA,aboveVA,belowVA,inREJ,inB10,inB9,inB9or10,
+      inB1,inB2,inB1or2,btwnVAREJ,rangeConf,vaPosBear,vaPosBull,
+      hiD,loD,off1,off2,off3,off4,off6,baseMove,at,hv,vx,vm});
+  }
+  return bandArr;
+}
+
+// ═══════════════════════════════════════════════════════
 // ENGINE
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function runEngine(){
   const bars=BARS, n=bars.length;
   const cl=bars.map(b=>b.cl), hi=bars.map(b=>b.h), lo=bars.map(b=>b.l);
 
   // Indicators
-  const hmaF=hma(cl,C.hmaFast), hmaS=hma(cl,C.hmaSlow), atr14=calcATR(bars,C.atrLen);
+  const hmaF=hma(cl,C.hmaFast), hmaS=hma(cl,C.hmaSlow);
+  const atr14=calcATR(bars,C.atrLen);
 
   // SMI
-  const smiRng=[],smiMid=[];
+  const smiRng=[],smiM_arr=[];
   for(let i=0;i<n;i++){
     const sl=Math.min(...lo.slice(Math.max(0,i-C.smiK+1),i+1));
     const sh=Math.max(...hi.slice(Math.max(0,i-C.smiK+1),i+1));
-    smiRng.push(sh-sl); smiMid.push(cl[i]-(sh+sl)/2);
+    smiRng.push(sh-sl); smiM_arr.push(cl[i]-(sh+sl)/2);
   }
-  const smiDs=ema(ema(smiMid,C.smiD),C.smiD);
+  const smiDs=ema(ema(smiM_arr,C.smiD),C.smiD);
   const smiHLD=ema(ema(smiRng,C.smiD),C.smiD);
   const smiVal=smiDs.map((v,i)=>smiHLD[i]?v/(smiHLD[i]/2)*100:0);
 
@@ -520,639 +605,625 @@ function runEngine(){
     const lo2=Math.min(...w),hi2=Math.max(...w);
     return hi2>lo2?Math.round((hv-lo2)/(hi2-lo2)*100):50;
   });
-  const shortHist=n<252;
-  if(shortHist)document.getElementById('hvp-warn').style.display='block';
 
-  // Band data per bar
-  const bandArr=[];
-  for(let i=0;i<n;i++){
-    const win=Math.min(C.lookback,i+1), ws=bars.slice(i-win+1,i+1);
-    const hiD=Math.max(...ws.map(b=>b.h)), loD=Math.min(...ws.map(b=>b.l));
-    const nb=C.bands, bW=(hiD-loD)/nb, bBase=loD;
-    const bBars=new Array(nb).fill(0), bHi=[], bLo=[];
-    for(let b=0;b<nb;b++){bHi.push(bBase+bW*(b+1));bLo.push(bBase+bW*b);}
-    // Pine exact: c >= bLo AND c <= bHi — BOTH inclusive, break on first match
-    ws.forEach(bar=>{
-      const c=bar.cl;
-      for(let b=0;b<nb;b++){if(c>=bLo[b]&&c<=bHi[b]){bBars[b]++;break;}}
-    });
-    // Bubble sort descending — exact Pine bubble sort order
-    const ranks=[...Array(nb).keys()];
-    for(let i2=0;i2<nb-1;i2++)for(let j=0;j<nb-2-i2+1;j++){
-      if(bBars[ranks[j]]<bBars[ranks[j+1]]){const t=ranks[j];ranks[j]=ranks[j+1];ranks[j+1]=t;}
-    }
-    const r1=ranks[0],r2=ranks[1],r3=ranks[2];
-    const vaHiIdx=Math.max(r1,r2,r3), vaLoIdx=Math.min(r1,r2,r3);
-    // CMP band: Pine uses c >= bLo AND c <= bHi
-    let curBand=nb-1;
-    for(let b=0;b<nb;b++){if(cl[i]>=bLo[b]&&cl[i]<=bHi[b]){curBand=b;break;}}
-    const inVA=curBand>=vaLoIdx&&curBand<=vaHiIdx;
-    const inB10=curBand===nb-1,inB9=curBand===nb-2,inB9or10=inB9||inB10;
-    const inB1=curBand===0,inB2=curBand===1,inB1or2=inB1||inB2;
-    const aboveVA=curBand>vaHiIdx, belowVA=curBand<vaLoIdx;
-    const btwnVAREJ=!inVA&&!inB9or10&&!inB1or2;
-    const vaHiP=bHi[vaHiIdx], vaLoP=bLo[vaLoIdx], vaMidP=(vaHiP+vaLoP)/2, vaWidth=vaHiP-vaLoP;
-    // Offsets
-    const hv=hv20[i]||15, vx=bars[i].vix||15;
-    const vm=vx>18?1.45:vx<12?0.65:1.0;
-    const sigMove=Math.round(cl[i]*(hv/100)*vm*C.ivMult*Math.sqrt(C.dte/365));
-    const at=atr14[i]||sigMove*0.5;
-    const baseMove=Math.round(sigMove*C.sigWt+at*(1-C.sigWt));
-    const off1=Math.max(snap(baseMove*C.sc1),snap(at*0.5));
-    const off2=Math.max(snap(baseMove*C.sc2),snap(at*1.0));
-    const off3=Math.max(snap(baseMove*C.sc3),snap(at*1.5));
-    const off4=Math.max(snap(baseMove*C.sc4),snap(at*2.0));
-    const off6=Math.max(snap(baseMove*C.sc6),snap(at*3.0));
-    // MTP: 10 sub-bands per band, find sub-band with most closes — exact Pine method
-    const bMTP=bLo.map((lo,b)=>{
-      const sbSz=bW/10, sbC=new Array(10).fill(0);
-      ws.forEach(bar=>{
-        const c=bar.cl;
-        if(c>=bLo[b]&&c<=bHi[b]){
-          const si=Math.min(9,Math.floor((c-bLo[b])/sbSz));
-          if(si>=0)sbC[si]++;
-        }
-      });
-      const maxI=sbC.indexOf(Math.max(...sbC));
-      return lo+maxI*sbSz+sbSz/2;
-    });
-    bandArr.push({i,cmp:cl[i],bHi,bLo,bBars,bMTP,ranks,r1,r2,r3,vaHiP,vaLoP,vaMidP,vaWidth,hiD,loD,
-      vaHiIdx,vaLoIdx,curBand,nb,inVA,aboveVA,belowVA,inB10,inB9,inB9or10,inB1,inB2,inB1or2,btwnVAREJ,
-      off1,off2,off3,off4,off6,baseMove,at,hv,vx});
-  }
+  if(n<252)document.getElementById('hvp-warn').style.display='block';
 
-  // SALT signals + reptile triggers
-  TRIGGERS=[];
-  let b2C=false,s2C=false,chopTopCnt=0,chopBotCnt=0,lastTop=-99,lastBot=-99;
-  let gfActive=false,gmActive=false,prevSalt=null,lastSalt=null;
+  // Store globally for band engine
+  ENG={hmaF,hmaS,smiVal,hv20,hvPct,atr14,bars};
 
-  // Per-bar SALT
+  const bandArr=computeBandData(bars);
+  ENG.bandArr=bandArr;
+
+  // SALT signals
   const saltArr=new Array(n).fill(null);
+  let b2Done=false,s2Done=false;
+
   for(let i=2;i<n;i++){
-    const hF=hmaF[i],hS=hmaS[i],hFp=hmaF[i-1],hSp=hmaS[i-1];
+    const hF=hmaF[i],hS=hmaS[i],hFp=hmaF[i-1]||hF,hSp=hmaS[i-1]||hS;
     if(isNaN(hF)||isNaN(hS))continue;
-    const hmaBull=hF>hS,hmaBear=hF<hS;
-    const hmaFlat=Math.abs(hF-hS)<cl[i]*0.0001;
+    const hmaFDir=hF-hFp, hmaFPrevDir=(hmaF[i-1]||hF)-(hmaF[i-2]||hmaF[i-1]||hF);
+    const hmaBull=hF>hS, hmaBear=hF<hS;
     const hmaCrsBull=hFp<=hSp&&hF>hS, hmaCrsBear=hFp>=hSp&&hF<hS;
-    const hmaFDir=hF-hFp, hmaFPrevDir=hFp-hmaF[i-2];
-    const sv=smiVal[i], svp=smiVal[i-1];
+    const sv=smiVal[i], svp=smiVal[i-1]||sv;
+    const smiOB=sv>=C.smiBull, smiOS=sv<=C.smiBear;
+    const smiOBp=svp>=C.smiBull, smiOSp=svp<=C.smiBear;
+    let sig=null;
+    if(hmaCrsBull&&smiOS){sig='B2';b2Done=true;s2Done=false;}
+    else if(hmaCrsBull&&b2Done)sig='B1-MOM';
+    else if(hmaFDir>0&&hmaFPrevDir<=0&&smiOS&&!hmaCrsBull)sig='B1-OS';
+    else if(hmaFDir>0&&hmaFPrevDir<=0&&smiOB&&hmaBull&&!hmaCrsBull)sig='B1-MOM';
+    else if(smiOS&&!smiOSp&&hmaBull&&hmaFDir>0&&b2Done&&!hmaCrsBull)sig='B3';
+    if(!sig){
+      if(hmaCrsBear&&smiOB){sig='S2';s2Done=true;b2Done=false;}
+      else if(hmaCrsBear&&s2Done)sig='S1-MOM';
+      else if(hmaFDir<0&&hmaFPrevDir>=0&&smiOB&&!hmaCrsBear)sig='S1-OS';
+      else if(hmaFDir<0&&hmaFPrevDir>=0&&smiOS&&hmaBear&&!hmaCrsBear)sig='S1-MOM';
+      else if(smiOB&&!smiOBp&&hmaBear&&hmaFDir<0&&s2Done&&!hmaCrsBear)sig='S3';
+      else if(hmaCrsBull&&!smiOS)sig='HSE';
+      else if(hmaCrsBear&&!smiOB)sig='HLE';
+    }
+    saltArr[i]=sig;
+  }
+  ENG.saltArr=saltArr;
+
+  // Build triggers
+  TRIGGERS=[];
+  let gfActive=false,gmActive=false;
+  let chopTopCnt=0,chopBotCnt=0,lastTop=-99,lastBot=-99;
+
+  for(let i=2;i<n;i++){
+    const bd=bandArr[i];
+    const {cmp,off1,off2,off3,off4,off6,vaHiP,vaLoP,vaMidP,vaWidth,
+           inVA,aboveVA,belowVA,inREJ,inB9or10,inB1or2,inB1,inB10,
+           inB9,inB2,btwnVAREJ,rangeConf,vaPosBear,vaPosBull,
+           rejZ1,rejZ2,nb,bHi,bLo,bBars,hv,vx,vm,at} = bd;
+    const hF=hmaF[i],hS=hmaS[i],hFp=hmaF[i-1]||hF,hSp=hmaS[i-1]||hS;
+    if(isNaN(hF)||isNaN(hS))continue;
+    const hmaBull=hF>hS, hmaBear=hF<hS;
+    const hmaFlat=Math.abs(hF-hS)<cmp*0.0001;
+    const hmaDir=hF-hFp;
+    const hmaDirPrev=(hmaF[i-1]||hF)-(hmaF[i-2]||hmaF[i-1]||hF);
+    const hmaTurnUp=hmaDir>0&&hmaDirPrev<0;
+    const hmaTurnDn=hmaDir<0&&hmaDirPrev>0;
+    const hmaFlatNow=hmaFlat||Math.abs(hmaDir)<Math.abs(hmaDirPrev)*0.3;
+    const hmaCrsBull=hFp<=hSp&&hF>hS, hmaCrsBear=hFp>=hSp&&hF<hS;
+    const sv=smiVal[i],svp=smiVal[i-1]||sv;
     const smiBull2=sv>C.smiBull, smiBear2=sv<C.smiBear;
     const smiNeut=!smiBull2&&!smiBear2;
     const smiOB=sv>=C.smiBull, smiOS=sv<=C.smiBear;
     const smiOBp=svp>=C.smiBull, smiOSp=svp<=C.smiBear;
-    const bd=bandArr[i];
-    const hv=hv20[i]||15, hvP=hvPct[i], gatePass=hvP>=C.hvGate;
-    const vx=bars[i].vix||15;
-    const ep=K=>estP(cl[i],K,hv,vx,C.dte);
+    const smiTurnUp=sv>svp&&svp<=smiVal[i-2];
+    const smiTurnDn=sv<svp&&svp>=smiVal[i-2];
+    const smiCrBull=svp<=0&&sv>0||sv>C.smiBull&&svp<=C.smiBull;
+    const smiCrBear=svp>=0&&sv<0||sv<C.smiBear&&svp>=C.smiBear;
+    const smiRise=sv>svp, smiFall=sv<svp;
+    const hvP=hvPct[i], hv20v=hv20[i]||15;
 
-    // Chop filter (increment on CROSS events only)
-    if(hmaCrsBear){chopTopCnt=(i-lastTop<C.chopB)?chopTopCnt+1:1;lastTop=i;}
-    if(hmaCrsBull){chopBotCnt=(i-lastBot<C.chopB)?chopBotCnt+1:1;lastBot=i;}
+    // v15 gates
+    const gatePass=hvP>=C.hvFloor;
+    const ratioGate=hvP>=C.hvRatio;
+    const gammaMode=hvP>60;
+
+    // Chop filter
+    if(inB9or10&&!(bandArr[i-1]?.inB9or10)){chopTopCnt=(i-lastTop<C.chopB)?chopTopCnt+1:1;lastTop=i;}
+    if(inB1or2&&!(bandArr[i-1]?.inB1or2)){chopBotCnt=(i-lastBot<C.chopB)?chopBotCnt+1:1;lastBot=i;}
     const chopTop=chopTopCnt>=C.chopX, chopBot=chopBotCnt>=C.chopX;
 
-    // SALT
-    let sig=null;
-    if(hmaCrsBull&&smiOS){sig='B2';b2C=true;s2C=false;}
-    else if(hmaFDir>0&&hmaFPrevDir<=0&&smiOS&&!hmaCrsBull)sig='B1-OS';
-    else if(hmaCrsBull&&b2C&&!smiOS)sig='B1-MOM';
-    else if(smiOS&&!smiOSp&&hmaBull&&hmaFDir>0&&b2C&&!hmaCrsBull)sig='B3';
-    else if(hmaCrsBull&&!smiOS&&!b2C)sig='HSE';
-
-    if(!sig){
-      if(hmaCrsBear&&smiOB){sig='S2';s2C=true;b2C=false;}
-      else if(hmaFDir<0&&hmaFPrevDir>=0&&smiOB&&!hmaCrsBear)sig='S1-OS';
-      else if(hmaCrsBear&&s2C)sig='S1-MOM';
-      else if(smiOB&&!smiOBp&&hmaBear&&hmaFDir<0&&s2C&&!hmaCrsBear)sig='S3';
-      else if(hmaCrsBear&&!smiOB&&!s2C)sig='HLE';
-    }
-    if(!sig&&hmaCrsBear&&smiOB)sig='LE';
-    if(!sig&&hmaCrsBull&&smiOS)sig='SE';
-    saltArr[i]=sig;
-    if(sig){prevSalt=lastSalt;lastSalt=sig;}
+    const salt=saltArr[i];
+    const ep=(K,dte)=>estP(cmp,K,hv20v,vm,dte||C.dte);
+    const otm=(K,isCall)=>calcOtm(K,isCall,cmp,hv20v,C.dte,vm);
+    const atmPr=cmp*(hv20v/100)*Math.sqrt(C.dte/365)*vm;
+    const T1=C.dte/365, effIVf=(hv20v/100)*C.ivPrem;
 
     // Zone label
-    const zl=bd.inB10?'UPPER REJ':bd.inB9?'TOP EXTREME':bd.inVA?'VALUE AREA':bd.inB2?'BOT EXTREME':bd.inB1?'LOWER REJ':bd.btwnVAREJ?'BETWEEN':'BETWEEN';
+    const zone=inVA?'VALUE AREA':inREJ?'REJ ZONE':aboveVA?'ABOVE VA':belowVA?'BELOW VA':'BETWEEN';
 
-    // ── GF ──
-    if(bd.inB9or10&&hmaCrsBear&&smiOB&&!gfActive&&!chopTop&&gatePass){
-      const BP=snap(cl[i]-bd.off4), SP=snap(cl[i]-bd.off6);
-      const SC=snap(bd.bHi[bd.nb-1]), BC=snap(bd.bHi[bd.nb-1]+bd.off2);
-      const debit=ep(BP)*2-ep(SP)-ep(SC)+ep(BC);
-      TRIGGERS.push(mkT(i,'GF',sig||'S2','UPPER REJ',bd,[
-        {t:'BP',K:BP,q:2},{t:'SP',K:SP,q:1},{t:'SC',K:SC,q:1},{t:'BC',K:BC,q:1}],
-        -Math.round(debit),null,'Direction move','HMA up + SMI OS in B1'));
-      gfActive=true;
+    // ── GF GRANDFATHER (RevJade — bearish credit) ──────
+    // v15: SC@+off1, BC@+off2, SP@-off2, BP@-off3 + JrSC@ATM
+    if(inB9or10&&hmaCrsBear&&smiOB&&!gfActive&&!chopTop&&gatePass){
+      const gfSC=snap25(cmp+off1), gfBC=snap25(cmp+off2);
+      const gfSP=snap25(cmp-off2), gfBP=snap25(cmp-off3);
+      const gfJrSC=snap25(cmp); // Journey ATM leg
+      const sc_p=ep(gfSC,C.tortDte), bc_p=ep(gfBC,C.tortDte);
+      const sp_p=ep(gfSP,C.tortDte), bp_p=ep(gfBP,C.tortDte);
+      const gfNetCr=Math.round(sc_p+sp_p-bc_p-bp_p);
+      const jt=jadeTest(sc_p,gfBC-gfSC);
+      if(creditOk(gfNetCr)){
+        TRIGGERS.push(mkT(i,'GF',salt||'S2',zone,bd,
+          [{t:'SC',K:gfSC,q:1},{t:'BC',K:gfBC,q:1},{t:'SP',K:gfSP,q:1},{t:'BP',K:gfBP,q:1}],
+          gfNetCr,50,'50% credit',`B1+HMA↑+SMI OS`,
+          {jade:jt.passes,jrAtm:gfJrSC,maxUp:Math.max(gfBC-gfSC-gfNetCr,0)}));
+        gfActive=true;
+      }
     }
-    if(gfActive&&bd.inB1&&hmaCrsBull&&smiOS)gfActive=false;
+    if(gfActive&&inB1&&hmaCrsBull&&smiOS)gfActive=false;
 
-    // ── GM ──
-    if(bd.inB1or2&&hmaCrsBull&&smiOS&&!gmActive&&!chopBot&&gatePass){
-      const BC=snap(cl[i]+bd.off4), SC=snap(cl[i]+bd.off6);
-      const SP=snap(bd.bLo[0]), BP=snap(bd.bLo[0]-bd.off2);
-      const debit=ep(BC)*2-ep(SC)-ep(SP)+ep(BP);
-      TRIGGERS.push(mkT(i,'GM',sig||'B2','LOWER REJ',bd,[
-        {t:'BC',K:BC,q:2},{t:'SC',K:SC,q:1},{t:'SP',K:SP,q:1},{t:'BP',K:BP,q:1}],
-        -Math.round(debit),null,'Direction move','HMA dn + SMI OB in B10'));
-      gmActive=true;
+    // ── GM GRANDMOTHER (Jade — bullish credit) ─────────
+    // v15: SP@-off1, BP@-off2, SC@+off2, BC@+off3 + JrSP@ATM
+    if(inB1or2&&hmaCrsBull&&smiOS&&!gmActive&&!chopBot&&gatePass){
+      const gmSP=snap25(cmp-off1), gmBP=snap25(cmp-off2);
+      const gmSC=snap25(cmp+off2), gmBC=snap25(cmp+off3);
+      const gmJrSP=snap25(cmp);
+      const sp_p=ep(gmSP,C.tortDte), bp_p=ep(gmBP,C.tortDte);
+      const sc_p=ep(gmSC,C.tortDte), bc_p=ep(gmBC,C.tortDte);
+      const gmNetCr=Math.round(sp_p+sc_p-bp_p-bc_p);
+      const jt=jadeTest(sc_p,gmBC-gmSC);
+      if(creditOk(gmNetCr)){
+        TRIGGERS.push(mkT(i,'GM',salt||'B2',zone,bd,
+          [{t:'SP',K:gmSP,q:1},{t:'BP',K:gmBP,q:1},{t:'SC',K:gmSC,q:1},{t:'BC',K:gmBC,q:1}],
+          gmNetCr,50,'50% credit',`B10+HMA↓+SMI OB`,
+          {jade:jt.passes,jrAtm:gmJrSP,maxDn:Math.max(gmSP-gmBP-gmNetCr,0)}));
+        gmActive=true;
+      }
     }
-    if(gmActive&&bd.inB10&&hmaCrsBear&&smiOB)gmActive=false;
+    if(gmActive&&inB10&&hmaCrsBear&&smiOB)gmActive=false;
 
-    // ── CROC ──
-    if(bd.inVA&&gatePass){
-      const SC=snap(bd.vaHiP), BC=snap(bd.vaHiP+bd.off2);
-      const SP=snap(bd.vaLoP), BP=snap(bd.vaLoP-bd.off2);
-      const cr=ep(SC)+ep(SP)-ep(BC)-ep(BP);
-      if(cr>0)TRIGGERS.push(mkT(i,'CROC','VA_ENTRY','VALUE AREA',bd,[
-        {t:'SC',K:SC,q:1},{t:'BC',K:BC,q:1},{t:'SP',K:SP,q:1},{t:'BP',K:BP,q:1}],
-        Math.round(cr),50,'50% of credit','VA break on close'));
-    }
-
-    // ── COBRA ──
-    if(bd.inVA&&hvP<35&&hmaFlat&&smiNeut&&gatePass){
-      const MID=snap(bd.vaMidP);
-      const BC=snap(bd.vaMidP+bd.off2), BP=snap(bd.vaMidP-bd.off2);
-      const cr=ep(MID)*2-ep(BC)-ep(BP);
-      TRIGGERS.push(mkT(i,'COBRA',sig||'FLAT','VALUE AREA',bd,[
-        {t:'SC',K:MID,q:1},{t:'SP',K:MID,q:1},{t:'BC',K:BC,q:1},{t:'BP',K:BP,q:1}],
-        Math.round(cr),40,'40% of credit','off2 breach (vaMid ± off2)'));
-    }
-
-    // ── SENT ──
-    if(!bd.inVA&&gatePass){
-      const SP=snap(cl[i]-bd.off1), SC=snap(cl[i]+bd.off1);
-      const BP=snap(cl[i]-bd.off3), BC=snap(cl[i]+bd.off3);
-      const cr=ep(SC)+ep(SP)-ep(BC)-ep(BP);
-      if(cr>0)TRIGGERS.push(mkT(i,'SENT',sig||'GUARD',zl,bd,[
-        {t:'SP',K:SP,q:1},{t:'SC',K:SC,q:1},{t:'BP',K:BP,q:1},{t:'BC',K:BC,q:1}],
-        Math.round(cr),null,'Expires worthless / upgrade','2x credit or upgrade to Komodo'));
-    }
-
-    // ── KOMO_UP ──
-    if(bd.inB9or10&&hmaBear&&smiBear2&&hvP>35&&gatePass){
-      const SP=snap(cl[i]), SC=snap(cl[i]+bd.off1);
-      const BP=snap(cl[i]-bd.off3), BC=snap(cl[i]+bd.off3);
-      const cr=ep(SP)*2+ep(SC)-ep(BP)-ep(BC);
-      TRIGGERS.push(mkT(i,'KOMO_UP',sig||'S2','UPPER REJ',bd,[
-        {t:'SP',K:SP,q:2},{t:'SC',K:SC,q:1},{t:'BP',K:BP,q:1},{t:'BC',K:BC,q:1}],
-        Math.round(cr),50,'50% of credit','2x credit loss or HMA flips UP'));
+    // ── KING COBRA (HVP<35, VA, flat) ─────────────────
+    if(inVA&&hvP<35&&hmaFlat&&smiNeut&&gatePass){
+      const co_sc=snap25(vaMidP);
+      const co_bc=snap25(vaMidP+off2), co_bp=snap25(vaMidP-off2);
+      const co_sc_p=ep(co_sc), co_bc_p=ep(co_bc), co_bp_p=ep(co_bp);
+      const co_cr=Math.round(2*co_sc_p-co_bc_p-co_bp_p);
+      if(creditOk(co_cr)){
+        TRIGGERS.push(mkT(i,'COBRA',salt||'FLAT',zone,bd,
+          [{t:'SC',K:co_sc,q:2},{t:'BC',K:co_bc,q:1},{t:'BP',K:co_bp,q:1}],
+          co_cr,40,'40% credit','off2 breach from vaMid',
+          {note:'PIN MODE | HVP<35 low-vol'}));
+      }
     }
 
-    // ── KOMO_LO ──
-    if(bd.inB1or2&&hmaBull&&smiBull2&&hvP>35&&gatePass){
-      const SC=snap(cl[i]), SP=snap(cl[i]-bd.off1);
-      const BP=snap(cl[i]-bd.off3), BC=snap(cl[i]+bd.off3);
-      const cr=ep(SC)*2+ep(SP)-ep(BP)-ep(BC);
-      TRIGGERS.push(mkT(i,'KOMO_LO',sig||'B2','LOWER REJ',bd,[
-        {t:'SC',K:SC,q:2},{t:'SP',K:SP,q:1},{t:'BP',K:BP,q:1},{t:'BC',K:BC,q:1}],
-        Math.round(cr),50,'50% of credit','2x credit loss or HMA flips DOWN'));
+    // ── PYTHON GAMMA MODE (HVP>60, outside VA) ────────
+    if(gammaMode&&!inVA&&gatePass){
+      const p_bull=hmaBull;
+      const p_inner=snap50(p_bull?cmp+off1:cmp-off1);
+      const p_outer=snap50(p_bull?cmp+off2:cmp-off2);
+      const p_inc=snap50(p_bull?cmp-off2:cmp+off2);
+      const in_p=ep(p_inner), out_p=ep(p_outer), inc_p=ep(p_inc);
+      const p_incOn=inc_p>=Math.round(off1*0.3);
+      const p_net=p_incOn?Math.round(in_p+inc_p-2*out_p):Math.round(in_p-2*out_p);
+      const legs=[{t:p_bull?'SC':'SP',K:p_inner,q:1},{t:p_bull?'BC':'BP',K:p_outer,q:2}];
+      if(p_incOn)legs.push({t:p_bull?'SP':'SC',K:p_inc,q:1});
+      TRIGGERS.push(mkT(i,'PYTH',salt||'GAMMA',zone,bd,legs,
+        p_net,40,'Income 40% + direction unlimited','HMA flip or Komodo fires',
+        {note:p_incOn?'3-scenario':'2-scenario',gamma:true}));
     }
 
-    // ── RATTLE ──
-    if((bd.inB9or10||bd.inB1or2)&&gatePass){
-      const bull=bd.inB9or10;
-      const iw=snap(cl[i]+(bull?bd.off1:-bd.off1));
-      const body=snap(cl[i]+(bull?bd.off2:-bd.off2));
-      const ow=snap(cl[i]+(bull?bd.off4:-bd.off4));
-      const inc=snap(cl[i]+(bull?-bd.off1:bd.off1));
-      const cr=ep(body)*2-ep(iw)-ep(ow)+ep(inc);
-      TRIGGERS.push(mkT(i,'RATTLE',sig||'REJ',bull?'UPPER REJ':'LOWER REJ',bd,[
-        {t:bull?'BC':'BP',K:iw,q:1},{t:bull?'SC':'SP',K:body,q:2},
-        {t:bull?'BC':'BP',K:ow,q:1},{t:bull?'SP':'SC',K:inc,q:1}],
-        Math.round(cr),null,'Pin at body or directional move','DTE<7 or full Komodo fires'));
+    // ── L1A: JRF + IC (VA, rangeConf, gatePass) ───────
+    const l1Active=inVA&&rangeConf&&gatePass;
+    if(l1Active){
+      // JRF — Jade Ratio Fly
+      const jrf_sc1=snap25(cmp), jrf_sp1=snap25(cmp);
+      const jrf_sc2=snap25(cmp+off1*0.5), jrf_sp2=snap25(cmp-off1*0.5);
+      const jrf_bc=snap25(cmp+off1*2.5), jrf_bp=snap25(cmp-off1*2.5);
+      const jrf_atmC=Math.round(cmp*(hv20v/100)*Math.sqrt(C.dte/365)*vm*0.98);
+      const jrf_atmP=Math.round(cmp*(hv20v/100)*Math.sqrt(C.dte/365)*vm*0.92);
+      const jrf_sc2p=otm(jrf_sc2,true), jrf_sp2p=otm(jrf_sp2,false);
+      const jrf_bcp=otm(jrf_bc,true), jrf_bpp=otm(jrf_bp,false);
+      const jrf_cCr=Math.round(jrf_atmC+jrf_sc2p-jrf_bcp);
+      const jrf_pCr=Math.round(jrf_atmP+jrf_sp2p-jrf_bpp);
+      const jrf_total=jrf_cCr+jrf_pCr;
+      const jt=jadeTest(jrf_cCr,jrf_bc-jrf_sc1);
+      if(creditOk(jrf_total)){
+        TRIGGERS.push(mkT(i,'L1A',salt||'VA_ENTRY','VALUE AREA',bd,
+          [{t:'SC',K:jrf_sc1,q:1},{t:'SC',K:jrf_sc2,q:1},{t:'SP',K:jrf_sp1,q:1},{t:'SP',K:jrf_sp2,q:1},
+           {t:'BC',K:jrf_bc,q:1},{t:'BP',K:jrf_bp,q:1}],
+          jrf_total,45,'45% credit','Wing breach',
+          {jade:jt.passes,sub:'JRF',note:'AGGR-VA: 4 shorts ±0.5A | Wings ±2.5A | Earns ALL -4A to +4A'}));
+      }
+      // IC — delta-based
+      let icSC,icSP,icBC,icBP;
+      const highIVEnv=hvP>65, hiIVDelta=Math.max(C.tgtDelta-0.04,0.05);
+      if(highIVEnv){icSC=findDeltaStrike(cmp,effIVf,T1,hiIVDelta,true);icSP=findDeltaStrike(cmp,effIVf,T1,hiIVDelta,false);icBC=snap25(icSC+off2);icBP=snap25(icSP-off2);}
+      else if(vaPosBear){icSC=findDeltaStrike(cmp,effIVf,T1,C.tgtDelta,true);icSP=findDeltaStrike(cmp,effIVf,T1,C.tgtDelta,false);icBC=snap25(icSC+off1);icBP=snap25(icSP-off2);}
+      else if(vaPosBull){icSC=findDeltaStrike(cmp,effIVf,T1,C.tgtDelta,true);icSP=findDeltaStrike(cmp,effIVf,T1,C.tgtDelta,false);icBC=snap25(icSC+off2);icBP=snap25(icSP-off1);}
+      else{icSC=findDeltaStrike(cmp,effIVf,T1,C.tgtDelta,true);icSP=findDeltaStrike(cmp,effIVf,T1,C.tgtDelta,false);icBC=snap25(icSC+off2);icBP=snap25(icSP-off2);}
+      const icSCp=otm(icSC,true),icBCp=otm(icBC,true),icSPp=otm(icSP,false),icBPp=otm(icBP,false);
+      const icCredit=Math.round((icSCp-icBCp)+(icSPp-icBPp));
+      const icMaxLoss=Math.max(Math.round(Math.max(icBC-icSC,icSP-icBP)-icCredit),0);
+      if(creditOk(icCredit)){
+        TRIGGERS.push(mkT(i,'L1A',salt||'VA_ENTRY','VALUE AREA',bd,
+          [{t:'SC',K:icSC,q:1},{t:'BC',K:icBC,q:1},{t:'SP',K:icSP,q:1},{t:'BP',K:icBP,q:1}],
+          icCredit,50,'50% credit','VA break',
+          {sub:'IC',shape:highIVEnv?'HI-IV':vaPosBear?'ASYM-BEAR':vaPosBull?'ASYM-BULL':'SYMM',
+           maxLoss:icMaxLoss,delta:C.tgtDelta}));
+      }
     }
 
-    // ── MON ──
-    if(bd.btwnVAREJ&&((hmaBull&&smiBull2)||(hmaBear&&smiBear2))&&!hmaFlat&&gatePass){
-      const bull=hmaBull&&smiBull2;
-      const SC=snap(cl[i]+(bull?bd.off1:-bd.off1)), BC=snap(cl[i]+(bull?bd.off2:-bd.off2));
-      const SP=snap(cl[i]+(bull?-bd.off3:bd.off3)), BP=snap(cl[i]+(bull?-bd.off4:bd.off4));
-      const cr=ep(SC)+ep(SP)-ep(BC)-ep(BP);
-      TRIGGERS.push(mkT(i,'MON',sig||(bull?'B2':'S2'),'BETWEEN',bd,[
-        {t:'SC',K:SC,q:1},{t:'BC',K:BC,q:1},{t:'SP',K:SP,q:1},{t:'BP',K:BP,q:1}],
-        Math.round(cr),40,'40% of credit','HMA direction flip'));
+    // ── L1B Calendar (VA, low vol) ─────────────────────
+    const lowVolEnv=hvP<C.calHVThr;
+    const calSig2=inVA&&rangeConf&&lowVolEnv&&(hmaFlat||Math.abs(hF-hS)<at*0.5);
+    if(calSig2){
+      const calStrike=snap25(cmp);
+      const n_atm=ep(calStrike,C.dte), f_atm=ep(calStrike,C.calFarDte||45);
+      const calDebit=Math.round(2*(f_atm-n_atm));
+      if(calDebit>0){
+        TRIGGERS.push(mkT(i,'L1B',salt||'LOW-VOL','VALUE AREA',bd,
+          [{t:'SC',K:calStrike,q:1,dte:C.dte},{t:'BC',K:calStrike,q:1,dte:C.calFarDte||45}],
+          -calDebit,50,'Calendar edge + time','Large move away from strike',
+          {sub:'CALENDAR',debit:calDebit,note:'Long vega + calendar edge | DTE near/far'}));
+      }
     }
 
-    // ── MOTH ──
-    if(bd.btwnVAREJ&&hmaFlat&&smiNeut&&gatePass){
-      const SC1=snap(cl[i]+bd.off1),SP1=snap(cl[i]-bd.off1);
-      const SC2=snap(cl[i]+bd.off2),SP2=snap(cl[i]-bd.off2);
-      const BC1=SC2,BP1=SP2;
-      const BC2=snap(cl[i]+bd.off3),BP2=snap(cl[i]-bd.off3);
-      const cr=ep(SC1)+ep(SP1)+ep(SC2)+ep(SP2)-ep(BC1)-ep(BP1)-ep(BC2)-ep(BP2);
-      TRIGGERS.push(mkT(i,'MOTH','FLAT','BETWEEN',bd,[
-        {t:'SC',K:SC1,q:1},{t:'SP',K:SP1,q:1},{t:'SC',K:SC2,q:1},{t:'SP',K:SP2,q:1},
-        {t:'BC',K:BC1,q:1},{t:'BP',K:BP1,q:1},{t:'BC',K:BC2,q:1},{t:'BP',K:BP2,q:1}],
-        Math.round(cr),45,'45% of credit','off3 breach or HMA turns directional'));
+    // ── L1C IBF (VA, very low vol HVP<30) ─────────────
+    const ibfSig2=inVA&&rangeConf&&hmaFlat&&smiNeut&&hvP<30;
+    if(ibfSig2){
+      const ibfStrike=snap25(cmp);
+      const ibf_atmC=Math.round(cmp*(hv20v/100)*Math.sqrt(C.dte/365)*vm*0.98);
+      const ibf_atmP=Math.round(cmp*(hv20v/100)*Math.sqrt(C.dte/365)*vm*0.92);
+      const ibf_bcP=otm(snap25(cmp+off2),true), ibf_bpP=otm(snap25(cmp-off2),false);
+      const ibfCredit=Math.round((ibf_atmC-ibf_bcP)+(ibf_atmP-ibf_bpP));
+      if(creditOk(ibfCredit)){
+        TRIGGERS.push(mkT(i,'L1C',salt||'PIN-MODE','VALUE AREA',bd,
+          [{t:'SC',K:ibfStrike,q:1},{t:'SP',K:ibfStrike,q:1},{t:'BC',K:snap25(cmp+off2),q:1},{t:'BP',K:snap25(cmp-off2),q:1}],
+          ibfCredit,25,'25% credit','Off-strike breach > 0.5 ATR',
+          {sub:'IBF',note:'DEEP PIN MODE | HVP<30 | TP25% | SL:move > 0.5ATR'}));
+      }
     }
 
-    // ── CHAM ──
-    if(bd.btwnVAREJ&&((hmaBull&&smiBear2)||(hmaBear&&smiBull2))&&gatePass){
-      const SP=snap(cl[i]-bd.off1), SC=snap(cl[i]+bd.off1);
-      const BP=snap(cl[i]-bd.off2), BC=snap(cl[i]+bd.off2);
-      const cr=ep(SP)*3+ep(SC)*3-ep(BP)*2-ep(BC)*2;
-      TRIGGERS.push(mkT(i,'CHAM','CONFLICT','BETWEEN',bd,[
-        {t:'SP',K:SP,q:3},{t:'SC',K:SC,q:3},{t:'BP',K:BP,q:2},{t:'BC',K:BC,q:2}],
-        Math.round(cr),40,'40% of credit','HMA+SMI both agree direction — close Cham, open Monitor'));
+    // ── L2 REJ (DRL + Fat Lizard + JL) ────────────────
+    const vaHiIdx2=Math.max(bd.r1,bd.r2,bd.r3), vaLoIdx2=Math.min(bd.r1,bd.r2,bd.r3);
+    const rejAbove2=(bd.curBand===rejZ1&&rejZ1>vaHiIdx2)||(bd.curBand===rejZ2&&rejZ2>vaHiIdx2);
+    const rejBelow2=(bd.curBand===rejZ1&&rejZ1<vaLoIdx2)||(bd.curBand===rejZ2&&rejZ2<vaLoIdx2);
+    const l2Bear=inREJ&&rejAbove2&&(hmaBear||hmaCrsBear)&&(smiBear2||smiCrBear)&&gatePass;
+    const l2Bull=inREJ&&rejBelow2&&(hmaBull||hmaCrsBull)&&(smiBull2||smiCrBull)&&gatePass;
+    const l2Early=inREJ&&!(l2Bear||l2Bull)&&(hmaTurnDn||hmaTurnUp);
+    const l2Active=l2Bear||l2Bull||l2Early;
+
+    if(l2Active){
+      // DRL — Double Ratio Lizard
+      if(l2Bear){
+        const drl_sc=snap25(cmp), drl_sp=snap25(cmp-off1*0.5);
+        const drl_bc=snap25(cmp+off2), drl_bp=snap25(cmp-off1*2.5);
+        const drl_sc_p=Math.round(atmPr*0.98), drl_sp_p=otm(drl_sp,false);
+        const drl_bc_p=otm(drl_bc,true), drl_bp_p=otm(drl_bp,false);
+        const mul=ratioGate?2:1;
+        const drl_callCr=Math.round(mul*drl_sc_p-drl_bc_p);
+        const drl_putCr=Math.round(mul*drl_sp_p-drl_bp_p);
+        const drl_total=drl_callCr+drl_putCr;
+        const jt=jadeTest(drl_callCr,drl_bc-drl_sc);
+        if(creditOk(drl_total)){
+          TRIGGERS.push(mkT(i,'L2',salt||'S2','REJ ZONE',bd,
+            [{t:'SC',K:drl_sc,q:mul},{t:'SP',K:drl_sp,q:mul},{t:'BC',K:drl_bc,q:1},{t:'BP',K:drl_bp,q:1}],
+            drl_total,40,'40% credit','Close > +3A from entry',
+            {sub:'DRL-BEAR',jade:jt.passes,ratio:mul+'x',note:`DRL BEAR | R:R 199:1 | ${ratioGate?'2x':'1x'}`}));
+        }
+        // Fat Lizard
+        if(ratioGate){
+          const fl_sp=snap25(cmp-off1), fl_sc=snap25(cmp), fl_bc=snap25(cmp+off2);
+          const fl_sp_p=otm(fl_sp,false), fl_sc_p=Math.round(atmPr*0.85), fl_bc_p=otm(fl_bc,true);
+          const fl_total=Math.round(fl_sp_p+2*fl_sc_p-fl_bc_p);
+          if(creditOk(fl_total)){
+            TRIGGERS.push(mkT(i,'L2',salt||'S2','REJ ZONE',bd,
+              [{t:'SP',K:fl_sp,q:1},{t:'SC',K:fl_sc,q:2},{t:'BC',K:fl_bc,q:1}],
+              fl_total,55,'55% credit','Reversal',
+              {sub:'FAT-LIZ-BEAR',note:'FAT LIZ BEAR 2xSC | TP55%'}));
+          }
+        }
+        // JL
+        const jl_sp=snap25(cmp-off1), jl_sc=snap25(cmp), jl_bc=snap25(cmp+off1);
+        const jl_sp_p=otm(jl_sp,false), jl_sc_p=Math.round(atmPr*0.85), jl_bc_p=otm(jl_bc,true);
+        const jl_total=Math.round(jl_sp_p+jl_sc_p-jl_bc_p);
+        const jlJt=jadeTest(jl_total,jl_bc-jl_sc);
+        if(creditOk(jl_total)){
+          TRIGGERS.push(mkT(i,'L2',salt||'S2','REJ ZONE',bd,
+            [{t:'SP',K:jl_sp,q:1},{t:'SC',K:jl_sc,q:1},{t:'BC',K:jl_bc,q:1}],
+            jl_total,50,'50% credit','REJ band exit',
+            {sub:'JL-BEAR',jade:jlJt.passes,note:'JADE LIZARD BEAR | TP50%'}));
+        }
+      } else if(l2Bull){
+        const drl_sp=snap25(cmp), drl_sc=snap25(cmp+off1*0.5);
+        const drl_bp=snap25(cmp-off2), drl_bc=snap25(cmp+off1*2.5);
+        const drl_sp_p=Math.round(atmPr*0.92), drl_sc_p=otm(drl_sc,true);
+        const drl_bp_p=otm(drl_bp,false), drl_bc_p=otm(drl_bc,true);
+        const mul=ratioGate?2:1;
+        const drl_putCr=Math.round(mul*drl_sp_p-drl_bp_p);
+        const drl_callCr=Math.round(mul*drl_sc_p-drl_bc_p);
+        const drl_total=drl_putCr+drl_callCr;
+        const jt=jadeTest(drl_putCr,drl_sp-drl_bp);
+        if(creditOk(drl_total)){
+          TRIGGERS.push(mkT(i,'L2',salt||'B2','REJ ZONE',bd,
+            [{t:'SP',K:drl_sp,q:mul},{t:'SC',K:drl_sc,q:mul},{t:'BP',K:drl_bp,q:1},{t:'BC',K:drl_bc,q:1}],
+            drl_total,40,'40% credit','Close < -3A from entry',
+            {sub:'DRL-BULL',jade:jt.passes,ratio:mul+'x',note:`DRL BULL | R:R 199:1`}));
+        }
+        // RJL
+        const jl_sc=snap25(cmp+off1), jl_sp=snap25(cmp), jl_bp=snap25(cmp-off1);
+        const jl_sc_p=otm(jl_sc,true), jl_sp_p=Math.round(atmPr*0.85), jl_bp_p=otm(jl_bp,false);
+        const jl_total=Math.round(jl_sc_p+jl_sp_p-jl_bp_p);
+        const jlJt=jadeTest(jl_total,jl_sp-jl_bp);
+        if(creditOk(jl_total)){
+          TRIGGERS.push(mkT(i,'L2',salt||'B2','REJ ZONE',bd,
+            [{t:'SC',K:jl_sc,q:1},{t:'SP',K:jl_sp,q:1},{t:'BP',K:jl_bp,q:1}],
+            jl_total,50,'50% credit','REJ band exit',
+            {sub:'RJL-BULL',jade:jlJt.passes,note:'REV JADE LIZ BULL | TP50%'}));
+        }
+      }
     }
 
-    // ── SIDE ──
-    if(!bd.inVA&&gatePass){
-      const bull=hmaBull;
-      const SC=snap(cl[i]+(bull?bd.off1:-bd.off1)), BC=snap(cl[i]+(bull?bd.off2:-bd.off2));
-      const SP=hvP>40?snap(cl[i]+(bull?-bd.off1:bd.off1)):null;
-      const cr=ep(SC)+(SP?ep(SP):0);
-      TRIGGERS.push(mkT(i,'SIDE',sig||'BG',zl,bd,
-        [{t:bull?'SC':'SP',K:SC,q:1},{t:bull?'BC':'BP',K:BC,q:1},...(SP?[{t:bull?'SP':'SC',K:SP,q:1}]:[])],
-        Math.round(cr),40,'Calendar edge + income','HMA reversal, close near leg'));
+    // ── L3 JRC + Monitor (btwnVAREJ, reversion) ───────
+    const betwnVAREJ=!inVA&&!inREJ;
+    const l3HmaRev=aboveVA&&(hmaTurnDn||hmaFlatNow||cmp<hF)||belowVA&&(hmaTurnUp||hmaFlatNow||cmp>hF);
+    const l3SmiRev=aboveVA&&(smiTurnDn||smiCrBear)||belowVA&&(smiTurnUp||smiCrBull);
+    const l3Active=betwnVAREJ&&(l3HmaRev||l3SmiRev)&&gatePass;
+    const l3Bear=aboveVA&&l3Active, l3Bull=belowVA&&l3Active;
+
+    if(l3Active){
+      if(l3Bear){
+        const jrc_sc1=snap25(cmp), jrc_sc2=snap25(cmp+off1*0.5);
+        const jrc_sp1=snap25(cmp-off1*0.5), jrc_sp2=snap25(cmp-off1*1.5);
+        const jrc_bc=snap25(cmp+off1*1.5), jrc_bp=snap25(cmp-off1*2.5);
+        const jrc_sc1p=Math.round(atmPr*0.98), jrc_sc2p=otm(jrc_sc2,true);
+        const jrc_sp1p=otm(jrc_sp1,false), jrc_sp2p=otm(jrc_sp2,false);
+        const jrc_bcp=otm(jrc_bc,true), jrc_bpp=otm(jrc_bp,false);
+        const jrc_cCr=Math.round(jrc_sc1p+jrc_sc2p-jrc_bcp);
+        const jrc_pCr=Math.round(jrc_sp1p+jrc_sp2p-jrc_bpp);
+        const jrc_tot=jrc_cCr+jrc_pCr;
+        const jt=jadeTest(jrc_cCr,jrc_bc-jrc_sc1);
+        if(creditOk(jrc_tot)){
+          TRIGGERS.push(mkT(i,'L3',salt||'S2','ABOVE VA',bd,
+            [{t:'SC',K:jrc_sc1,q:1},{t:'SC',K:jrc_sc2,q:1},{t:'SP',K:jrc_sp1,q:1},{t:'SP',K:jrc_sp2,q:1},
+             {t:'BC',K:jrc_bc,q:1},{t:'BP',K:jrc_bp,q:1}],
+            jrc_tot,45,'45% credit','VA boundary approach',
+            {sub:'JRC-BEAR',jade:jt.passes,note:'JADE-REV-CONDOR BEAR | R:R 46:1 | TP45%'}));
+        }
+      } else if(l3Bull){
+        const jrc_sp1=snap25(cmp), jrc_sp2=snap25(cmp-off1*0.5);
+        const jrc_sc1=snap25(cmp+off1*0.5), jrc_sc2=snap25(cmp+off1*1.5);
+        const jrc_bp=snap25(cmp-off1*1.5), jrc_bc=snap25(cmp+off1*2.5);
+        const jrc_sp1p=Math.round(atmPr*0.98), jrc_sp2p=otm(jrc_sp2,false);
+        const jrc_sc1p=otm(jrc_sc1,true), jrc_sc2p=otm(jrc_sc2,true);
+        const jrc_bpp=otm(jrc_bp,false), jrc_bcp=otm(jrc_bc,true);
+        const jrc_pCr=Math.round(jrc_sp1p+jrc_sp2p-jrc_bpp);
+        const jrc_cCr=Math.round(jrc_sc1p+jrc_sc2p-jrc_bcp);
+        const jrc_tot=jrc_pCr+jrc_cCr;
+        const jt=jadeTest(jrc_pCr,jrc_sp1-jrc_bp);
+        if(creditOk(jrc_tot)){
+          TRIGGERS.push(mkT(i,'L3',salt||'B2','BELOW VA',bd,
+            [{t:'SP',K:jrc_sp1,q:1},{t:'SP',K:jrc_sp2,q:1},{t:'SC',K:jrc_sc1,q:1},{t:'SC',K:jrc_sc2,q:1},
+             {t:'BP',K:jrc_bp,q:1},{t:'BC',K:jrc_bc,q:1}],
+            jrc_tot,45,'45% credit','VA boundary approach',
+            {sub:'JRC-BULL',jade:jt.passes,note:'JADE-REV-CONDOR BULL | R:R 46:1 | TP45%'}));
+        }
+      }
+      // Monitor alongside L3
+      const monBull=hmaBull&&smiBull2;
+      const mon_sp=snap25(cmp-(monBull?off1:off2)), mon_bp=snap25(cmp-(monBull?off2:off3));
+      const mon_sc=snap25(cmp+(monBull?off2:off1)), mon_bc=snap25(cmp+(monBull?off3:off2));
+      const mon_sp_p=otm(mon_sp,false), mon_sc_p=otm(mon_sc,true);
+      const mon_bp_p=otm(mon_bp,false), mon_bc_p=otm(mon_bc,true);
+      const mon_cr=Math.round(mon_sp_p+mon_sc_p-mon_bp_p-mon_bc_p);
+      if(creditOk(mon_cr)){
+        TRIGGERS.push(mkT(i,'L3',salt||(monBull?'B2':'S2'),zone,bd,
+          [{t:'SP',K:mon_sp,q:1},{t:'SC',K:mon_sc,q:1},{t:'BP',K:mon_bp,q:1},{t:'BC',K:mon_bc,q:1}],
+          mon_cr,40,'40% credit','HMA flip',
+          {sub:monBull?'MON-BULL':'MON-BEAR',note:'MONITOR | TP40% | SL:HMA flip'}));
+      }
     }
 
-    // ── IGUA ──
-    if(bd.inB9&&!gfActive&&gatePass){
-      const SP=snap(bd.bLo[bd.nb-2]), SC=snap(bd.bHi[bd.nb-2]+bd.off1);
-      const BC=snap(bd.bHi[bd.nb-2]+bd.off2), BP=snap(bd.bLo[bd.nb-2]-bd.off2);
-      const cr=ep(SC)+ep(SP)-ep(BC)-ep(BP);
-      TRIGGERS.push(mkT(i,'IGUA','B9_PASSIVE','TOP EXTREME',bd,[
-        {t:'SP',K:SP,q:1},{t:'SC',K:SC,q:1},{t:'BC',K:BC,q:1},{t:'BP',K:BP,q:1}],
-        Math.round(cr),50,'50% credit or GF fires','HMA dn cross in B9 = GF fires, close Iguana'));
+    // ── L4 JTC + TrendRatio (btwnVAREJ, trending) ─────
+    const l4HmaTrend=aboveVA&&(hmaBull&&!hmaTurnDn&&!hmaFlatNow||cmp>hF)||belowVA&&(hmaBear&&!hmaTurnUp&&!hmaFlatNow||cmp<hF);
+    const l4SmiTrend=aboveVA&&(smiBull2||smiRise)&&!smiTurnDn||belowVA&&(smiBear2||smiFall)&&!smiTurnUp;
+    const l4Active=betwnVAREJ&&!l3Active&&gatePass;
+    const l4Bull=aboveVA&&l4Active, l4Bear=belowVA&&l4Active;
+    const l4Strong=l4Active&&l4HmaTrend&&l4SmiTrend;
+
+    if(l4Active&&!l4Bear&&!l4Bull){}
+    else if(l4Bull){
+      const jtc_sc1=snap25(cmp+off1*2.5), jtc_sc2=snap25(cmp+off1*0.5);
+      const jtc_sp1=snap25(cmp), jtc_sp2=snap25(cmp-off1);
+      const jtc_bc=snap25(cmp+off1*3.5), jtc_bp=snap25(cmp-off1*2.0);
+      const jtc_sc1p=otm(jtc_sc1,true), jtc_sc2p=otm(jtc_sc2,true);
+      const jtc_sp1p=Math.round(atmPr*0.92), jtc_sp2p=otm(jtc_sp2,false);
+      const jtc_bcp=otm(jtc_bc,true), jtc_bpp=otm(jtc_bp,false);
+      const jtc_cCr=Math.round(jtc_sc1p+jtc_sc2p-jtc_bcp);
+      const jtc_pCr=Math.round(jtc_sp1p+jtc_sp2p-jtc_bpp);
+      const jtc_tot=jtc_cCr+jtc_pCr;
+      const jt=jadeTest(jtc_cCr,jtc_bc-jtc_sc1);
+      if(creditOk(jtc_tot)){
+        TRIGGERS.push(mkT(i,'L4',salt||'B2','ABOVE VA',bd,
+          [{t:'SC',K:jtc_sc1,q:1},{t:'SC',K:jtc_sc2,q:1},{t:'SP',K:jtc_sp1,q:1},{t:'SP',K:jtc_sp2,q:1},
+           {t:'BC',K:jtc_bc,q:1},{t:'BP',K:jtc_bp,q:1}],
+          jtc_tot,45,'45% credit','Reversal below VA',
+          {sub:'JTC-BULL',jade:jt.passes,strong:l4Strong,note:'JTC BULL | R:R 334:1 | TP45%'}));
+      }
+    } else if(l4Bear){
+      const jtc_sp1=snap25(cmp-off1*2.5), jtc_sp2=snap25(cmp-off1*0.5);
+      const jtc_sc1=snap25(cmp), jtc_sc2=snap25(cmp+off1);
+      const jtc_bp=snap25(cmp-off1*3.5), jtc_bc=snap25(cmp+off1*2.0);
+      const jtc_sp1p=otm(jtc_sp1,false), jtc_sp2p=otm(jtc_sp2,false);
+      const jtc_sc1p=Math.round(atmPr*0.92), jtc_sc2p=otm(jtc_sc2,true);
+      const jtc_bpp=otm(jtc_bp,false), jtc_bcp=otm(jtc_bc,true);
+      const jtc_pCr=Math.round(jtc_sp1p+jtc_sp2p-jtc_bpp);
+      const jtc_cCr=Math.round(jtc_sc1p+jtc_sc2p-jtc_bcp);
+      const jtc_tot=jtc_pCr+jtc_cCr;
+      const jt=jadeTest(jtc_pCr,jtc_sp1-jtc_bp);
+      if(creditOk(jtc_tot)){
+        TRIGGERS.push(mkT(i,'L4',salt||'S2','BELOW VA',bd,
+          [{t:'SP',K:jtc_sp1,q:1},{t:'SP',K:jtc_sp2,q:1},{t:'SC',K:jtc_sc1,q:1},{t:'SC',K:jtc_sc2,q:1},
+           {t:'BP',K:jtc_bp,q:1},{t:'BC',K:jtc_bc,q:1}],
+          jtc_tot,45,'45% credit','Reversal above VA',
+          {sub:'JTC-BEAR',jade:jt.passes,strong:l4Strong,note:'JTC BEAR | R:R 334:1 | TP45%'}));
+      }
     }
 
-    // ── GECK ──
-    if(bd.inB2&&!gmActive&&gatePass){
-      const SC=snap(bd.bHi[1]), SP=snap(bd.bLo[1]-bd.off1);
-      const BP=snap(bd.bLo[1]-bd.off2), BC=snap(bd.bHi[1]+bd.off2);
-      const cr=ep(SC)+ep(SP)-ep(BP)-ep(BC);
-      TRIGGERS.push(mkT(i,'GECK','B2_PASSIVE','BOT EXTREME',bd,[
-        {t:'SC',K:SC,q:1},{t:'SP',K:SP,q:1},{t:'BP',K:BP,q:1},{t:'BC',K:BC,q:1}],
-        Math.round(cr),50,'50% credit or GM fires','HMA up cross in B2 = GM fires, close Gecko'));
+    // ── Ratio Batman (conflict zone) ───────────────────
+    const inConflict=btwnVAREJ&&((hmaBull&&smiBear2)||(hmaBear&&smiBull2));
+    if(inConflict&&hvP>=35&&hvP<=65&&!l3Active&&!l4Active&&gatePass){
+      const bat_atm=Math.round(cmp*(hv20v/100)*Math.sqrt(C.dte/365)*vm*0.98);
+      const bat_sc_p=otm(snap25(cmp+off1),true), bat_bc_p=otm(snap25(cmp+off2),true);
+      const bat_sp_p=otm(snap25(cmp-off1),false), bat_bp_p=otm(snap25(cmp-off2),false);
+      const bat_bull_cr=Math.round(2*bat_sc_p-bat_atm-bat_bc_p);
+      const bat_bear_cr=Math.round(2*bat_sp_p-bat_atm-bat_bp_p);
+      const bat_tot=bat_bull_cr+bat_bear_cr;
+      if(bat_tot>0){
+        TRIGGERS.push(mkT(i,'BATMAN',salt||'CONFLICT',zone,bd,
+          [{t:'BC',K:snap25(cmp),q:1},{t:'SC',K:snap25(cmp+off1),q:2},{t:'BC',K:snap25(cmp+off2),q:1},
+           {t:'BP',K:snap25(cmp),q:1},{t:'SP',K:snap25(cmp-off1),q:2},{t:'BP',K:snap25(cmp-off2),q:1}],
+          bat_tot,null,'TP at ±1A humps','HMA direction confirms',
+          {sub:'BATMAN',note:'CONFLICT ZONE | 0.5x SIZE | Double BWB'}));
+      }
     }
 
-    // ── PYTH ──
-    if(!bd.inVA&&hvP>60&&gatePass){
-      const bull=hmaBull;
-      const SC=snap(cl[i]+(bull?bd.off1:-bd.off1));
-      const BC=snap(cl[i]+(bull?bd.off2:-bd.off2));
-      const SP=snap(cl[i]+(bull?-bd.off2:bd.off2));
-      const incOn=ep(SP)>=bd.off1*0.3;
-      const cr=ep(SC)+(incOn?ep(SP):0);
-      TRIGGERS.push(mkT(i,'PYTH',sig||'HVP>60','BETWEEN',bd,
-        [{t:bull?'SC':'SP',K:SC,q:1},{t:bull?'BC':'BP',K:BC,q:2},...(incOn?[{t:bull?'SP':'SC',K:SP,q:1}]:[])],
-        Math.round(cr),40,'Income 40% + direction unlimited','IV collapse or Komodo fires'));
+    // ── L0 Always-On Tail Hedges ───────────────────────
+    // Fire once per unique date to avoid duplicates
+    if(i===n-1||(i>0&&bars[i].date!==bars[i-1].date)){
+      const l0_tv=Math.sqrt(C.l0dte/365);
+      const l0_base=cmp*(hv20v/100)*l0_tv*vm;
+      const l0_bp=snap25(cmp-off4), l0_sp=snap25(cmp-off6);
+      const l0_bpPr=Math.max(Math.round(l0_base*Math.exp(-(off4/cmp)*7)*0.5),2);
+      const l0_spPr=Math.max(Math.round(l0_base*Math.exp(-(off6/cmp)*7)*0.5),1);
+      const l0_net=Math.round(2*l0_bpPr-l0_spPr);
+      TRIGGERS.push(mkT(i,'L0',null,'TAIL HEDGE',bd,
+        [{t:'BP',K:l0_bp,q:2},{t:'SP',K:l0_sp,q:1}],
+        -l0_net,50,'50% of max','Roll at DTE 16d',
+        {sub:'L0-PUT',note:'TAIL HEDGE always-on | DTE '+C.l0dte+'d | Roll @16d'}));
+      const l0b_bc=snap25(cmp+off4), l0b_sc=snap25(cmp+off6);
+      const l0b_bcPr=Math.max(Math.round(l0_base*Math.exp(-(off4/cmp)*7)*0.5),2);
+      const l0b_scPr=Math.max(Math.round(l0_base*Math.exp(-(off6/cmp)*7)*0.5),1);
+      const l0b_net=Math.round(2*l0b_bcPr-l0b_scPr);
+      TRIGGERS.push(mkT(i,'L0',null,'TAIL HEDGE',bd,
+        [{t:'BC',K:l0b_bc,q:2},{t:'SC',K:l0b_sc,q:1}],
+        -l0b_net,50,'50% of max','Roll at DTE 16d',
+        {sub:'L0B-CALL',note:'RALLY HEDGE always-on | DTE '+C.l0dte+'d | Roll @16d'}));
     }
   }
 
-  // ── Call exit tracker after all triggers collected ──
-  // (needs forward-scan so must run after full trigger list built)
+  // Newest first
+  TRIGGERS.reverse();
 
-  // Deduplicate CROC + SENT per day
-  const seen=new Set(), final=[];
-  TRIGGERS.forEach(t=>{
-    const k=t.reptile+t.date;
-    if((t.reptile==='CROC'||t.reptile==='SENT')&&seen.has(k))return;
-    seen.add(k); final.push(t);
-  });
-  TRIGGERS=final.reverse(); // NEWEST FIRST
+  // Compute exits
+  computeExits();
 
-  ENG={hmaF,hmaS,smiVal,hv20,hvPct,bandArr,saltArr,bars};
-  setProgress(100);
+  ENG.bandArr=bandArr;
+  setProg(100);
   setStatus(`✓ ${TRIGGERS.length} TRIGGERS — ${n} BARS  ${BARS[0].date}→${BARS[n-1].date}`,'ok');
   showUI();
 }
 
-function mkT(i,reptile,signal,zone,bd,legs,credit,tp_pct,tp,sl_rule){
+// ═══════════════════════════════════════════════════════
+// mkT helper
+// ═══════════════════════════════════════════════════════
+function mkT(i,layer,signal,zone,bd,legs,credit,tp_pct,tp,sl_rule,extra={}){
   return{
-    barIdx:i, date:BARS[i].date, reptile, signal, zone,
+    barIdx:i, date:BARS[i].date, layer, signal:signal||'—', zone,
     cmp:BARS[i].cl, vix:BARS[i].vix, hvp:ENG.hvPct?.[i]||0,
-    hv:ENG.hv20?.[i]||15,
-    off1:bd.off1,off2:bd.off2,off3:bd.off3,off4:bd.off4,
+    hv:ENG.hv20?.[i]||15, ratioGate:(ENG.hvPct?.[i]||0)>=C.hvRatio,
+    off1:bd.off1, off2:bd.off2, off3:bd.off3, off4:bd.off4,
     legs, credit, tp_pct, tp, sl_rule,
     vaHi:bd.vaHiP, vaLo:bd.vaLoP, curBand:bd.curBand,
     bHi:bd.bHi, bLo:bd.bLo, r1:bd.r1, r2:bd.r2, r3:bd.r3,
     vaHiIdx:bd.vaHiIdx, vaLoIdx:bd.vaLoIdx, nb:bd.nb,
-    hiD:bd.hiD, loD:bd.loD,
-    // Exit tracking — filled in by computeExits()
+    rejZ1:bd.rejZ1, rejZ2:bd.rejZ2, hiD:bd.hiD, loD:bd.loD,
+    ...extra,
     exitDate:null, exitCmp:null, exitReason:null,
     pnlPts:null, pnlRs:null, holdBars:null
   };
 }
 
-// ── EXIT TRACKING ─────────────────────────────────────────────────
-// For each trigger, scan forward to find when exit condition fires.
-// Pine exit rules per reptile:
-//   GF: price in B1 + HMA crosses UP + SMI OS
-//   GM: price in B10 + HMA crosses DOWN + SMI OB
-//   CROC: price closes outside VA (vaBreak) OR TP 50% (approx)
-//   COBRA: price beyond vaMid ± off2  OR TP 40%
-//   SENT: REJ confirm fires Komodo (upgrade) OR VA re-entry OR DTE
-//   KOMO_UP: HMA crosses UP (rejection fails) OR 2x credit loss
-//   KOMO_LO: HMA crosses DOWN (rejection fails) OR 2x credit loss
-//   RATTLE/MOTH/MON/CHAM: HMA flip OR off3 breach
-//   IGUA: HMA dn cross in B9 (= GF fires same bar)
-//   GECK: HMA up cross in B2 (= GM fires same bar)
-//   SIDE: near leg expires (21 bars) OR HMA reversal
-//   PYTH: HMA flip OR Komodo fires
-// TP exits: price returns to tp% of credit within spread lifetime
+// ═══════════════════════════════════════════════════════
+// EXIT TRACKING — v15 rules
+// ═══════════════════════════════════════════════════════
 function computeExits(){
   const {hmaF,hmaS,smiVal,bandArr,bars}=ENG;
-  const n=bars.length;
-  const cl=bars.map(b=>b.cl);
+  const n=bars.length, cl=bars.map(b=>b.cl);
 
   TRIGGERS.forEach(t=>{
     const startBar=t.barIdx;
-    // Max scan = min(dte, remaining bars in dataset)
-    const maxScan=Math.min(n-1, startBar+C.dte);
-
+    const maxScan=Math.min(n-1,startBar+C.dte);
     let exitBar=maxScan, exitReason='DTE EXPIRY';
 
-    for(let i=startBar+1; i<=maxScan; i++){
+    for(let i=startBar+1;i<=maxScan;i++){
       const bd=bandArr[i];
-      const hF=hmaF[i], hS=hmaS[i], hFp=hmaF[i-1]||hF, hSp=hmaS[i-1]||hS;
-      if(isNaN(hF)||isNaN(hS)) continue;
-      const hmaCrsBull=(hFp<=hSp)&&(hF>hS);
-      const hmaCrsBear=(hFp>=hSp)&&(hF<hS);
+      const hF=hmaF[i],hS=hmaS[i],hFp=hmaF[i-1]||hF,hSp=hmaS[i-1]||hS;
+      if(isNaN(hF)||isNaN(hS))continue;
+      const hmaCrsBull=hFp<=hSp&&hF>hS, hmaCrsBear=hFp>=hSp&&hF<hS;
       const hmaBull=hF>hS, hmaBear=hF<hS;
       const sv=smiVal[i]||0;
       const smiOB=sv>=C.smiBull, smiOS=sv<=C.smiBear;
       const c=cl[i];
       let exited=false;
+      const entMid=(t.vaHi+t.vaLo)/2;
 
-      // ── Entry flags stored at trigger time ───────────────────────
-      const entryVaMid=(t.vaHi+t.vaLo)/2;
-
-      switch(t.reptile){
-
+      switch(t.layer){
         case 'GF':
-          // Pine: gfClsTrig = gfActive AND inB1 AND hmaCrsBull AND smiOS
-          if(bd.inB1 && hmaCrsBull && smiOS){
-            exitBar=i; exitReason='B1+HMA↑+SMI OS'; exited=true;
-          }
-          // Also exit if price reaches B1 (NEAR CLOSE phase) even without full signal
-          else if(bd.inB1 && hmaBull){
-            exitBar=i; exitReason='NEAR CLOSE B1+HMA bull'; exited=true;
-          }
+          if(bd.inB1&&hmaCrsBull&&smiOS){exitBar=i;exitReason='B1+HMA↑+SMI OS';exited=true;}
+          else if(bd.inB1&&hmaBull){exitBar=i;exitReason='NEAR CLOSE B1';exited=true;}
           break;
-
         case 'GM':
-          // Pine: gmClsTrig = gmActive AND inB10 AND hmaCrsBear AND smiOB
-          if(bd.inB10 && hmaCrsBear && smiOB){
-            exitBar=i; exitReason='B10+HMA↓+SMI OB'; exited=true;
-          }
-          else if(bd.inB10 && hmaBear){
-            exitBar=i; exitReason='NEAR CLOSE B10+HMA bear'; exited=true;
-          }
+          if(bd.inB10&&hmaCrsBear&&smiOB){exitBar=i;exitReason='B10+HMA↓+SMI OB';exited=true;}
+          else if(bd.inB10&&hmaBear){exitBar=i;exitReason='NEAR CLOSE B10';exited=true;}
           break;
-
-        case 'CROC':
-          // SL: price closes outside VA — Death Roll
-          if(!bd.inVA){
-            exitBar=i; exitReason='VA BREAK (Death Roll)'; exited=true;
-          }
+        case 'L1A':
+          // IC: VA break. JRF: wing breach
+          if(!bd.inVA){exitBar=i;exitReason='VA BREAK';exited=true;}
           break;
-
+        case 'L1B':
+          // Move away > 1.5 ATR from strike, or IV spike
+          {const calStrike=t.legs[0]?.K||t.cmp;
+          const dist=Math.abs(c-calStrike), atrVal=ENG.atr14[i]||200;
+          if(dist>atrVal*1.5){exitBar=i;exitReason='LARGE MOVE FROM STRIKE';exited=true;}
+          else if(ENG.hvPct[i]>60){exitBar=i;exitReason='IV SPIKE HVP>60';exited=true;}}
+          break;
+        case 'L1C':
+          // Off-strike breach
+          {const ibfStrike=t.legs[0]?.K||t.cmp;
+          const dist=Math.abs(c-ibfStrike), atrVal=ENG.atr14[i]||200;
+          if(dist>atrVal*0.5){exitBar=i;exitReason='OFF-STRIKE BREACH';exited=true;}}
+          break;
         case 'COBRA':
-          // SL: price beyond vaMid ± off2 at entry
-          if(c > entryVaMid + t.off2 || c < entryVaMid - t.off2){
-            exitBar=i; exitReason='off2 BREACH'; exited=true;
-          }
+          {const dist=Math.abs(c-entMid);
+          if(dist>t.off2){exitBar=i;exitReason='off2 BREACH';exited=true;}}
           break;
-
-        case 'KOMO_UP':
-          // SL1: HMA crosses UP (rejection fails — price going up not down)
-          if(hmaCrsBull){
-            exitBar=i; exitReason='HMA↑ CROSS — rejection failed'; exited=true;
-          }
-          // SL2: price moves UP more than off2 from entry (2× credit proxy)
-          else if(c > t.cmp + t.off2){
-            exitBar=i; exitReason='PRICE BREACH off2 above entry'; exited=true;
-          }
+        case 'L2':
+          // Exit REJ zone
+          if(!bd.inREJ){exitBar=i;exitReason='LEFT REJ ZONE';exited=true;}
+          else if(t.sub?.includes('BEAR')&&hmaCrsBull){exitBar=i;exitReason='HMA↑ FLIP';exited=true;}
+          else if(t.sub?.includes('BULL')&&hmaCrsBear){exitBar=i;exitReason='HMA↓ FLIP';exited=true;}
           break;
-
-        case 'KOMO_LO':
-          if(hmaCrsBear){
-            exitBar=i; exitReason='HMA↓ CROSS — rejection failed'; exited=true;
-          }
-          else if(c < t.cmp - t.off2){
-            exitBar=i; exitReason='PRICE BREACH off2 below entry'; exited=true;
-          }
+        case 'L3':
+          // Price approaches VA boundary
+          {const atrVal=ENG.atr14[i]||200;
+          const nearVA=bd.aboveVA?c<=t.vaHi+atrVal*0.3:c>=t.vaLo-atrVal*0.3;
+          if(nearVA){exitBar=i;exitReason='VA BOUNDARY APPROACH';exited=true;}
+          else if(hmaCrsBull||hmaCrsBear){exitBar=i;exitReason='HMA DIRECTIONAL';exited=true;}}
           break;
-
-        case 'MON':{
-          // Determine direction from stored legs: if first leg is SC above CMP = bull trade
-          const firstLeg=t.legs[0];
-          const isBull=firstLeg && (firstLeg.t==='SC') && (firstLeg.K > t.cmp);
-          // SL: HMA flips against direction
-          if(isBull && hmaCrsBear){
-            exitBar=i; exitReason='HMA↓ FLIP against bull trade'; exited=true;
-          } else if(!isBull && hmaCrsBull){
-            exitBar=i; exitReason='HMA↑ FLIP against bear trade'; exited=true;
-          }
-          // Also SL: price breaches SP strike (now at off3)
-          const spLeg=t.legs.find(l=>l.t==='SP');
-          if(spLeg && c < spLeg.K && !exited){
-            exitBar=i; exitReason='SP BREACH'; exited=true;
-          }
+        case 'L4':
+          // Price reaches REJ zone
+          {const atrVal=ENG.atr14[i]||200;
+          const nearREJ=bd.aboveVA?c>=bLo(bd,bd.rejZ1)-atrVal*0.3:c<=bHi(bd,bd.rejZ1)+atrVal*0.3;
+          if(nearREJ){exitBar=i;exitReason='PRICE REACHED REJ';exited=true;}
+          else if(t.sub?.includes('BULL')&&hmaCrsBear){exitBar=i;exitReason='HMA REVERSAL';exited=true;}
+          else if(t.sub?.includes('BEAR')&&hmaCrsBull){exitBar=i;exitReason='HMA REVERSAL';exited=true;}}
           break;
-        }
-
-        case 'MOTH':
-          // SL: HMA turns directional (flat condition ends)
-          if(hmaCrsBull || hmaCrsBear){
-            exitBar=i; exitReason='HMA DIRECTIONAL (flat ends)'; exited=true;
-          }
-          // SL2: price beyond off3
-          if(!exited && (c > t.cmp + t.off3 || c < t.cmp - t.off3)){
-            exitBar=i; exitReason='off3 BREACH'; exited=true;
-          }
-          break;
-
-        case 'CHAM':
-          // SL: HMA+SMI both agree direction (conflict resolved)
-          if(hmaCrsBull || hmaCrsBear){
-            exitBar=i; exitReason='DIRECTION CONFIRMED — conflict resolved'; exited=true;
-          }
-          break;
-
-        case 'IGUA':
-          // Exit: HMA crosses DOWN in B9 = GF fires
-          if(hmaCrsBear){
-            exitBar=i; exitReason='HMA↓ in B9 — GF fires'; exited=true;
-          }
-          // Also exit if price leaves B9 (moved to B10 = GF territory)
-          else if(bd.inB10){
-            exitBar=i; exitReason='PRICE MOVED TO B10'; exited=true;
-          }
-          break;
-
-        case 'GECK':
-          if(hmaCrsBull){
-            exitBar=i; exitReason='HMA↑ in B2 — GM fires'; exited=true;
-          }
-          else if(bd.inB1){
-            exitBar=i; exitReason='PRICE MOVED TO B1'; exited=true;
-          }
-          break;
-
-        case 'RATTLE':
-          // Exit at DTE - 7 (i.e. 38 bars after entry for 45d dte)
-          if(i-startBar >= C.dte-7){
-            exitBar=i; exitReason='DTE-7 EXPIRY'; exited=true;
-          }
-          break;
-
-        case 'SENT':
-          // Exit: VA entry (Croc takes over) OR HMA cross fires Komodo
-          if(bd.inVA){
-            exitBar=i; exitReason='VA ENTRY — upgrade to CROC'; exited=true;
-          } else if(bd.inB9or10 && hmaCrsBear){
-            exitBar=i; exitReason='UPGRADED TO KOMO_UP'; exited=true;
-          } else if(bd.inB1or2 && hmaCrsBull){
-            exitBar=i; exitReason='UPGRADED TO KOMO_LO'; exited=true;
-          }
-          break;
-
-        case 'SIDE':
-          // Near leg expires at 21 bars
-          if(i-startBar >= 21){
-            exitBar=i; exitReason='NEAR LEG EXPIRY (21d)'; exited=true;
-          }
-          break;
-
         case 'PYTH':
-          // Exit: HMA flip against direction
-          const pythBull=t.legs.find(l=>l.t==='BC');
-          if(pythBull && hmaCrsBear){
-            exitBar=i; exitReason='HMA↓ FLIP — close Python'; exited=true;
-          } else if(!pythBull && hmaCrsBull){
-            exitBar=i; exitReason='HMA↑ FLIP — close Python'; exited=true;
-          }
+          if(hmaCrsBull||hmaCrsBear){exitBar=i;exitReason='HMA FLIP';exited=true;}
+          break;
+        case 'BATMAN':
+          if(hmaCrsBull||hmaCrsBear){exitBar=i;exitReason='DIRECTION CONFIRMED';exited=true;}
+          break;
+        case 'L0':
+          if(i-startBar>=C.dteR){exitBar=i;exitReason='ROLL at DTE '+C.dteR;exited=true;}
           break;
       }
-
-      if(exited) break;
+      if(exited)break;
     }
 
-    // ── P&L CALCULATION ──────────────────────────────────────────
-    // Principle: P&L is in NIFTY INDEX POINTS (not rupees directly)
-    // For options spreads: credit received is the max profit in points.
-    // Max loss = wing width (off1 or off2) minus credit received.
-    // TP exit = realised % of credit. SL exit = partial or full wing loss.
-    // For directional (GF/GM): NIFTY move from entry to exit × delta proxy.
-
-    const entryCmp=t.cmp;
-    const exitCmp=bars[exitBar].cl;
-    const holdBars=exitBar-startBar;
-    const maxLoss=Math.round(t.off1); // conservative: spread width ≈ off1
+    const entryCmp=t.cmp, exitCmp=bars[exitBar].cl, holdBars=exitBar-startBar;
     const credit=t.credit||0;
     let pnlPts=0;
 
-    if(t.reptile==='GF'){
-      // Directional: NIFTY fell from entry to exit = profit
-      // BP2x gains: each 1pt fall = +2pts premium, but delta < 1 early
-      // Approximate delta of BP2x near off4 strike ≈ 0.35 per lot
-      // Use: P&L = (entryCmp - exitCmp) × 0.35 as NIFTY-equivalent points
-      const move=entryCmp-exitCmp; // +ve if price fell (profit)
-      pnlPts=Math.round(move*0.35);
-
-    } else if(t.reptile==='GM'){
-      const move=exitCmp-entryCmp; // +ve if price rose (profit)
-      pnlPts=Math.round(move*0.35);
-
-    } else if(t.reptile==='CROC'){
-      if(exitReason.includes('Death Roll') || exitReason.includes('VA BREAK')){
-        // Loss: lose credit + lose on the short that got breached
-        // Wing protects at off2 so max loss ≈ off2 - credit
-        pnlPts=Math.round(-(t.off2-credit));
-      } else {
-        // Held inside VA: full credit kept at DTE
-        pnlPts=credit;
-      }
-
-    } else if(t.reptile==='COBRA'){
-      if(exitReason.includes('BREACH')){
-        // Loss: off2 spread - credit
-        pnlPts=Math.round(-(t.off2-credit));
-      } else {
-        // TP or expiry: full credit
-        pnlPts=credit;
-      }
-
-    } else if(t.reptile==='KOMO_UP'||t.reptile==='KOMO_LO'){
-      if(exitReason.includes('BREACH')||exitReason.includes('failed')){
-        // 2× credit loss rule: lose approximately 2× credit
-        pnlPts=Math.round(-credit*2);
-      } else {
-        // TP 50%: keep 50% of credit
-        pnlPts=Math.round(credit*(t.tp_pct||50)/100);
-      }
-
-    } else if(t.reptile==='MON'){
-      if(exitReason.includes('FLIP')||exitReason.includes('BREACH')){
-        // SL: lose credit + partial spread loss ≈ off1
-        pnlPts=Math.round(-(maxLoss));
-      } else {
-        pnlPts=Math.round(credit*(t.tp_pct||40)/100);
-      }
-
-    } else if(t.reptile==='MOTH'){
-      if(exitReason.includes('BREACH')||exitReason.includes('DIRECTIONAL')){
-        // off3 breach: lose credit + off1 spread
-        pnlPts=Math.round(-(maxLoss));
-      } else {
-        pnlPts=Math.round(credit*(t.tp_pct||45)/100);
-      }
-
-    } else if(t.reptile==='CHAM'){
-      if(exitReason.includes('DIRECTION')){
-        pnlPts=Math.round(credit*(t.tp_pct||40)/100);
-      } else {
-        pnlPts=Math.round(credit*(t.tp_pct||40)/100);
-      }
-
-    } else if(t.reptile==='IGUA'||t.reptile==='GECK'){
-      if(exitReason.includes('FIRES')||exitReason.includes('B10')||exitReason.includes('B1')){
-        // Positive: this is the intended exit (upgrade to GF/GM)
-        pnlPts=Math.round(credit*0.5);
-      } else {
-        pnlPts=Math.round(credit*(t.tp_pct||50)/100);
-      }
-
-    } else if(t.reptile==='SENT'){
-      if(exitReason.includes('UPGRADED')){
-        // Sentinel upgraded: partial theta earned
-        pnlPts=Math.round(credit*0.3*holdBars/C.dte);
-      } else {
-        pnlPts=Math.round(credit*0.5);
-      }
-
-    } else if(t.reptile==='RATTLE'){
-      // At expiry: if price moved directionally from entry, check if near body strike
-      const bodyLeg=t.legs.find(l=>l.q===2);
-      const bodyK=bodyLeg?bodyLeg.K:t.cmp;
-      const atPin=Math.abs(exitCmp-bodyK) < (t.off1||200)*0.5;
-      if(atPin){
-        // Near pin = max profit
-        pnlPts=credit+Math.round(t.off1);
-      } else {
-        // Away from pin: smaller profit from income leg or partial credit
-        pnlPts=Math.round(credit*0.4);
-      }
-
-    } else if(t.reptile==='SIDE'){
-      // Calendar edge: near leg decayed faster if IV held
-      // Approximate: 60% of credit as realistic calendar P&L
-      pnlPts=Math.round(credit*0.6);
-
-    } else if(t.reptile==='PYTH'){
-      // Directional: if HMA flipped after a move, P&L = NIFTY move
-      const move=Math.abs(exitCmp-entryCmp);
-      if(exitReason.includes('FLIP')&&move>t.off2){
-        // Big move = long gamma profit
-        pnlPts=Math.round((move-t.off1)*0.5); // rough gamma P&L
-      } else {
-        pnlPts=Math.round(credit*0.4);
-      }
-
+    if(t.layer==='GF'){
+      // Directional: cmp fell = profit, delta proxy 0.35
+      pnlPts=Math.round((entryCmp-exitCmp)*0.35);
+    } else if(t.layer==='GM'){
+      pnlPts=Math.round((exitCmp-entryCmp)*0.35);
+    } else if(t.layer==='L1B'){
+      // Calendar debit: profit if price stayed near strike
+      const calStrike=t.legs[0]?.K||entryCmp;
+      const dist=Math.abs(exitCmp-calStrike), atrVal=ENG.atr14[exitBar]||200;
+      const atStrike=dist<atrVal*0.3;
+      pnlPts=atStrike?Math.abs(credit)*0.5:Math.round(-Math.abs(credit)*0.3);
+    } else if(t.layer==='L0'){
+      // Hedge: small positive or negligible
+      pnlPts=Math.round(Math.abs(credit)*0.3);
     } else {
-      pnlPts=Math.round(credit*(t.tp_pct||40)/100);
+      // Credit spreads: P&L based on exit reason
+      if(exitReason.includes('VA BREAK')||exitReason.includes('BREACH')||
+         exitReason.includes('FLIP')||exitReason.includes('DIRECTION')||
+         exitReason.includes('REVERSAL')||exitReason.includes('LEFT REJ')){
+        // SL: lose credit + partial spread
+        pnlPts=Math.round(-(t.off1||200));
+      } else if(exitReason.includes('APPROACH')||exitReason.includes('REACHED REJ')){
+        // Planned exit at target: keep TP% of credit
+        pnlPts=Math.round(credit*(t.tp_pct||45)/100);
+      } else if(exitReason==='DTE EXPIRY'){
+        // At expiry: check if within spread
+        const finalBd=bandArr[exitBar];
+        const stayed=finalBd.inVA||(t.layer==='COBRA'&&Math.abs(exitCmp-t.cmp)<t.off2);
+        pnlPts=stayed?credit:Math.round(-t.off1||0);
+      } else {
+        pnlPts=Math.round(credit*(t.tp_pct||40)/100);
+      }
     }
 
     t.exitDate=bars[exitBar].date;
@@ -1164,563 +1235,532 @@ function computeExits(){
   });
 }
 
+function bLo(bd,idx){return bd.bLo[idx]||0;}
+function bHi(bd,idx){return bd.bHi[idx]||0;}
 
-
-// ══════════════════════════════════════════════════════════
-// UI SHOW
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// SHOW UI
+// ═══════════════════════════════════════════════════════
 function showUI(){
   document.getElementById('nav').style.display='flex';
-  ['cdp','band-panel','filter-bar','tbl-wrap'].forEach(id=>{
-    const el=document.getElementById(id); if(el)el.style.display='';
+  ['cdp','gate-row','band-panel','port-panel','summary-row','filter-bar'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display='';
   });
-  document.getElementById('summary-row').style.display='flex';
-  computeExits();
+  document.getElementById('tbl-wrap').style.display='';
   renderCurrentPanel();
+  renderGateRow();
   renderBandTable();
+  renderPortfolioPanel();
   renderSummaryCards();
   renderTable();
   renderIndicatorChart();
   renderStats();
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // CURRENT DATE PANEL
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function renderCurrentPanel(){
   const n=BARS.length, last=BARS[n-1], prev=BARS[n-2]||last;
   const bd=ENG.bandArr[n-1], hv=ENG.hv20[n-1]||0, hvP=ENG.hvPct[n-1]||0;
-  const chg=last.cl-prev.cl, pct=(chg/prev.cl*100);
-  const salt=ENG.saltArr[n-1]||'—', prevSalt=ENG.saltArr.slice(0,n-1).reverse().find(s=>s);
-  const zones=['LOWER REJ','BOT EXTREME','BETWEEN','VALUE AREA','TOP EXTREME','UPPER REJ'];
-  const zl=bd.inB10?'UPPER REJ':bd.inB9?'TOP EXTREME':bd.inVA?'VALUE AREA':bd.inB2?'BOT EXTREME':bd.inB1?'LOWER REJ':'BETWEEN';
-  const zc={'UPPER REJ':'var(--red)','TOP EXTREME':'var(--orange)','VALUE AREA':'var(--cyan)','BETWEEN':'var(--purple)','BOT EXTREME':'var(--orange)','LOWER REJ':'var(--green)'};
+  const chg=last.cl-prev.cl, pct=(chg/prev.cl*100).toFixed(2);
+  const salt=ENG.saltArr[n-1]||'—';
+  const prevSalt=ENG.saltArr.slice(0,n-1).reverse().find(s=>s)||'—';
+  const zl=bd.inVA?'VALUE AREA':bd.inREJ?'REJ ZONE':bd.aboveVA?'ABOVE VA':bd.belowVA?'BELOW VA':'BETWEEN';
+  const zc={'VALUE AREA':'var(--cyan)','REJ ZONE':'var(--red)','ABOVE VA':'var(--orange)',
+    'BELOW VA':'var(--green)','BETWEEN':'var(--purple)'};
+  const gatePass=hvP>=C.hvFloor;
 
-  $$('cdp-date').textContent=last.date;
-  $$('cdp-cmp').textContent=fmtN(last.cl);
-  $$('cdp-chg').innerHTML=`<span style="color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${fmtN(chg)} (${pct.toFixed(2)}%)</span>`;
-  $$('cdp-vix').textContent=last.vix?.toFixed(1)||'—';
-  $$('cdp-vixenv').textContent=last.vix>18?'HIGH >18':last.vix<12?'LOW <12':'NORMAL';
-  $$('cdp-hv').textContent=(hv||0).toFixed(1)+'%';
-  $$('cdp-hvp').textContent=hvP+'%';
-  $$('cdp-hvp').style.color=hvP>=60?'var(--green)':hvP<25?'var(--red)':'var(--gold)';
-  $$('cdp-gate').textContent=hvP>=C.hvGate?'GATE PASS ✓':'GATE FAIL ✗';
-  $$('cdp-gate').style.color=hvP>=C.hvGate?'var(--green)':'var(--red)';
-  $$('cdp-zone').textContent=zl;
-  $$('cdp-zone').style.color=zc[zl]||'var(--white)';
-  $$('cdp-band').textContent=`B${bd.curBand+1} of ${bd.nb}`;
-  $$('cdp-offs').textContent=`${bd.off1} / ${bd.off2} / ${bd.off3}`;
-  $$('cdp-salt').textContent=salt;
-  $$('cdp-salt').style.color=salt?.startsWith('B')?'var(--green)':salt?.startsWith('S')?'var(--red)':'var(--muted)';
-  $$('cdp-saltprev').textContent=`PRV: ${prevSalt||'—'}`;
-  document.getElementById('cdp').style.display='flex';
+  const cdp=document.getElementById('cdp');
+  cdp.innerHTML=`
+    <div class="cdp-block"><div class="cdp-lbl">LATEST DATE</div><div class="cdp-val">${last.date}</div></div>
+    <div class="cdp-block${chg>=0?'':' warn'}">
+      <div class="cdp-lbl">NIFTY CMP</div>
+      <div class="cdp-val">${fmtN(last.cl)}</div>
+      <div class="cdp-sub" style="color:${chg>=0?'var(--green)':'var(--red)'}">${chg>=0?'+':''}${fmtN(Math.round(chg))} (${pct}%)</div>
+    </div>
+    <div class="cdp-block">
+      <div class="cdp-lbl">VIX</div>
+      <div class="cdp-val" style="color:${last.vix>18?'var(--red)':last.vix<12?'var(--green)':'var(--navy)'}">${last.vix?.toFixed(1)||'—'}</div>
+      <div class="cdp-sub">${last.vix>18?'HIGH >18':last.vix<12?'LOW <12':'NORMAL'}</div>
+    </div>
+    <div class="cdp-block">
+      <div class="cdp-lbl">HV20</div>
+      <div class="cdp-val">${(hv||0).toFixed(1)}%</div>
+    </div>
+    <div class="cdp-block${!gatePass?' warn':hvP>=60?' active-now':''}">
+      <div class="cdp-lbl">HVP%</div>
+      <div class="cdp-val" style="color:${!gatePass?'var(--red)':hvP>=60?'var(--green)':'var(--navy)'}">${hvP}%</div>
+      <div class="cdp-sub" style="color:${gatePass?'var(--green)':'var(--red)'}">${gatePass?'FLOOR ✓':'FLOOR ✗ BLOCKED'}</div>
+    </div>
+    <div class="cdp-block">
+      <div class="cdp-lbl">ZONE</div>
+      <div class="cdp-val" style="color:${zc[zl]||'var(--navy)'}">${zl}</div>
+      <div class="cdp-sub">B${bd.curBand+1} of ${bd.nb}</div>
+    </div>
+    <div class="cdp-block">
+      <div class="cdp-lbl">off1/off2/off3</div>
+      <div class="cdp-val" style="font-size:12px">${bd.off1}/${bd.off2}/${bd.off3}</div>
+    </div>
+    <div class="cdp-block">
+      <div class="cdp-lbl">SALT SIGNAL</div>
+      <div class="cdp-val" style="color:${salt?.startsWith('B')?'var(--green)':salt?.startsWith('S')?'var(--red)':'var(--muted)'}">${salt}</div>
+      <div class="cdp-sub">PRV: ${prevSalt}</div>
+    </div>
+  `;
 }
 
-// ══════════════════════════════════════════════════════════
-// BAND TABLE (like Pine Row 0)
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// GATE ROW
+// ═══════════════════════════════════════════════════════
+function renderGateRow(){
+  const bd=ENG.bandArr[ENG.bandArr.length-1];
+  const hvP=ENG.hvPct[ENG.bandArr.length-1]||0;
+  const gatePass=hvP>=C.hvFloor, ratioGate=hvP>=C.hvRatio, gammaMode=hvP>60;
+  document.getElementById('gate-row').innerHTML=`
+    <span class="gate-pill ${gatePass?'gate-pass':'gate-fail'}">HVP FLOOR (${C.hvFloor}%): ${gatePass?'✓ PASS — PREMIUM SELLING OK':'✗ BLOCKED — NO STRUCTURES'}</span>
+    <span class="gate-pill ${ratioGate?'gate-pass':'gate-warn'}">RATIO GATE (${C.hvRatio}%): ${ratioGate?'✓ 2x RATIO ALLOWED':'1x ONLY'}</span>
+    <span class="gate-pill ${gammaMode?'gate-pass':'gate-info'}">GAMMA MODE: ${gammaMode?'✓ PYTHON ACTIVE':'HVP≤60'}</span>
+    <span class="gate-pill gate-info">MIN CREDIT: ${C.minCr}pts</span>
+    <span class="gate-pill gate-info">DTE: ${C.dte}d  ROLL: ${C.dteR}d  TORTOISE: ${C.tortDte}d</span>
+    <span class="gate-pill gate-info">snap25()  rangeConf: ${C.rangeConf}bars</span>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// BAND TABLE — v15 REJ = least-traded bands
+// ═══════════════════════════════════════════════════════
 function renderBandTable(){
   const n=BARS.length, bd=ENG.bandArr[n-1];
-  const {bHi,bLo,bBars,r1,r2,r3,curBand,vaHiIdx,vaLoIdx,nb}=bd;
+  const prevBd=ENG.bandArr[n-2]||bd;
+  const {bHi,bLo,bBars,bMTP,r1,r2,r3,rejZ1,rejZ2,curBand,vaHiIdx,vaLoIdx,nb}=bd;
+  const prevBand=prevBd.curBand;
   const maxBars=Math.max(...bBars);
   const grid=document.getElementById('band-grid');
   grid.innerHTML='';
-  // Get previous bar band for prev indicator
-  const prevBd=ENG.bandArr[ENG.bandArr.length-2]||bd;
-  const prevBandIdx=prevBd.curBand;
-  // Render B10 down to B1
   for(let b=nb-1;b>=0;b--){
-    const isR1=b===r1, isR2=b===r2, isR3=b===r3;
+    const isR1=b===r1,isR2=b===r2,isR3=b===r3;
     const isVA=b>=vaLoIdx&&b<=vaHiIdx;
-    const isTop2=b>=nb-2, isBot2=b<=1, isCur=b===curBand;
-    const isPrev=b===prevBandIdx&&b!==curBand;
+    const isRej1=b===rejZ1, isRej2=b===rejZ2;
+    const isCur=b===curBand, isPrev=b===prevBand&&b!==curBand;
     const pct=maxBars>0?bBars[b]/maxBars*100:0;
-    const mtp=bd.bMTP?bd.bMTP[b]:Math.round((bd.bLo[b]+bd.bHi[b])/2);
+    const mtp=bMTP?bMTP[b]:Math.round((bLo[b]+bHi[b])/2);
     let cls='band-cell';
     if(isR1)cls+=' rank1';
     else if(isR2)cls+=' rank2';
     else if(isR3)cls+=' rank3';
+    else if(isRej1)cls+=' rej1';
+    else if(isRej2)cls+=' rej2';
     else if(isVA)cls+=' va';
-    else if(isTop2)cls+=' top2';
-    else if(isBot2)cls+=' bot2';
     if(isCur)cls+=' current';
     if(isPrev)cls+=' prev';
-    const tag=isR1?'<span class="bc-tag" style="background:#1a7a3a;color:#fff;font-weight:700">★R1</span>':
-               isR2?'<span class="bc-tag" style="background:#4daa60;color:#fff">R2</span>':
-               isR3?'<span class="bc-tag" style="background:#88cc99;color:#1a4a2a">R3</span>':
-               isCur?'<span class="bc-tag" style="background:#b8860b;color:#fff;font-weight:700">▶CMP</span>':
-               isPrev?'<span class="bc-tag" style="background:#6680a0;color:#fff">PRV</span>':'';
-    const fillCol=isR1?'#1a7a3a':isR2?'#4daa60':isR3?'#88cc99':isVA?'#0077aa':isTop2?'#cc2222':'#b8c8de';
-    const rankNumColor=isR1?'#fff':isR2?'#1a7a3a':isR3?'#2a7a44':isCur?'#b8860b':isVA?'#0077aa':isTop2?'#cc2222':'#6680a0';
-    const rangeK=`${(bLo[b]/1000).toFixed(1)}-${(bHi[b]/1000).toFixed(1)}k`;
-    const mtpStr=fmtN(Math.round(mtp));
-    const bandH=Math.max(52, 52+pct*0.5);
+    const rankCol=isR1?'#fff':isR2?'var(--green)':isR3?'#2a7a44':isCur?'var(--gold)':isRej1?'var(--red)':isRej2?'#e06040':'var(--muted)';
+    const fillCol=isR1?'var(--green)':isR2?'#4daa60':isR3?'#88cc99':isRej1?'var(--red)':isRej2?'#e06040':isVA?'var(--cyan)':'var(--border2)';
+    const tag=isR1?`<span class="bc-tag" style="background:var(--green);color:#fff">★R1</span>`:
+               isR2?`<span class="bc-tag" style="background:#4daa60;color:#fff">R2</span>`:
+               isR3?`<span class="bc-tag" style="background:#88cc99;color:#1a4a2a">R3</span>`:
+               isRej1?`<span class="bc-tag" style="background:var(--red);color:#fff">REJ1</span>`:
+               isRej2?`<span class="bc-tag" style="background:#e06040;color:#fff">REJ2</span>`:
+               isCur?`<span class="bc-tag" style="background:var(--gold);color:#fff;font-weight:700">▶CMP</span>`:
+               isPrev?`<span class="bc-tag" style="background:var(--muted);color:#fff">PRV</span>`:'';
+    const bandH=Math.max(52,52+pct*0.45);
     grid.innerHTML+=`<div class="${cls}" style="height:${bandH}px">
       ${tag}
-      <div class="bc-num" style="color:${rankNumColor};font-weight:700;font-size:10px">B${b+1}</div>
-      <div style="font-size:7px;color:#6680a0;margin-top:1px">${rangeK}</div>
-      <div style="color:#0077aa;font-size:8px;margin-top:1px">MTP:${mtpStr}</div>
-      <div style="color:${rankNumColor};font-size:9px;font-weight:700;margin-top:2px">${bBars[b]}b</div>
-      <div style="height:4px;background:#e0e8f0;margin-top:3px;border-radius:2px;overflow:hidden">
+      <div style="color:${rankCol};font-weight:700;font-size:10px">B${b+1}</div>
+      <div style="font-size:7px;color:var(--muted);margin-top:1px">${(bLo[b]/1000).toFixed(1)}-${(bHi[b]/1000).toFixed(1)}k</div>
+      <div style="color:var(--cyan);font-size:8px">MTP:${fmtN(Math.round(mtp))}</div>
+      <div style="color:${rankCol};font-size:9px;font-weight:700;margin-top:2px">${bBars[b]}b</div>
+      <div style="height:4px;background:var(--border);margin-top:2px;border-radius:2px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:${fillCol};border-radius:2px"></div>
       </div>
     </div>`;
   }
-  document.getElementById('band-panel').style.display='block';
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// PORTFOLIO PANEL
+// ═══════════════════════════════════════════════════════
+function renderPortfolioPanel(){
+  const n=BARS.length-1;
+  const hvP=ENG.hvPct[n]||0;
+  const bd=ENG.bandArr[n];
+  const gatePass=hvP>=C.hvFloor, ratioGate=hvP>=C.hvRatio;
+  let ctx='';
+  if(!gatePass) ctx=`<span style="color:var(--red)">⚠ HVP=${hvP}% < FLOOR ${C.hvFloor}% — ALL PREMIUM SELLING BLOCKED</span>`;
+  else if(bd.inVA) ctx=`<span style="color:var(--cyan)">IN VA → L1A JRF+IC active | Earn Θ daily | Watch VA break → L2 fires</span>`;
+  else if(bd.inREJ) ctx=`<span style="color:var(--red)">AT REJ ZONE → L2 DRL${ratioGate?' + Fat Lizard 2x':''} + JL | R:R 199:1</span>`;
+  else if(bd.aboveVA) ctx=`<span style="color:var(--orange)">ABOVE VA BETWEEN → L3 JRC 46:1 BEAR | L4 JTC trending check</span>`;
+  else if(bd.belowVA) ctx=`<span style="color:var(--green)">BELOW VA BETWEEN → L3 JRC 46:1 BULL | L4 JTC trending check</span>`;
+  else ctx=`<span style="color:var(--muted)">AWAITING SIGNAL</span>`;
+  document.getElementById('port-text').innerHTML=`<span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">CONTEXT: </span>${ctx}`;
+}
+
+// ═══════════════════════════════════════════════════════
 // SUMMARY CARDS
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function renderSummaryCards(){
-  const byR={};
-  TRIGGERS.forEach(t=>{byR[t.reptile]=(byR[t.reptile]||0)+1;});
-  const top=Object.entries(byR).sort((a,b)=>b[1]-a[1])[0];
+  const byL={};
+  TRIGGERS.forEach(t=>{byL[t.layer]=(byL[t.layer]||0)+1;});
+  const top=Object.entries(byL).sort((a,b)=>b[1]-a[1])[0];
   const days=[...new Set(TRIGGERS.map(t=>t.date))].length;
   const crTr=TRIGGERS.filter(t=>t.credit>0);
   const avgCr=crTr.length?Math.round(crTr.reduce((s,t)=>s+t.credit,0)/crTr.length):0;
+  const wins=TRIGGERS.filter(t=>t.pnlPts>0).length;
+  const wr=TRIGGERS.length?Math.round(wins/TRIGGERS.length*100):0;
   const sr=document.getElementById('summary-row');
   sr.innerHTML=`
-    <div class="sum-card"><div class="sum-label">TOTAL TRIGGERS</div><div class="sum-val" style="color:var(--gold)">${TRIGGERS.length}</div><div class="sum-sub">${days} unique days</div></div>
+    <div class="sum-card"><div class="sum-label">TOTAL TRIGGERS</div><div class="sum-val" style="color:var(--navy)">${TRIGGERS.length}</div><div class="sum-sub">${days} days</div></div>
     <div class="sum-card"><div class="sum-label">NSEI BARS</div><div class="sum-val" style="color:var(--cyan)">${BARS.length}</div><div class="sum-sub">${BARS[BARS.length-1].date}</div></div>
-    <div class="sum-card"><div class="sum-label">MOST ACTIVE</div><div class="sum-val" style="color:${RC[top?.[0]]||'var(--gold)'}">${top?.[0]||'—'}</div><div class="sum-sub">${top?.[1]||0}× triggers</div></div>
-    <div class="sum-card"><div class="sum-label">AVG CREDIT ₹</div><div class="sum-val" style="color:var(--green)">${avgCr}</div><div class="sum-sub">per lot × 1</div></div>
-    <div class="sum-card"><div class="sum-label">HVP GATE</div><div class="sum-val" style="color:var(--orange)">${C.hvGate}%</div><div class="sum-sub">min percentile</div></div>
+    <div class="sum-card"><div class="sum-label">MOST ACTIVE</div><div class="sum-val" style="color:${LC[top?.[0]]||'var(--navy)'}">${top?.[0]||'—'}</div><div class="sum-sub">${top?.[1]||0}× fires</div></div>
+    <div class="sum-card"><div class="sum-label">AVG CREDIT ₹</div><div class="sum-val" style="color:var(--green)">${avgCr}</div><div class="sum-sub">per unit</div></div>
+    <div class="sum-card"><div class="sum-label">WIN RATE (est)</div><div class="sum-val" style="color:${wr>=60?'var(--green)':wr>=40?'var(--gold)':'var(--red)'}">${wr}%</div><div class="sum-sub">${wins} of ${TRIGGERS.length}</div></div>
   `;
 }
 
-// ══════════════════════════════════════════════════════════
-// TRIGGER TABLE — newest first
-// ══════════════════════════════════════════════════════════
-const COLS=['#','DATE','REPTILE','SIGNAL','ZONE','CMP','VIX','HVP%','OFF1','OFF2','S1','S2','S3','S4','CREDIT','LOT CR','TP%','EXIT DATE','EXIT CMP','HOLD(d)','P&L PTS','P&L ₹','EXIT REASON'];
-const RC={GF:'#1a7a3a',GM:'#0077aa',CROC:'#0d5c7a',COBRA:'#cc2222',SENT:'#c05800',KOMO_UP:'#cc2222',KOMO_LO:'#1a7a3a',RATTLE:'#2a8a7a',MON:'#6600cc',MOTH:'#228844',CHAM:'#0055cc',SIDE:'#0066aa',IGUA:'#2a7a44',GECK:'#2a7a44',PYTH:'#aa2222'};
-const ZC={'UPPER REJ':'#cc2222','TOP EXTREME':'#c05800','VALUE AREA':'#0077aa','BETWEEN':'#6600cc','BOT EXTREME':'#c05800','LOWER REJ':'#1a7a3a'};
+// ═══════════════════════════════════════════════════════
+// TRIGGER TABLE
+// ═══════════════════════════════════════════════════════
+const COLS=['#','DATE','LAYER','SUB','SIGNAL','ZONE','CMP','VIX','HVP%','off1','off2','S1','S2','S3','S4','CREDIT','LOT₹','TP%','EXIT DATE','EXIT CMP','HOLD','P&L PTS','P&L ₹','EXIT REASON'];
+const LC={L1A:'#0077aa',L1B:'#0055aa',L1C:'#6600cc',L2:'#cc2222',L3:'#c05800',L4:'#1a7a3a',GF:'#1a7a3a',GM:'#0077aa',COBRA:'#cc2222',PYTH:'#aa2222',BATMAN:'#6600cc',L0:'#8899bb'};
+const ZC={'VALUE AREA':'var(--cyan)','REJ ZONE':'var(--red)','ABOVE VA':'var(--orange)','BELOW VA':'var(--green)','BETWEEN':'var(--purple)','TAIL HEDGE':'var(--muted)'};
 
 function renderTable(){
   const rf=$$('f-rep').value, zf=$$('f-zone').value, sf=$$('f-sig').value;
-  const rows=TRIGGERS.filter(t=>(!rf||t.reptile===rf)&&(!zf||t.zone===zf)&&(!sf||t.signal===sf));
+  const rows=TRIGGERS.filter(t=>(!rf||t.layer===rf)&&(!zf||t.zone===zf)&&(!sf||(t.signal||'').includes(sf)));
   const lot=LOT();
-
-  // Build header once
   const hdrEl=document.getElementById('tbl-hdr');
-  if(!hdrEl.children.length)COLS.forEach((c,i)=>hdrEl.innerHTML+=`<th onclick="sortTable(${i})">${c}</th>`);
-
+  if(!hdrEl.children.length)COLS.forEach((c,i)=>hdrEl.innerHTML+=`<th onclick="sortTbl(${i})">${c}</th>`);
   const tbody=document.getElementById('tbl-body');
   tbody.innerHTML=rows.map((t,idx)=>{
-    const cr=t.credit, lotPL=cr>0?cr*lot:cr*lot;
-    const crCol=cr>0?'var(--green)':'var(--red)';
-    const ks=t.legs.map(l=>l.K).filter(k=>k>0);
-    const s1=ks[0]||'—',s2=ks[1]||'—',s3=ks[2]||'—',s4=ks[3]||'—';
-    const pnl=t.pnlPts||0;
-    const pnlCol=pnl>0?'var(--green)':pnl<0?'var(--red)':'var(--muted)';
+    const cr=t.credit||0, crCol=cr>0?'var(--green)':'var(--red)';
+    const pnl=t.pnlPts||0, pnlCol=pnl>0?'var(--green)':pnl<0?'var(--red)':'var(--muted)';
     const pnlRs=t.pnlRs||0;
-    const reasonShort=(t.exitReason||'—').replace('—','—').substring(0,30);
+    const ks=t.legs.map(l=>l.K).filter(k=>k>0);
+    const jadeIcon=t.jade?'<span style="color:var(--green)">✓</span>':'';
+    const rsn=(t.exitReason||'—').substring(0,28);
+    const rsnCol=t.exitReason?.includes('VA BREAK')||t.exitReason?.includes('BREACH')||t.exitReason?.includes('FLIP')?'var(--red)':t.exitReason?.includes('TP')||t.exitReason?.includes('APPROACH')?'var(--green)':'var(--muted)';
     return`<tr onclick="clickRow(${TRIGGERS.indexOf(t)})" data-idx="${TRIGGERS.indexOf(t)}">
       <td style="color:var(--muted)">${idx+1}</td>
-      <td style="color:var(--gold)">${t.date}</td>
-      <td><span class="pill r-${t.reptile}">${t.reptile}</span></td>
-      <td style="color:var(--cyan2)">${t.signal||'—'}</td>
+      <td style="color:var(--gold2);font-weight:700">${t.date}</td>
+      <td><span class="pill l-${t.layer}">${t.layer}</span></td>
+      <td style="color:var(--muted);font-size:9px">${t.sub||'—'}${jadeIcon}</td>
+      <td style="color:var(--cyan)">${t.signal||'—'}</td>
       <td style="color:${ZC[t.zone]||'var(--white)'}">${t.zone}</td>
-      <td style="color:var(--gold);font-weight:700">${fmtN(t.cmp)}</td>
+      <td style="color:var(--navy);font-weight:700">${fmtN(Math.round(t.cmp))}</td>
       <td style="color:${t.vix>18?'var(--red)':t.vix<12?'var(--green)':'var(--muted)'}">${t.vix?.toFixed(1)||'—'}</td>
-      <td style="color:${t.hvp>=60?'var(--green)':t.hvp<25?'var(--red)':'var(--muted)'}">${t.hvp}%</td>
+      <td style="color:${t.hvp>=C.hvFloor?t.hvp>=C.hvRatio?'var(--green)':'var(--muted)':'var(--red)'}">${t.hvp}%</td>
       <td style="color:var(--muted)">${t.off1}</td>
       <td style="color:var(--muted)">${t.off2}</td>
-      <td>${fmtN(s1)}</td><td>${fmtN(s2)}</td><td>${fmtN(s3)}</td><td>${fmtN(s4)}</td>
+      <td>${fmtN(ks[0]||'—')}</td><td>${fmtN(ks[1]||'—')}</td><td>${fmtN(ks[2]||'—')}</td><td>${fmtN(ks[3]||'—')}</td>
       <td style="color:${crCol};font-weight:700">${cr>0?'+':''}${cr}</td>
-      <td style="color:${crCol};font-weight:700">${cr>0?'+':''}₹${fmtN(cr*lot)}</td>
+      <td style="color:${crCol};font-weight:700">${cr>0?'+':''}₹${fmtN(Math.round(cr*lot))}</td>
       <td style="color:var(--muted)">${t.tp_pct?t.tp_pct+'%':'—'}</td>
       <td style="color:var(--muted)">${t.exitDate||'—'}</td>
       <td style="color:var(--muted)">${t.exitCmp||'—'}</td>
       <td style="color:var(--muted)">${t.holdBars||'—'}</td>
       <td style="color:${pnlCol};font-weight:700">${pnl>0?'+':''}${pnl}</td>
       <td style="color:${pnlCol};font-weight:700">${pnlRs>0?'+':''}₹${fmtN(Math.round(pnlRs))}</td>
-      <td style="color:${t.exitReason?.includes('TP')?'var(--green)':t.exitReason?.includes('BREACH')||t.exitReason?.includes('FLIP')||t.exitReason?.includes('DEATH')?'var(--red)':'var(--muted)'};font-size:9px">${reasonShort}</td>
+      <td style="color:${rsnCol};font-size:9px">${rsn}</td>
     </tr>`;
   }).join('');
   $$('tbl-count').textContent=`${rows.length} of ${TRIGGERS.length}`;
 }
 
 function clickRow(idx){
-  selectedTrigger=TRIGGERS[idx];
+  selT=TRIGGERS[idx];
   document.querySelectorAll('#tbl-body tr').forEach(r=>r.classList.toggle('sel',+r.dataset.idx===idx));
-  goTab('payoff');
-  renderPayoff(selectedTrigger);
+  goTab('payoff');renderPayoff(selT);
 }
 
-function sortTable(col){
-  if(sortCol===col)sortAsc=!sortAsc; else{sortCol=col;sortAsc=false;}
-  const keys=['#','date','reptile','signal','zone','cmp','vix','hvp','off1','off2','off3','off4',null,null,null,null,'credit',null,'tp_pct','sl_rule'];
-  const k=keys[col]; if(!k)return;
-  TRIGGERS.sort((a,b)=>{const v=a[k]>b[k]?1:a[k]<b[k]?-1:0;return sortAsc?v:-v;});
+let _sortCol=-1,_sortAsc=false;
+function sortTbl(col){
+  if(_sortCol===col)_sortAsc=!_sortAsc;else{_sortCol=col;_sortAsc=false;}
+  const keys=[null,'date','layer','sub','signal','zone','cmp','vix','hvp','off1','off2',null,null,null,null,'credit',null,'tp_pct','exitDate','exitCmp','holdBars','pnlPts',null,'exitReason'];
+  const k=keys[col];if(!k)return;
+  TRIGGERS.sort((a,b)=>{const v=a[k]>b[k]?1:a[k]<b[k]?-1:0;return _sortAsc?v:-v;});
   renderTable();
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // PAYOFF DIAGRAM
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function renderPayoff(t){
   document.getElementById('no-payoff').style.display='none';
   document.getElementById('payoff-content').style.display='block';
-  const lot=LOT();
-  const rc=RC[t.reptile]||'#ffd700';
-
-  // Title
-  $$('payoff-rep').textContent=t.reptile;
-  $$('payoff-rep').style.color=rc;
-  $$('payoff-date').innerHTML=`${t.date} &nbsp;|&nbsp; Zone: <span style="color:${ZC[t.zone]||'var(--white)'}">${t.zone}</span> &nbsp;|&nbsp; Signal: <span style="color:var(--cyan)">${t.signal}</span> &nbsp;|&nbsp; CMP: <span style="color:var(--gold)">${fmtN(t.cmp)}</span>`;
-
-  // Legs
-  $$('payoff-legs').innerHTML=t.legs.map(l=>{
+  const lot=LOT(), lc=LC[t.layer]||'#0077aa';
+  $$('payoff-rep').textContent=`${t.layer}${t.sub?' — '+t.sub:''}`;
+  $$('payoff-rep').style.color=lc;
+  $$('payoff-date').innerHTML=`${t.date} &nbsp;|&nbsp; Zone: <span style="color:${ZC[t.zone]||'#000'}">${t.zone}</span> &nbsp;|&nbsp; Signal: <span style="color:var(--cyan)">${t.signal}</span> &nbsp;|&nbsp; CMP: <span style="color:var(--gold2)">${fmtN(Math.round(t.cmp))}</span>`;
+  $$('payoff-legs').innerHTML=t.legs.filter(l=>l.K>0).map(l=>{
     const buy=l.t==='BC'||l.t==='BP';
-    return`<div class="leg-chip ${buy?'buy':'sell'}">${buy?'BUY':'SELL'} ${l.q>1?l.q+'×':''} ${l.t} @${fmtN(l.K)}</div>`;
+    return`<div class="leg-chip ${buy?'buy':'sell'}">${buy?'BUY':'SELL'} ${l.q>1?l.q+'×':''} ${l.t} @${fmtN(l.K)}${l.dte?' ('+l.dte+'d)':''}</div>`;
   }).join('');
 
-  // Compute payoff
   const allK=t.legs.map(l=>l.K).filter(k=>k>0);
   if(!allK.length){$$('payoff-metrics').innerHTML='<div style="color:var(--muted);font-family:var(--font-mono);font-size:10px">No valid strikes</div>';return;}
   const minK=Math.min(...allK), maxK=Math.max(...allK);
-  const pad=Math.max((maxK-minK)*0.6,t.off2*2.5);
-  const xMin=minK-pad, xMax=maxK+pad, steps=400;
-  const xs=[], ys=[];
+  const pad=Math.max((maxK-minK)*0.65,t.off2*2.5);
+  const xMin=minK-pad, xMax=maxK+pad, steps=500;
+  const xs=[],ys=[];
   for(let i=0;i<=steps;i++){
     const price=xMin+i*(xMax-xMin)/steps;
     let pnl=0;
     t.legs.forEach(leg=>{
       if(!leg.K||leg.K===0)return;
-      const buy=leg.t==='BC'||leg.t==='BP';
-      const call=leg.t==='BC'||leg.t==='SC';
+      const buy=leg.t==='BC'||leg.t==='BP', call=leg.t==='BC'||leg.t==='SC';
       const intrinsic=call?Math.max(0,price-leg.K):Math.max(0,leg.K-price);
       pnl+=(buy?1:-1)*intrinsic*leg.q;
     });
-    pnl+=t.credit;
-    xs.push(price); ys.push(pnl*lot);
+    pnl+=t.credit||0;
+    xs.push(price);ys.push(pnl*lot);
   }
-
   const maxPnl=Math.max(...ys), minPnl=Math.min(...ys);
+  const tpAmt=t.tp_pct&&(t.credit||0)>0?Math.round((t.credit||0)*t.tp_pct/100*lot):null;
 
-  // Greeks (net portfolio)
+  // Greeks
   const T=C.dte/365, hv=t.hv||15, vx=t.vix||15;
-  const vm=vx>18?1.45:vx<12?0.65:1.0, iv=hv/100*vm*C.ivMult;
+  const vm=vx>18?1.45:vx<12?0.65:1.0, iv=hv/100*vm*C.ivPrem;
   let totD=0,totG=0,totTh=0,totV=0;
   t.legs.forEach(leg=>{
     if(!leg.K||leg.K===0)return;
     const buy=leg.t==='BC'||leg.t==='BP', call=leg.t==='BC'||leg.t==='SC';
-    const g=bsGreeks(t.cmp,leg.K,T,0.05,iv,call);
+    const g=bsGreeks(t.cmp,leg.K,T,iv,call);
     const sign=buy?1:-1;
-    totD+=sign*g.delta*leg.q; totG+=sign*g.gamma*leg.q;
-    totTh+=sign*g.theta*leg.q; totV+=sign*g.vega*leg.q;
+    totD+=sign*g.delta*leg.q;totG+=sign*g.gamma*leg.q;
+    totTh+=sign*g.theta*leg.q;totV+=sign*g.vega*leg.q;
   });
 
-  // Metrics
-  const tpAmt=t.tp_pct?Math.round(t.credit*t.tp_pct/100*lot):null;
   $$('payoff-metrics').innerHTML=`
-    <div class="pm-box"><div class="pm-lbl">EST CREDIT/LOT</div><div class="pm-val" style="color:${t.credit>0?'var(--green)':'var(--red)'}">${t.credit>0?'+':''}₹${t.credit}</div></div>
-    <div class="pm-box"><div class="pm-lbl">LOT P&L (×${lot})</div><div class="pm-val" style="color:${t.credit>0?'var(--green)':'var(--red)'}">${t.credit>0?'+':''}₹${fmtN(t.credit*lot)}</div></div>
-    <div class="pm-box"><div class="pm-lbl">MAX PROFIT</div><div class="pm-val" style="color:var(--green)">+₹${fmtN(maxPnl)}</div></div>
-    <div class="pm-box"><div class="pm-lbl">MAX LOSS</div><div class="pm-val" style="color:var(--red)">${minPnl<0?'₹'+fmtN(minPnl):'DEFINED'}</div></div>
-    ${tpAmt?`<div class="pm-box"><div class="pm-lbl">TP TARGET (${t.tp_pct}%)</div><div class="pm-val" style="color:var(--cyan)">₹${fmtN(tpAmt)}</div></div>`:''}
-    <div class="pm-box"><div class="pm-lbl">TP RULE</div><div class="pm-val" style="color:var(--cyan);font-size:10px">${t.tp}</div></div>
-    <div class="pm-box"><div class="pm-lbl">SL RULE</div><div class="pm-val" style="color:var(--red);font-size:10px">${t.sl_rule}</div></div>
+    <div class="pm-box"><div class="pm-lbl">CREDIT/UNIT</div><div class="pm-val" style="color:${(t.credit||0)>0?'var(--green)':'var(--red)'}">${t.credit>0?'+':''}₹${t.credit||0}</div></div>
+    <div class="pm-box"><div class="pm-lbl">LOT P&L (×${lot})</div><div class="pm-val" style="color:${(t.credit||0)>0?'var(--green)':'var(--red)'}">${(t.credit||0)>0?'+':''}₹${fmtN(Math.round((t.credit||0)*lot))}</div></div>
+    <div class="pm-box"><div class="pm-lbl">MAX PROFIT</div><div class="pm-val" style="color:var(--green)">+₹${fmtN(Math.round(maxPnl))}</div></div>
+    <div class="pm-box"><div class="pm-lbl">MAX LOSS</div><div class="pm-val" style="color:var(--red)">${minPnl<-1?'₹'+fmtN(Math.round(minPnl)):'DEFINED'}</div></div>
+    ${tpAmt?`<div class="pm-box"><div class="pm-lbl">TP ${t.tp_pct}%</div><div class="pm-val" style="color:var(--cyan)">₹${fmtN(tpAmt)}</div></div>`:''}
+    <div class="pm-box"><div class="pm-lbl">EST P&L PTS</div><div class="pm-val" style="color:${(t.pnlPts||0)>=0?'var(--green)':'var(--red)'}">${(t.pnlPts||0)>0?'+':''}${t.pnlPts||0}</div></div>
+    ${t.jade?`<div class="pm-box" style="background:var(--green-lt)"><div class="pm-lbl">JADE TEST</div><div class="pm-val" style="color:var(--green)">✓ PASS</div></div>`:''}
+    ${t.note?`<div class="pm-box" style="flex:2"><div class="pm-lbl">NOTE</div><div class="pm-val" style="font-size:9px;color:var(--navy)">${t.note}</div></div>`:''}
   `;
 
-  // Greeks display
   $$('greeks-row').innerHTML=`
     <div class="greek-box"><div class="greek-sym">Δ</div><div class="greek-val" style="color:${totD>0?'var(--green)':'var(--red)'}">${totD.toFixed(3)}</div><div class="greek-lbl">NET DELTA</div></div>
-    <div class="greek-box"><div class="greek-sym">Γ</div><div class="greek-val" style="color:var(--cyan)">${(totG*1000).toFixed(2)}</div><div class="greek-lbl">GAMMA ×1000</div></div>
-    <div class="greek-box"><div class="greek-sym">Θ</div><div class="greek-val" style="color:${totTh>0?'var(--green)':'var(--red)'}">₹${(totTh*lot).toFixed(0)}/day</div><div class="greek-lbl">THETA × LOT</div></div>
-    <div class="greek-box"><div class="greek-sym">V</div><div class="greek-val" style="color:var(--purple)">₹${(totV*lot).toFixed(0)}/1%IV</div><div class="greek-lbl">VEGA × LOT</div></div>
-    <div class="greek-box"><div class="greek-sym">IV</div><div class="greek-val" style="color:var(--gold)">${(iv*100).toFixed(1)}%</div><div class="greek-lbl">IMPLIED VOL</div></div>
-    <div class="greek-box"><div class="greek-sym">HV</div><div class="greek-val" style="color:var(--muted)">${(hv||0).toFixed(1)}%</div><div class="greek-lbl">HIST VOL 20D</div></div>
+    <div class="greek-box"><div class="greek-sym">Γ</div><div class="greek-val" style="color:var(--purple)">${(totG*1000).toFixed(2)}</div><div class="greek-lbl">GAMMA×1000</div></div>
+    <div class="greek-box"><div class="greek-sym">Θ</div><div class="greek-val" style="color:${totTh>0?'var(--green)':'var(--red)'}">₹${(totTh*lot).toFixed(0)}/d</div><div class="greek-lbl">THETA×LOT</div></div>
+    <div class="greek-box"><div class="greek-sym">V</div><div class="greek-val" style="color:var(--navy)">₹${(totV*lot).toFixed(0)}/1%</div><div class="greek-lbl">VEGA×LOT</div></div>
+    <div class="greek-box"><div class="greek-sym">IV</div><div class="greek-val" style="color:var(--gold2)">${(iv*100).toFixed(1)}%</div><div class="greek-lbl">IMPLIED VOL</div></div>
   `;
 
   // Draw canvas
   const cv=document.getElementById('payoff-canvas');
-  const ctx=cv.getContext('2d');
-  const W=cv.width, H=cv.height;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
-
-  const yPad=(Math.max(Math.abs(maxPnl),Math.abs(minPnl))*0.18)||1000;
+  const ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
+  const yPad=Math.max((Math.abs(maxPnl)+Math.abs(minPnl))*0.15,1000);
   const yl=minPnl-yPad, yh=maxPnl+yPad;
-  const L=52, R=W-20, T2=25, B=H-35;
-  const px=x=>L+(x-xMin)/(xMax-xMin)*(R-L);
-  const py=y=>T2+(1-(y-yl)/(yh-yl))*(B-T2);
-  const y0=py(0);
-
+  const L=55,R=W-20,T2=28,B=H-35;
+  const PX=x=>L+(x-xMin)/(xMax-xMin)*(R-L);
+  const PY=y=>T2+(1-(y-yl)/(yh-yl))*(B-T2);
+  const y0=PY(0);
   // Grid
-  ctx.strokeStyle='#e0e8f0'; ctx.lineWidth=0.5;
-  for(let i=0;i<=5;i++){
-    const yv=yl+(yh-yl)*i/5, yp=py(yv);
-    ctx.beginPath();ctx.moveTo(L,yp);ctx.lineTo(R,yp);ctx.stroke();
-    ctx.fillStyle='#6680a0';ctx.font='9px Share Tech Mono';ctx.textAlign='right';
-    ctx.fillText((yv>=0?'+':'')+fmtN(Math.round(yv)),L-3,yp+3);
-  }
-  for(let i=0;i<=8;i++){
-    const xv=xMin+i*(xMax-xMin)/8;
-    const xp=px(xv);
-    ctx.beginPath();ctx.moveTo(xp,T2);ctx.lineTo(xp,B);ctx.stroke();
-    ctx.fillStyle='#6680a0';ctx.font='9px Share Tech Mono';ctx.textAlign='center';
-    ctx.fillText(fmtN(Math.round(xv)),xp,B+12);
-  }
-
+  ctx.strokeStyle='#e0e8f0';ctx.lineWidth=0.5;
+  for(let i=0;i<=5;i++){const yv=yl+(yh-yl)*i/5,yp=PY(yv);ctx.beginPath();ctx.moveTo(L,yp);ctx.lineTo(R,yp);ctx.stroke();ctx.fillStyle='#6680a0';ctx.font='9px Share Tech Mono';ctx.textAlign='right';ctx.fillText((yv>=0?'+':'')+fmtN(Math.round(yv)),L-3,yp+3);}
+  for(let i=0;i<=7;i++){const xv=xMin+i*(xMax-xMin)/7,xp=PX(xv);ctx.beginPath();ctx.moveTo(xp,T2);ctx.lineTo(xp,B);ctx.stroke();ctx.fillStyle='#6680a0';ctx.font='8px Share Tech Mono';ctx.textAlign='center';ctx.fillText(fmtN(Math.round(xv)),xp,B+12);}
   // Zero line
-  ctx.strokeStyle='#c0d0e8'; ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(L,y0);ctx.lineTo(R,y0);ctx.stroke();
-  ctx.fillStyle='#4a6a8a';ctx.font='9px Share Tech Mono';ctx.textAlign='right';
-  ctx.fillText('0',L-3,y0+3);
-
+  ctx.strokeStyle='#c0d0e8';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,y0);ctx.lineTo(R,y0);ctx.stroke();
   // Profit fill
-  ctx.save();
-  const path=new Path2D();
-  xs.forEach((x,i)=>{const xp=px(x),yp2=py(ys[i]);i===0?path.moveTo(xp,yp2):path.lineTo(xp,yp2);});
-  path.lineTo(px(xs[xs.length-1]),y0);path.lineTo(px(xs[0]),y0);path.closePath();
-  ctx.fillStyle='rgba(26,122,58,0.10)';ctx.fill(path);
-
-  // Loss fill
-  const path2=new Path2D();
-  xs.forEach((x,i)=>{const xp=px(x),yp2=py(Math.min(ys[i],0));i===0?path2.moveTo(xp,yp2):path2.lineTo(xp,yp2);});
-  path2.lineTo(px(xs[xs.length-1]),y0);path2.lineTo(px(xs[0]),y0);path2.closePath();
-  ctx.fillStyle='rgba(204,34,34,0.10)';ctx.fill(path2);
-  ctx.restore();
-
-  // Strike lines
-  allK.forEach(K=>{
-    const xp=px(K);
-    ctx.strokeStyle='rgba(240,192,64,0.25)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
-    ctx.beginPath();ctx.moveTo(xp,T2);ctx.lineTo(xp,B);ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle='var(--gold)';ctx.font='bold 9px Share Tech Mono';ctx.textAlign='center';
-    ctx.fillText(fmtN(K),xp,T2-4);
-  });
-
-  // CMP line
-  const cmpp=px(t.cmp);
-  ctx.strokeStyle='rgba(64,196,255,0.5)';ctx.lineWidth=1.5;ctx.setLineDash([4,2]);
-  ctx.beginPath();ctx.moveTo(cmpp,T2);ctx.lineTo(cmpp,B);ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle='#40c4ff';ctx.font='bold 9px Share Tech Mono';ctx.textAlign='center';
-  ctx.fillText('CMP',cmpp,B+24);
-
+  const path=new Path2D();xs.forEach((x,i)=>{const xp=PX(x),yp=PY(ys[i]);i===0?path.moveTo(xp,yp):path.lineTo(xp,yp);});
+  path.lineTo(PX(xs[xs.length-1]),y0);path.lineTo(PX(xs[0]),y0);path.closePath();
+  ctx.fillStyle='rgba(26,122,58,0.09)';ctx.fill(path);
+  const path2=new Path2D();xs.forEach((x,i)=>{const xp=PX(x),yp=PY(Math.min(ys[i],0));i===0?path2.moveTo(xp,yp):path2.lineTo(xp,yp);});
+  path2.lineTo(PX(xs[xs.length-1]),y0);path2.lineTo(PX(xs[0]),y0);path2.closePath();
+  ctx.fillStyle='rgba(204,34,34,0.08)';ctx.fill(path2);
+  // Strikes
+  allK.forEach(K=>{const xp=PX(K);ctx.strokeStyle='rgba(184,134,11,0.3)';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(xp,T2);ctx.lineTo(xp,B);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='var(--gold)';ctx.font='bold 9px Share Tech Mono';ctx.textAlign='center';ctx.fillText(fmtN(K),xp,T2-5);});
+  // CMP
+  const cmpp=PX(t.cmp);ctx.strokeStyle='rgba(0,119,170,0.5)';ctx.lineWidth=1.5;ctx.setLineDash([4,2]);ctx.beginPath();ctx.moveTo(cmpp,T2);ctx.lineTo(cmpp,B);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#0077aa';ctx.font='bold 9px Share Tech Mono';ctx.textAlign='center';ctx.fillText('CMP',cmpp,B+24);
   // TP line
-  if(tpAmt){
-    const tpY=py(tpAmt);
-    ctx.strokeStyle='rgba(77,255,145,0.4)';ctx.lineWidth=1;ctx.setLineDash([5,3]);
-    ctx.beginPath();ctx.moveTo(L,tpY);ctx.lineTo(R,tpY);ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle='#4dff91';ctx.font='9px Share Tech Mono';ctx.textAlign='left';
-    ctx.fillText(`TP ${t.tp_pct}%  +₹${fmtN(tpAmt)}`,L+4,tpY-3);
-  }
-
-  // Main curve
-  ctx.strokeStyle=rc;ctx.lineWidth=2.5;ctx.setLineDash([]);
-  ctx.shadowColor=rc;ctx.shadowBlur=6;
-  ctx.beginPath();
-  xs.forEach((x,i)=>{const xp=px(x),yp2=py(ys[i]);i===0?ctx.moveTo(xp,yp2):ctx.lineTo(xp,yp2);});
-  ctx.stroke();
-  ctx.shadowBlur=0;
-
+  if(tpAmt){const tpY=PY(tpAmt);ctx.strokeStyle='rgba(26,122,58,0.4)';ctx.lineWidth=1;ctx.setLineDash([5,3]);ctx.beginPath();ctx.moveTo(L,tpY);ctx.lineTo(R,tpY);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='var(--green)';ctx.font='9px Share Tech Mono';ctx.textAlign='left';ctx.fillText(`TP ${t.tp_pct}%  +₹${fmtN(tpAmt)}`,L+4,tpY-3);}
+  // Curve
+  ctx.strokeStyle=lc;ctx.lineWidth=2.5;ctx.shadowColor=lc;ctx.shadowBlur=4;
+  ctx.beginPath();xs.forEach((x,i)=>{const xp=PX(x),yp=PY(ys[i]);i===0?ctx.moveTo(xp,yp):ctx.lineTo(xp,yp);});ctx.stroke();ctx.shadowBlur=0;
   // Annotations
   ctx.font='bold 10px Share Tech Mono';ctx.textAlign='center';
-  const mxIdx=ys.indexOf(maxPnl);
-  if(maxPnl>0){ctx.fillStyle='#4dff91';ctx.fillText(`MAX +₹${fmtN(maxPnl)}`,px(xs[mxIdx]),py(maxPnl)-10);}
-  const mnIdx=ys.indexOf(minPnl);
-  if(minPnl<0){ctx.fillStyle='#ff4444';ctx.fillText(`LOSS ₹${fmtN(minPnl)}`,px(xs[mnIdx]),py(minPnl)+18);}
-
+  if(maxPnl>0){const mx=ys.indexOf(maxPnl);ctx.fillStyle='var(--green)';ctx.fillText(`MAX +₹${fmtN(Math.round(maxPnl))}`,PX(xs[mx]),PY(maxPnl)-10);}
+  if(minPnl<0){const mn=ys.indexOf(minPnl);ctx.fillStyle='var(--red)';ctx.fillText(`LOSS ₹${fmtN(Math.round(minPnl))}`,PX(xs[mn]),PY(minPnl)+16);}
   // Breakevens
-  for(let i=1;i<ys.length;i++){
-    if((ys[i-1]<=0&&ys[i]>0)||(ys[i-1]>=0&&ys[i]<0)){
-      const bex=xs[i-1]+(xs[i]-xs[i-1])*(-ys[i-1]/(ys[i]-ys[i-1]));
-      ctx.fillStyle='#ffd700';ctx.beginPath();ctx.arc(px(bex),y0,5,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#ffd700';ctx.font='bold 9px Share Tech Mono';ctx.textAlign='center';
-      ctx.fillText('BE '+fmtN(Math.round(bex)),px(bex),y0-10);
-    }
-  }
-
+  for(let i=1;i<ys.length;i++){if((ys[i-1]<=0&&ys[i]>0)||(ys[i-1]>=0&&ys[i]<0)){const bex=xs[i-1]+(xs[i]-xs[i-1])*(-ys[i-1]/(ys[i]-ys[i-1]));ctx.fillStyle='#b8860b';ctx.beginPath();ctx.arc(PX(bex),y0,5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b8860b';ctx.font='bold 9px Share Tech Mono';ctx.fillText('BE '+fmtN(Math.round(bex)),PX(bex),y0-10);}}
   // Axis labels
-  ctx.fillStyle='#6680a0';ctx.font='9px Share Tech Mono';ctx.textAlign='center';
-  ctx.fillText('NIFTY PRICE AT EXPIRY →',L+(R-L)/2,H-2);
-  ctx.save();ctx.translate(12,T2+(B-T2)/2);ctx.rotate(-Math.PI/2);
-  ctx.fillText(`P&L ₹ (LOT SIZE ${lot})`,0,0);ctx.restore();
+  ctx.fillStyle='#6680a0';ctx.font='9px Share Tech Mono';ctx.textAlign='center';ctx.fillText('NIFTY PRICE AT EXPIRY →',L+(R-L)/2,H-3);
+  ctx.save();ctx.translate(12,T2+(B-T2)/2);ctx.rotate(-Math.PI/2);ctx.fillText(`P&L ₹ (LOT×${lot})`,0,0);ctx.restore();
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // INDICATOR CHART
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function renderIndicatorChart(){
-  const {hmaF,hmaS,smiVal,bandArr,bars}=ENG;
+  const {hmaF,hmaS,smiVal,hv20,hvPct,bandArr,bars,atr14}=ENG;
   const n=bars.length, cl=bars.map(b=>b.cl);
+  const W=Math.max(window.innerWidth-42,600);
 
-  // Price + HMA chart
+  // Price + HMA
   const cv=document.getElementById('ind-canvas');
-  const W=window.innerWidth-48, H=260;
-  cv.width=W;cv.height=H;
+  const H=280;cv.width=W;cv.height=H;
   const ctx=cv.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
-
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
   const allP=cl.filter(x=>!isNaN(x));
-  const pMin=Math.min(...allP)*0.994,pMax=Math.max(...allP)*1.006;
-  const L=55,R=W-15,T2=20,B=H-25;
-  const px=i=>L+(i/(n-1))*(R-L);
-  const py=v=>T2+(1-(v-pMin)/(pMax-pMin))*(B-T2);
-
-  // Latest band shading
+  const pMin=Math.min(...allP)*0.994, pMax=Math.max(...allP)*1.006;
+  const L=58,R=W-12,T2=22,B=H-22;
+  const PX=i=>L+(i/(n-1))*(R-L);
+  const PY=v=>T2+(1-(v-pMin)/(pMax-pMin))*(B-T2);
   const lbd=bandArr[n-1];
+  // Band shading
   for(let b=0;b<lbd.nb;b++){
-    const isVA=b>=lbd.vaLoIdx&&b<=lbd.vaHiIdx;
-    const isTop=b>=lbd.nb-2, isBot=b<=1;
-    const col=isVA?'rgba(56,217,245,0.04)':isTop?'rgba(255,68,68,0.03)':isBot?'rgba(77,255,145,0.03)':null;
+    const isR1=b===lbd.r1,isR2=b===lbd.r2,isR3=b===lbd.r3;
+    const isRej1=b===lbd.rejZ1, isRej2=b===lbd.rejZ2;
+    const col=isR1?'rgba(26,122,58,0.10)':isR2?'rgba(26,122,58,0.06)':isR3?'rgba(26,122,58,0.04)':
+              isRej1?'rgba(204,34,34,0.07)':isRej2?'rgba(224,96,64,0.05)':
+              (b>=lbd.vaLoIdx&&b<=lbd.vaHiIdx)?'rgba(0,119,170,0.05)':null;
     if(!col)continue;
-    const y1=py(lbd.bHi[b]),y2=py(lbd.bLo[b]);
-    ctx.fillStyle=col;ctx.fillRect(L,y1,R-L,y2-y1);
+    ctx.fillStyle=col;ctx.fillRect(L,PY(lbd.bHi[b]),R-L,PY(lbd.bLo[b])-PY(lbd.bHi[b]));
   }
   // VA lines
-  ctx.setLineDash([4,3]);
-  ctx.strokeStyle='rgba(77,255,145,0.4)';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(L,py(lbd.vaHiP));ctx.lineTo(R,py(lbd.vaHiP));ctx.stroke();
-  ctx.strokeStyle='#cc2222';
-  ctx.beginPath();ctx.moveTo(L,py(lbd.vaLoP));ctx.lineTo(R,py(lbd.vaLoP));ctx.stroke();
+  ctx.setLineDash([4,3]);ctx.lineWidth=1.5;
+  ctx.strokeStyle='#1a7a3a';ctx.beginPath();ctx.moveTo(L,PY(lbd.vaHiP));ctx.lineTo(R,PY(lbd.vaHiP));ctx.stroke();
+  ctx.strokeStyle='#cc2222';ctx.beginPath();ctx.moveTo(L,PY(lbd.vaLoP));ctx.lineTo(R,PY(lbd.vaLoP));ctx.stroke();
+  // REJ lines
+  ctx.strokeStyle='rgba(204,34,34,0.4)';
+  [lbd.rejZ1,lbd.rejZ2].forEach(rz=>{
+    ctx.beginPath();ctx.moveTo(L,PY(lbd.bHi[rz]));ctx.lineTo(R,PY(lbd.bHi[rz]));ctx.stroke();
+    ctx.beginPath();ctx.moveTo(L,PY(lbd.bLo[rz]));ctx.lineTo(R,PY(lbd.bLo[rz]));ctx.stroke();
+  });
   ctx.setLineDash([]);
-
   // Grid
-  ctx.strokeStyle='#1a3048';ctx.lineWidth=0.4;
-  for(let i=0;i<=4;i++){const yv=pMin+(pMax-pMin)*i/4,yp=py(yv);ctx.beginPath();ctx.moveTo(L,yp);ctx.lineTo(R,yp);ctx.stroke();ctx.fillStyle='#4a6a8a';ctx.font='8px Share Tech Mono';ctx.textAlign='right';ctx.fillText(fmtN(Math.round(yv)),L-3,yp+3);}
-
-  // Triggers
+  ctx.strokeStyle='#e0e8f0';ctx.lineWidth=0.4;
+  for(let i=0;i<=4;i++){const yv=pMin+(pMax-pMin)*i/4,yp=PY(yv);ctx.beginPath();ctx.moveTo(L,yp);ctx.lineTo(R,yp);ctx.stroke();ctx.fillStyle='#6680a0';ctx.font='8px Share Tech Mono';ctx.textAlign='right';ctx.fillText(fmtN(Math.round(yv)),L-3,yp+3);}
+  // Trigger dots
   TRIGGERS.forEach(t=>{
     const bi=t.barIdx;if(bi<0||bi>=n)return;
-    const x=px(bi),y=py(bars[bi].cl);
-    const col=RC[t.reptile]||'#b8860b';
-    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;
-    ctx.fillStyle=col;
+    const x=PX(bi),y=PY(bars[bi].cl),col=LC[t.layer]||'#b8860b';
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.fillStyle=col;
     ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();ctx.stroke();
   });
-
   // Price
-  ctx.strokeStyle='#1a2233';ctx.lineWidth=1.5;
-  ctx.beginPath();cl.forEach((c,i)=>{if(!isNaN(c)){const x=px(i),y=py(c);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}});ctx.stroke();
-
+  ctx.strokeStyle='#1a2233';ctx.lineWidth=1.5;ctx.beginPath();
+  cl.forEach((c,i)=>{if(!isNaN(c)){const x=PX(i),y=PY(c);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}});ctx.stroke();
   // HMA
-  ctx.strokeStyle='#0077aa';ctx.lineWidth=2;
-  ctx.beginPath();let f=true;
-  hmaF.forEach((v,i)=>{if(!isNaN(v)){const x=px(i),y=py(v);f?ctx.moveTo(x,y):ctx.lineTo(x,y);f=false;}});ctx.stroke();
+  ctx.strokeStyle='#0077aa';ctx.lineWidth=2;ctx.beginPath();let f=true;
+  hmaF.forEach((v,i)=>{if(!isNaN(v)){const x=PX(i),y=PY(v);f?ctx.moveTo(x,y):ctx.lineTo(x,y);f=false;}});ctx.stroke();
   ctx.strokeStyle='#cc2222';ctx.lineWidth=2;ctx.beginPath();f=true;
-  hmaS.forEach((v,i)=>{if(!isNaN(v)){const x=px(i),y=py(v);f?ctx.moveTo(x,y):ctx.lineTo(x,y);f=false;}});ctx.stroke();
-
-  // Date labels
-  ctx.fillStyle='#4a6a8a';ctx.font='8px Share Tech Mono';ctx.textAlign='center';
+  hmaS.forEach((v,i)=>{if(!isNaN(v)){const x=PX(i),y=PY(v);f?ctx.moveTo(x,y):ctx.lineTo(x,y);f=false;}});ctx.stroke();
+  // Dates
+  ctx.fillStyle='#6680a0';ctx.font='8px Share Tech Mono';ctx.textAlign='center';
   const step=Math.max(1,Math.floor(n/10));
-  for(let i=0;i<n;i+=step)ctx.fillText(bars[i].date.slice(5),px(i),B+14);
+  for(let i=0;i<n;i+=step)ctx.fillText(bars[i].date.slice(5),PX(i),B+14);
 
   // SMI
-  const sc=document.getElementById('smi-canvas');
-  const SH=100;sc.width=W;sc.height=SH;
-  const sc2=sc.getContext('2d');sc2.clearRect(0,0,W,SH);
-  sc2.fillStyle='#ffffff';sc2.fillRect(0,0,W,SH);
-  const sMin=-110,sMax=110;
-  const spy=v=>8+(1-(v-sMin)/(sMax-sMin))*(SH-16);
-  sc2.fillStyle='rgba(204,34,34,0.08)';sc2.fillRect(L,spy(C.smiBull),R-L,spy(110)-spy(C.smiBull));
-  sc2.fillStyle='rgba(26,122,58,0.08)';sc2.fillRect(L,spy(0),R-L,spy(C.smiBear)-spy(0));
-  [0,C.smiBull,C.smiBear].forEach(lv=>{
-    sc2.strokeStyle='#e0e8f0';sc2.lineWidth=0.5;sc2.setLineDash([2,2]);
-    sc2.beginPath();sc2.moveTo(L,spy(lv));sc2.lineTo(R,spy(lv));sc2.stroke();
-    sc2.setLineDash([]);
-    sc2.fillStyle='#6680a0';sc2.font='8px Share Tech Mono';sc2.textAlign='right';
-    sc2.fillText(lv,L-3,spy(lv)+3);
-  });
+  const sc=document.getElementById('smi-canvas'), SH=100;
+  sc.width=W;sc.height=SH;
+  const sc2=sc.getContext('2d');sc2.clearRect(0,0,W,SH);sc2.fillStyle='#ffffff';sc2.fillRect(0,0,W,SH);
+  const spy=v=>8+(1-(v+110)/(220))*(SH-16);
+  sc2.fillStyle='rgba(204,34,34,0.07)';sc2.fillRect(L,spy(C.smiBull),R-L,spy(110)-spy(C.smiBull));
+  sc2.fillStyle='rgba(26,122,58,0.07)';sc2.fillRect(L,spy(0),R-L,spy(C.smiBear)-spy(0));
+  [0,C.smiBull,C.smiBear].forEach(lv=>{sc2.strokeStyle='#e0e8f0';sc2.lineWidth=0.5;sc2.setLineDash([2,2]);sc2.beginPath();sc2.moveTo(L,spy(lv));sc2.lineTo(R,spy(lv));sc2.stroke();sc2.setLineDash([]);sc2.fillStyle='#6680a0';sc2.font='8px Share Tech Mono';sc2.textAlign='right';sc2.fillText(lv,L-3,spy(lv)+3);});
   sc2.strokeStyle='#6600cc';sc2.lineWidth=1.5;sc2.beginPath();f=true;
-  smiVal.forEach((v,i)=>{if(!isNaN(v)){const x=px(i),y=spy(Math.max(-100,Math.min(100,v)));f?sc2.moveTo(x,y):sc2.lineTo(x,y);f=false;}});sc2.stroke();
+  smiVal.forEach((v,i)=>{if(!isNaN(v)){const x=PX(i),y=spy(Math.max(-100,Math.min(100,v)));f?sc2.moveTo(x,y):sc2.lineTo(x,y);f=false;}});sc2.stroke();
   sc2.fillStyle='#6680a0';sc2.font='8px Share Tech Mono';sc2.textAlign='left';sc2.fillText('SMI',L+3,SH-3);
 
+  // HVP chart
+  const hc=document.getElementById('hvp-canvas'), HC=90;
+  hc.width=W;hc.height=HC;
+  const hctx=hc.getContext('2d');hctx.clearRect(0,0,W,HC);hctx.fillStyle='#ffffff';hctx.fillRect(0,0,W,HC);
+  const hpy=v=>8+(1-v/100)*(HC-16);
+  // Floor/ratio gates
+  hctx.fillStyle='rgba(204,34,34,0.07)';hctx.fillRect(L,hpy(C.hvFloor),R-L,hpy(0)-hpy(C.hvFloor));
+  hctx.fillStyle='rgba(26,122,58,0.05)';hctx.fillRect(L,hpy(100),R-L,hpy(C.hvRatio)-hpy(100));
+  [C.hvFloor,C.hvRatio,60].forEach((lv,ii)=>{
+    const cols=['#cc2222','#c05800','#1a7a3a'];
+    hctx.strokeStyle=cols[ii];hctx.lineWidth=1;hctx.setLineDash([3,3]);hctx.beginPath();hctx.moveTo(L,hpy(lv));hctx.lineTo(R,hpy(lv));hctx.stroke();hctx.setLineDash([]);
+    hctx.fillStyle=cols[ii];hctx.font='8px Share Tech Mono';hctx.textAlign='right';hctx.fillText(['FLOOR','RATIO','GAMMA'][ii]+' '+lv+'%',L-3,hpy(lv)+3);
+  });
+  hctx.strokeStyle='#0077aa';hctx.lineWidth=1.5;hctx.beginPath();f=true;
+  hvPct.forEach((v,i)=>{if(!isNaN(v)){const x=PX(i),y=hpy(v);f?hctx.moveTo(x,y):hctx.lineTo(x,y);f=false;}});hctx.stroke();
+  hctx.fillStyle='#6680a0';hctx.font='8px Share Tech Mono';hctx.textAlign='left';hctx.fillText('HVP%',L+3,HC-3);
+
   // Band timeline
-  const bt=document.getElementById('bt-canvas');
-  const BTH=80;bt.width=W;bt.height=BTH;
-  const bt2=bt.getContext('2d');bt2.clearRect(0,0,W,BTH);
-  bt2.fillStyle='#f7f9fc';bt2.fillRect(0,0,W,BTH);
+  const bt=document.getElementById('bt-canvas'), BTH=70;
+  bt.width=W;bt.height=BTH;
+  const bt2=bt.getContext('2d');bt2.clearRect(0,0,W,BTH);bt2.fillStyle='#f7f9fc';bt2.fillRect(0,0,W,BTH);
   const bTW=(R-L)/n;
-  bandArr.forEach((bd,i)=>{
+  bandArr.forEach((bd2,i)=>{
     const x=L+i*bTW;
-    const bFrac=bd.curBand/bd.nb;
-    const col=bd.inB10||bd.inB9?`rgba(255,68,68,${0.4+bFrac*0.4})`:bd.inVA?`rgba(56,217,245,${0.3+bFrac*0.2})`:bd.inB1||bd.inB2?`rgba(77,255,145,${0.4+bFrac*0.4})`:`rgba(192,132,252,0.3)`;
-    const yFrac=1-bd.curBand/(bd.nb-1);
+    const isR=bd2.curBand===bd2.rejZ1||bd2.curBand===bd2.rejZ2;
+    const col=bd2.inVA?'rgba(0,119,170,0.35)':isR?'rgba(204,34,34,0.4)':bd2.aboveVA?'rgba(192,88,0,0.25)':'rgba(26,122,58,0.25)';
+    const yFrac=1-bd2.curBand/(bd2.nb-1);
     const y=8+yFrac*(BTH-16);
     bt2.fillStyle=col;bt2.fillRect(x,8,Math.max(1,bTW-0.5),BTH-16);
     bt2.fillStyle='rgba(0,0,0,0.5)';bt2.beginPath();bt2.arc(x+bTW/2,y,1.5,0,Math.PI*2);bt2.fill();
   });
-  // Band labels on right
-  bt2.fillStyle='#6680a0';bt2.font='7px Share Tech Mono';bt2.textAlign='left';
-  ['B10','B5','B1'].forEach((lbl,i)=>{bt2.fillText(lbl,3,8+i*(BTH-16)/2+3);});
+  ['B10','B5','B1'].forEach((lbl,ii)=>{bt2.fillStyle='#6680a0';bt2.font='7px Share Tech Mono';bt2.textAlign='left';bt2.fillText(lbl,3,8+ii*(BTH-16)/2+3);});
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // STATISTICS
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function renderStats(){
-  const byR={};
+  const byL={};
   TRIGGERS.forEach(t=>{
-    if(!byR[t.reptile])byR[t.reptile]={count:0,credits:[],zones:{},signals:{}};
-    byR[t.reptile].count++;
-    if(t.credit>0)byR[t.reptile].credits.push(t.credit);
-    byR[t.reptile].zones[t.zone]=(byR[t.reptile].zones[t.zone]||0)+1;
-    byR[t.reptile].signals[t.signal]=(byR[t.reptile].signals[t.signal]||0)+1;
+    if(!byL[t.layer])byL[t.layer]={count:0,credits:[],zones:{},subs:{},pnls:[]};
+    byL[t.layer].count++;
+    if(t.credit>0)byL[t.layer].credits.push(t.credit);
+    byL[t.layer].zones[t.zone]=(byL[t.layer].zones[t.zone]||0)+1;
+    byL[t.layer].subs[t.sub||'—']=(byL[t.layer].subs[t.sub||'—']||0)+1;
+    if(t.pnlPts!==null)byL[t.layer].pnls.push(t.pnlPts);
   });
-  const maxCount=Math.max(...Object.values(byR).map(d=>d.count));
-  const html=Object.entries(byR).sort((a,b)=>b[1].count-a[1].count).map(([rep,d])=>{
+  const maxCount=Math.max(...Object.values(byL).map(d=>d.count));
+  const html=Object.entries(byL).sort((a,b)=>b[1].count-a[1].count).map(([layer,d])=>{
     const avgCr=d.credits.length?Math.round(d.credits.reduce((s,v)=>s+v,0)/d.credits.length):0;
-    const pnls=TRIGGERS.filter(t=>t.reptile===rep&&t.pnlPts!==null).map(t=>t.pnlPts);
-    const avgPnl=pnls.length?Math.round(pnls.reduce((s,v)=>s+v,0)/pnls.length):0;
+    const topZ=Object.entries(d.zones).sort((a,b)=>b[1]-a[1])[0];
+    const topSub=Object.entries(d.subs).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}(${v})`).join(' ');
+    const pnls=d.pnls, avgPnl=pnls.length?Math.round(pnls.reduce((s,v)=>s+v,0)/pnls.length):0;
     const wins=pnls.filter(p=>p>0).length;
     const winRate=pnls.length?Math.round(wins/pnls.length*100):0;
-    const topZ=Object.entries(d.zones).sort((a,b)=>b[1]-a[1])[0];
-    const topS=Object.entries(d.signals).sort((a,b)=>b[1]-a[1])[0];
     const pct=Math.round(d.count/maxCount*100);
-    const rc=RC[rep]||'#ffd700';
+    const lc=LC[layer]||'#0077aa';
     return`<div class="stat-card">
-      <h3 style="color:${rc}">🦎 ${rep}</h3>
-      <div class="bar-row"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${rc}"></div></div></div>
+      <h3 style="color:${lc}">${layer}</h3>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${lc}"></div></div>
       <div class="stat-row"><span class="sl">Triggers</span><span class="sv">${d.count}</span></div>
+      <div class="stat-row"><span class="sl">Sub-strategies</span><span class="sv" style="font-size:8px;color:var(--muted)">${topSub}</span></div>
       <div class="stat-row"><span class="sl">Avg Credit ₹</span><span class="sv" style="color:var(--green)">${avgCr||'N/A'}</span></div>
-      <div class="stat-row"><span class="sl">Lot P&L (×${LOT()})</span><span class="sv" style="color:var(--green)">${avgCr?'₹'+fmtN(avgCr*LOT()):'N/A'}</span></div>
+      <div class="stat-row"><span class="sl">Lot P&L (×${LOT()})</span><span class="sv" style="color:var(--green)">${avgCr?'₹'+fmtN(avgCr*LOT()):'—'}</span></div>
       <div class="stat-row"><span class="sl">Avg P&L pts</span><span class="sv" style="color:${avgPnl>0?'var(--green)':'var(--red)'}">${avgPnl>0?'+':''}${avgPnl}</span></div>
-      <div class="stat-row"><span class="sl">Win rate</span><span class="sv" style="color:${winRate>=60?'var(--green)':winRate>=40?'var(--gold)':'var(--red)'}">${winRate}%</span></div>
-      <div class="stat-row"><span class="sl">Top Zone</span><span class="sv" style="color:${ZC[topZ?.[0]]||'var(--white)'}">${topZ?.[0]||'—'}</span></div>
-      <div class="stat-row"><span class="sl">Top Signal</span><span class="sv" style="color:var(--cyan)">${topS?.[0]||'—'}</span></div>
-      <div class="stat-row"><span class="sl">Credit triggers</span><span class="sv">${d.credits.length} / ${d.count}</span></div>
+      <div class="stat-row"><span class="sl">Win rate</span><span class="sv" style="color:${winRate>=60?'var(--green)':winRate>=40?'var(--gold2)':'var(--red)'}">${winRate}% (${wins}/${pnls.length})</span></div>
+      <div class="stat-row"><span class="sl">Top zone</span><span class="sv" style="color:${ZC[topZ?.[0]]||'var(--white)'}">${topZ?.[0]||'—'}</span></div>
     </div>`;
   }).join('');
-  document.getElementById('stats-grid').innerHTML=html||'<div class="empty">NO DATA</div>';
+  document.getElementById('stats-grid').innerHTML=html||'<div style="color:var(--muted);font-family:var(--font-mono);padding:20px">UPLOAD CSV TO SEE STATISTICS</div>';
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // UTILITIES
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function goTab(name){
   const pages={triggers:'pg-triggers',payoff:'pg-payoff',indicators:'pg-indicators',stats:'pg-stats'};
-  Object.entries(pages).forEach(([k,id])=>{
-    document.getElementById(id).classList.toggle('active',k===name);
-  });
-  document.querySelectorAll('.nav-tab').forEach((t,i)=>{
-    const names=['triggers','payoff','indicators','stats'];
-    t.classList.toggle('active',names[i]===name);
-  });
+  Object.entries(pages).forEach(([k,id])=>document.getElementById(id).classList.toggle('active',k===name));
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',['triggers','payoff','indicators','stats'][i]===name));
   if(name==='indicators')renderIndicatorChart();
   if(name==='stats')renderStats();
 }
-
 function $$(id){return document.getElementById(id);}
 function fmtN(n){if(typeof n!=='number'||isNaN(n))return n;return Math.abs(n)>=1000?n.toLocaleString('en-IN'):n.toString();}
-
 function exportCSV(){
-  const hdr='Date,Reptile,Signal,Zone,CMP,VIX,HVP%,off1,off2,S1,S2,S3,S4,Credit,LotCredit,TP%,ExitDate,ExitCMP,HoldDays,PnL_pts,PnL_Rs,ExitReason';
+  const hdr='Date,Layer,Sub,Signal,Zone,CMP,VIX,HVP%,off1,off2,S1,S2,S3,S4,Credit,LotCredit,TP%,Jade,ExitDate,ExitCMP,HoldBars,PnL_pts,PnL_Rs,ExitReason';
   const lot=LOT();
   const rows=TRIGGERS.map(t=>{
     const ks=t.legs.map(l=>l.K).filter(k=>k>0);
-    return[t.date,t.reptile,t.signal,t.zone,Math.round(t.cmp),t.vix?.toFixed(1),t.hvp,t.off1,t.off2,ks[0]||'',ks[1]||'',ks[2]||'',ks[3]||'',t.credit,t.credit*lot,t.tp_pct||'',t.exitDate||'',t.exitCmp||'',t.holdBars||'',t.pnlPts||'',t.pnlRs||'',(t.exitReason||'').replace(/,/g,' ')].join(',');
+    return[t.date,t.layer,t.sub||'',t.signal,t.zone,Math.round(t.cmp),t.vix?.toFixed(1),t.hvp,t.off1,t.off2,ks[0]||'',ks[1]||'',ks[2]||'',ks[3]||'',t.credit,Math.round((t.credit||0)*lot),t.tp_pct||'',t.jade?'Y':'',t.exitDate||'',t.exitCmp||'',t.holdBars||'',t.pnlPts||'',t.pnlRs||'',(t.exitReason||'').replace(/,/g,' ')].join(',');
   });
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(hdr+'\n'+rows.join('\n'));
-  a.download='jade_reptillis_triggers.csv';a.click();
+  a.download='jade_suprema_v15_triggers.csv';a.click();
 }
 </script>
 </body>
