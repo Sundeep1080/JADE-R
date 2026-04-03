@@ -535,7 +535,7 @@ td.dim-text   { color: var(--dim); }
 <div class="header">
   <div class="header-left">
     <div class="title">JADE SUPREMA</div>
-    <div class="subtitle">BAND SALT — TRADE JOURNAL v15 · NIFTY50</div>
+    <div class="subtitle">BAND SALT — TRADE JOURNAL v16 · NIFTY50</div>
   </div>
   <div class="header-stats" id="headerStats">
     <div class="hstat">
@@ -567,15 +567,17 @@ td.dim-text   { color: var(--dim); }
   </div>
 
   <div class="csv-format">
-    <div class="csv-format-title">EXPECTED CSV FORMAT</div>
-    <code>Date,Open,High,Low,Close,VIX</code>
-    <code>01-Apr-2025,22500.00,22850.00,22350.00,22720.00,14.50</code>
-    <code>02-Apr-2025,22720.00,23100.00,22600.00,23050.00,13.80</code>
+    <div class="csv-format-title">SUPPORTED CSV FORMATS</div>
+    <code>FORMAT A — Simple: Date,Open,High,Low,Close,VIX</code>
+    <code>FORMAT B — Multi-symbol (auto-detected):</code>
+    <code>Date,Symbol,Sector,Index,Open,High,Low,Close</code>
+    <code>2025-03-26,NSEI,Market Index,MAJOR INDEX,23700.95,23736.50,23451.70,23486.85</code>
+    <code>2025-03-26,INDIAVIX,Market Index,VOLATALITY INDEX,13.64,13.92,13.31,13.47</code>
     <div class="note">
-      • Date format: DD-Mon-YYYY or DD/MM/YYYY or YYYY-MM-DD &nbsp;|&nbsp;
-      • VIX column optional &nbsp;|&nbsp;
-      • Header row required &nbsp;|&nbsp;
-      • Oldest date first (chronological order)
+      • Date: YYYY-MM-DD, DD-Mon-YYYY, or DD/MM/YYYY &nbsp;|&nbsp;
+      • Format B: NSEI rows = price data, INDIAVIX rows = VIX &nbsp;|&nbsp;
+      • Both symbols auto-detected &nbsp;|&nbsp;
+      • Header row required
     </div>
   </div>
 </div>
@@ -751,14 +753,20 @@ let trades = [];         // trade log
 let allTrades = [];      // unfiltered
 let currentFilter = 'ALL';
 let sortCol = 'entryDate';
-let sortDir = 1;
+let sortDir = -1;  // default: newest date first
 
 // ═══════════════════════════════════════════════════════════
-// CSV PARSING
+// CSV PARSING  — supports BOTH formats:
+//   FORMAT A (simple):  Date,Open,High,Low,Close[,VIX]
+//   FORMAT B (multi-symbol): Date,Symbol,Sector,Index,Open,High,Low,Close
+//     → extracts NSEI rows as OHLC and INDIAVIX rows as VIX
 // ═══════════════════════════════════════════════════════════
 function parseDate(str) {
   str = str.trim();
-  // DD-Mon-YYYY
+  // YYYY-MM-DD
+  const m3 = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  if (m3) return new Date(+m3[1], +m3[2]-1, +m3[3]);
+  // DD-Mon-YYYY  e.g. 03-Apr-2026
   const m1 = str.match(/^(\d{1,2})[\/\-]([A-Za-z]+)[\/\-](\d{4})$/);
   if (m1) {
     const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
@@ -767,23 +775,116 @@ function parseDate(str) {
   // DD/MM/YYYY
   const m2 = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if (m2) return new Date(+m2[3], +m2[2]-1, +m2[1]);
-  // YYYY-MM-DD
-  const m3 = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
-  if (m3) return new Date(+m3[1], +m3[2]-1, +m3[3]);
   return new Date(str);
+}
+
+function fmtDateStr(d) {
+  // Convert Date object → "DD-Mon-YYYY" display string
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return String(d.getDate()).padStart(2,'0')+'-'+months[d.getMonth()]+'-'+d.getFullYear();
 }
 
 function parseCSV(text) {
   const lines = text.trim().split('\n').filter(l => l.trim());
   if (lines.length < 2) throw new Error('CSV too short');
   const header = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/['"]/g,''));
-  const dIdx = header.findIndex(h => h.includes('date'));
+
+  const dIdx   = header.findIndex(h => h.includes('date'));
+  const symIdx = header.findIndex(h => h === 'symbol');
+  if (dIdx < 0) throw new Error('Need a Date column');
+
+  // ── FORMAT B: multi-symbol (Date,Symbol,Sector,Index,Open,High,Low,Close) ──
+  if (symIdx >= 0) {
+    const oIdx = header.findIndex(h => h === 'open');
+    const hIdx = header.findIndex(h => h === 'high');
+    const lIdx = header.findIndex(h => h === 'low');
+    const cIdx = header.findIndex(h => h === 'close');
+    if (cIdx < 0) throw new Error('Need a Close column');
+
+    // Bucket rows by symbol
+    const bySymbol = {};
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim().replace(/['"]/g,''));
+      if (cols.length < cIdx+1) continue;
+      const sym = cols[symIdx].toUpperCase();
+      if (!bySymbol[sym]) bySymbol[sym] = [];
+      bySymbol[sym].push(cols);
+    }
+
+    // Detect which symbol is the main price index (highest Close values = NSEI)
+    // and which is the volatility index (INDIAVIX or lowest values)
+    const symbols = Object.keys(bySymbol);
+    let mainSym = null, vixSym = null;
+
+    // Prefer explicit known names first
+    const knownMain = symbols.find(s => s==='NSEI'||s==='NIFTY'||s==='BANKNIFTY'||s==='SENSEX');
+    const knownVix  = symbols.find(s => s.includes('VIX'));
+    if (knownMain) mainSym = knownMain;
+    if (knownVix)  vixSym  = knownVix;
+
+    // Fallback: symbol with highest avg close = main index
+    if (!mainSym && symbols.length >= 1) {
+      let bestAvg = -1;
+      for (const sym of symbols) {
+        const avg = bySymbol[sym].reduce((s,r)=>s+(parseFloat(r[cIdx])||0),0)/bySymbol[sym].length;
+        if (avg > bestAvg) { bestAvg = avg; mainSym = sym; }
+      }
+    }
+    // Fallback: remaining symbol = vix
+    if (!vixSym) {
+      vixSym = symbols.find(s => s !== mainSym) || null;
+    }
+
+    // Build VIX lookup map: date-string → close
+    const vixMap = {};
+    if (vixSym) {
+      for (const cols of bySymbol[vixSym]) {
+        const dateKey = cols[dIdx];
+        vixMap[dateKey] = parseFloat(cols[cIdx]) || 0;
+      }
+    }
+
+    // Build main rows
+    const rows = [];
+    for (const cols of (bySymbol[mainSym] || [])) {
+      const d = parseDate(cols[dIdx]);
+      if (isNaN(d)) continue;
+      const cl = parseFloat(cols[cIdx]);
+      if (isNaN(cl)) continue;
+      // VIX: exact date match first, then nearest previous date
+      let vixVal = vixMap[cols[dIdx]];
+      if (vixVal === undefined) {
+        // find closest prior date in vixMap
+        const ts = d.getTime();
+        let bestTs = -Infinity, bestV = 0;
+        for (const k of Object.keys(vixMap)) {
+          const kt = parseDate(k).getTime();
+          if (kt <= ts && kt > bestTs) { bestTs = kt; bestV = vixMap[k]; }
+        }
+        vixVal = bestV;
+      }
+      rows.push({
+        date:    d,
+        dateStr: fmtDateStr(d),
+        open:  oIdx>=0 ? parseFloat(cols[oIdx])||cl : cl,
+        high:  hIdx>=0 ? parseFloat(cols[hIdx])||cl : cl,
+        low:   lIdx>=0 ? parseFloat(cols[lIdx])||cl : cl,
+        close: cl,
+        vix:   vixVal || 0
+      });
+    }
+    rows.sort((a,b) => a.date - b.date);
+    if (rows.length < 50) throw new Error('Need at least 50 NSEI rows');
+    return rows;
+  }
+
+  // ── FORMAT A: simple single-symbol (Date,Open,High,Low,Close[,VIX]) ──
   const oIdx = header.findIndex(h => h.startsWith('open'));
   const hIdx = header.findIndex(h => h.startsWith('high'));
   const lIdx = header.findIndex(h => h.startsWith('low'));
   const cIdx = header.findIndex(h => h.startsWith('close'));
   const vIdx = header.findIndex(h => h.includes('vix'));
-  if (dIdx<0||cIdx<0) throw new Error('Need Date and Close columns');
+  if (cIdx < 0) throw new Error('Need Date and Close columns');
   const rows = [];
   for (let i=1; i<lines.length; i++) {
     const cols = lines[i].split(',').map(c=>c.trim().replace(/['"]/g,''));
@@ -794,7 +895,7 @@ function parseCSV(text) {
     if (isNaN(c)) continue;
     rows.push({
       date: d,
-      dateStr: cols[dIdx].trim(),
+      dateStr: fmtDateStr(d),
       open:  oIdx>=0 ? parseFloat(cols[oIdx])||c : c,
       high:  hIdx>=0 ? parseFloat(cols[hIdx])||c : c,
       low:   lIdx>=0 ? parseFloat(cols[lIdx])||c : c,
@@ -1204,10 +1305,11 @@ function _runBacktest() {
   // Close any still-open trades at last bar
   for (const key of Object.keys(openTrades)) {
     const t = openTrades[key];
-    t.exitDate = computed[N-1].dateStr;
-    t.exitReason = 'OPEN (last bar)';
-    t.pnlPts = null;
-    t.outcome = 'OPEN';
+    t.exitDate    = computed[N-1].dateStr;
+    t.exitDateIdx = N-1;
+    t.exitReason  = 'OPEN (last bar)';
+    t.pnlPts      = null;
+    t.outcome     = 'OPEN';
     allTrades.push(t);
   }
 
@@ -1239,8 +1341,9 @@ function checkExit(t, c, i, comp) {
 
   // Max hold = 32 days
   if (i - t.entryIdx >= 32) {
-    t.exitDate   = c.dateStr;
-    t.exitReason = 'TIME STOP (32d)';
+    t.exitDate    = c.dateStr;
+    t.exitDateIdx = i;
+    t.exitReason  = 'TIME STOP (32d)';
     t.pnlPts     = Math.round(cp - t.entryPrice) * (dir==='BULL'?1:-1);
     t.outcome    = t.pnlPts>=0?'WIN':'LOSS';
     t.closed=true; return;
@@ -1250,13 +1353,13 @@ function checkExit(t, c, i, comp) {
   if (t.layer==='L1A') {
     const B = c.bands;
     if (!B.inVA) {
-      t.exitDate=c.dateStr; t.exitReason='VA BREAK';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='VA BREAK';
       t.pnlPts=Math.round(cp-t.entryPrice)*(dir==='BULL'?1:-1);
       t.outcome=t.pnlPts>=0?'WIN':'LOSS'; t.closed=true; return;
     }
     // TP: HMA flip or price near VA boundary with theta decay
     if ((dir==='BULL'&&c.hmaBear)||(dir==='BEAR'&&c.hmaBull)) {
-      t.exitDate=c.dateStr; t.exitReason='HMA FLIP';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='HMA FLIP';
       t.pnlPts=Math.round(cp-t.entryPrice)*(dir==='BULL'?1:-1);
       t.outcome=t.pnlPts>=0?'WIN':'LOSS'; t.closed=true; return;
     }
@@ -1266,13 +1369,13 @@ function checkExit(t, c, i, comp) {
     const B=c.bands;
     // TP: price returned to VA
     if (B.inVA||(dir==='BEAR'&&cp<=t.tpLevel)||(dir==='BULL'&&cp>=t.tpLevel)) {
-      t.exitDate=c.dateStr; t.exitReason='TP — VA REACHED';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='TP — VA REACHED';
       t.pnlPts=Math.abs(Math.round(t.entryPrice-t.tpLevel));
       t.outcome='WIN'; t.closed=true; return;
     }
     // SL: price moves further from VA beyond SL
     if ((dir==='BEAR'&&cp>=t.slLevel)||(dir==='BULL'&&cp<=t.slLevel)) {
-      t.exitDate=c.dateStr; t.exitReason='SL — REJ BREAK';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='SL — REJ BREAK';
       t.pnlPts=-Math.abs(Math.round(t.entryPrice-t.slLevel));
       t.outcome='LOSS'; t.closed=true; return;
     }
@@ -1281,19 +1384,19 @@ function checkExit(t, c, i, comp) {
   if (t.layer==='L3') {
     // TP: price returns to VA boundary
     if ((t.direction==='BEAR'&&cp<=t.tpLevel+50)||(t.direction==='BULL'&&cp>=t.tpLevel-50)) {
-      t.exitDate=c.dateStr; t.exitReason='TP — VA BOUNDARY';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='TP — VA BOUNDARY';
       t.pnlPts=Math.abs(Math.round(t.entryPrice-t.tpLevel));
       t.outcome='WIN'; t.closed=true; return;
     }
     // SL: price reaches REJ
     if ((t.direction==='BEAR'&&cp>=t.slLevel)||(t.direction==='BULL'&&cp<=t.slLevel)) {
-      t.exitDate=c.dateStr; t.exitReason='SL — REJ HIT';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='SL — REJ HIT';
       t.pnlPts=-Math.abs(Math.round(t.entryPrice-t.slLevel));
       t.outcome='LOSS'; t.closed=true; return;
     }
     // Also HMA reversal negating reversion
     if ((t.direction==='BEAR'&&c.hmaBull&&c.smiBull)||(t.direction==='BULL'&&c.hmaBear&&c.smiBear)) {
-      t.exitDate=c.dateStr; t.exitReason='SL — TREND RESUMES';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='SL — TREND RESUMES';
       t.pnlPts=Math.round(cp-t.entryPrice)*(t.direction==='BULL'?1:-1);
       t.outcome=t.pnlPts>=0?'WIN':'LOSS'; t.closed=true; return;
     }
@@ -1302,13 +1405,13 @@ function checkExit(t, c, i, comp) {
   if (t.layer==='L4') {
     // TP: price reaches REJ
     if ((t.direction==='BULL'&&cp>=t.tpLevel)||(t.direction==='BEAR'&&cp<=t.tpLevel)) {
-      t.exitDate=c.dateStr; t.exitReason='TP — REJ REACHED';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='TP — REJ REACHED';
       t.pnlPts=Math.abs(Math.round(t.entryPrice-t.tpLevel));
       t.outcome='WIN'; t.closed=true; return;
     }
     // SL: price reverses to VA
     if ((t.direction==='BULL'&&cp<=t.slLevel)||(t.direction==='BEAR'&&cp>=t.slLevel)) {
-      t.exitDate=c.dateStr; t.exitReason='SL — VA REVERSAL';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='SL — VA REVERSAL';
       t.pnlPts=-Math.abs(Math.round(t.entryPrice-t.slLevel));
       t.outcome='LOSS'; t.closed=true; return;
     }
@@ -1317,13 +1420,13 @@ function checkExit(t, c, i, comp) {
   if (t.layer==='TORT') {
     // TP
     if ((t.direction==='BEAR'&&cp<=t.tpLevel)||(t.direction==='BULL'&&cp>=t.tpLevel)) {
-      t.exitDate=c.dateStr; t.exitReason='TP — TREND TARGET';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='TP — TREND TARGET';
       t.pnlPts=Math.abs(Math.round(t.entryPrice-t.tpLevel));
       t.outcome='WIN'; t.closed=true; return;
     }
     // SL
     if ((t.direction==='BEAR'&&cp>=t.slLevel)||(t.direction==='BULL'&&cp<=t.slLevel)) {
-      t.exitDate=c.dateStr; t.exitReason='SL — REVERSAL';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='SL — REVERSAL';
       t.pnlPts=-Math.abs(Math.round(t.entryPrice-t.slLevel));
       t.outcome='LOSS'; t.closed=true; return;
     }
@@ -1331,18 +1434,18 @@ function checkExit(t, c, i, comp) {
 
   if (t.layer==='PYTH') {
     if ((t.direction==='BULL'&&cp>=t.tpLevel)||(t.direction==='BEAR'&&cp<=t.tpLevel)) {
-      t.exitDate=c.dateStr; t.exitReason='TP — 2×off2 MOVE';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='TP — 2×off2 MOVE';
       t.pnlPts=Math.abs(Math.round(t.tpLevel-t.entryPrice));
       t.outcome='WIN'; t.closed=true; return;
     }
     if ((t.direction==='BULL'&&cp<=t.slLevel)||(t.direction==='BEAR'&&cp>=t.slLevel)) {
-      t.exitDate=c.dateStr; t.exitReason='SL — IV COLLAPSE';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='SL — IV COLLAPSE';
       t.pnlPts=-Math.abs(Math.round(t.slLevel-t.entryPrice));
       t.outcome='LOSS'; t.closed=true; return;
     }
     // HVP dropped
     if (c.hvPct<50) {
-      t.exitDate=c.dateStr; t.exitReason='SL — HVP<50%';
+      t.exitDate=c.dateStr; t.exitDateIdx=i; t.exitReason='SL — HVP<50%';
       t.pnlPts=Math.round(cp-t.entryPrice)*(t.direction==='BULL'?1:-1);
       t.outcome=t.pnlPts>=0?'WIN':'LOSS'; t.closed=true; return;
     }
@@ -1402,10 +1505,16 @@ function renderResults(numBands, comp) {
   // Chart
   drawChart(comp, numBands);
 
-  // Table
+  // Table — reset to newest-entry-date-first on every RUN
   currentFilter='ALL';
+  sortCol='entryDate';
+  sortDir=-1;
   document.querySelectorAll('.btn-filter').forEach(b=>b.classList.toggle('active',b.dataset.filter==='ALL'));
-  renderTable(allTrades);
+  document.querySelectorAll('thead th').forEach(th=>{
+    th.className='';
+    if(th.getAttribute('onclick')?.includes("'entryDate'")) th.className='sort-desc';
+  });
+  applyFilter();
 
   // Status
   const first=rawData[0],lastD=rawData[rawData.length-1];
@@ -1558,10 +1667,19 @@ function applyFilter() {
   else if (currentFilter==='LOSS') data=data.filter(t=>t.outcome==='LOSS');
   else if (currentFilter==='OPEN') data=data.filter(t=>t.outcome==='OPEN');
   else if (currentFilter!=='ALL')  data=data.filter(t=>t.layer===currentFilter);
-  // Sort
+  // Sort — date columns use bar index for reliable chronological order
   data.sort((a,b)=>{
-    let av=a[sortCol]??0, bv=b[sortCol]??0;
-    if (typeof av==='string') return av.localeCompare(bv)*sortDir;
+    let av, bv;
+    if (sortCol==='entryDate') {
+      av = a.entryIdx; bv = b.entryIdx;
+    } else if (sortCol==='exitDate') {
+      av = a.exitDateIdx ?? (sortDir===1 ? Infinity : -Infinity);
+      bv = b.exitDateIdx ?? (sortDir===1 ? Infinity : -Infinity);
+    } else {
+      av = a[sortCol] ?? (sortDir===1 ? Infinity : -Infinity);
+      bv = b[sortCol] ?? (sortDir===1 ? Infinity : -Infinity);
+      if (typeof av==='string') return av.localeCompare(bv)*sortDir;
+    }
     return (av-bv)*sortDir;
   });
   renderTable(data);
