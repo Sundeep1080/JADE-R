@@ -337,7 +337,7 @@ select:focus { border-color: var(--gold); }
 }
 canvas#priceChart {
   width: 100%;
-  height: 200px;
+  height: 220px;
   background: var(--bg1);
   border: 1px solid var(--border);
   border-radius: 3px;
@@ -522,6 +522,95 @@ td.dim-text   { color: var(--dim); }
 }
 .loading.show { display: block; }
 
+/* ── LAYER/BAND SUMMARY TABLE ── */
+.perf-section {
+  padding: 0 24px 20px;
+}
+.perf-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.perf-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) { .perf-grid { grid-template-columns: 1fr; } }
+.perf-block-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+.perf-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.perf-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 420px;
+  font-size: 11px;
+}
+.perf-table thead tr {
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border2);
+}
+.perf-table thead th {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold2);
+  padding: 7px 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+.perf-table thead th:first-child { text-align: left; }
+.perf-table tbody tr {
+  border-bottom: 1px solid rgba(30,51,84,0.5);
+  transition: background 0.1s;
+}
+.perf-table tbody tr:hover { background: rgba(40,70,110,0.3); }
+.perf-table td {
+  padding: 6px 10px;
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text2);
+  white-space: nowrap;
+}
+.perf-table td:first-child {
+  text-align: left;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.perf-table td.net-pos { color: var(--bull); font-weight: 700; }
+.perf-table td.net-neg { color: var(--bear); font-weight: 700; }
+.perf-table td.wr-hi   { color: var(--bull); }
+.perf-table td.wr-lo   { color: var(--bear); }
+.perf-table tbody tr.best-row  { background: rgba(61,220,132,0.05); }
+.perf-table tbody tr.worst-row { background: rgba(255,77,106,0.05); }
+.perf-table tfoot tr { background: var(--bg3); border-top: 1px solid var(--border2); }
+.perf-table tfoot td {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold2);
+  padding: 6px 10px;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -684,6 +773,59 @@ td.dim-text   { color: var(--dim); }
 
 <!-- BAND LEGEND -->
 <div class="band-legend" id="bandLegend" style="display:none"></div>
+
+<!-- PERFORMANCE SUMMARY -->
+<div class="perf-section" id="perfSection" style="display:none">
+  <div class="perf-title">PERFORMANCE BREAKDOWN</div>
+  <div class="perf-grid">
+    <div>
+      <div class="perf-block-title">BY LAYER / STRUCTURE</div>
+      <div class="perf-wrap">
+        <table class="perf-table">
+          <thead>
+            <tr>
+              <th>LAYER</th>
+              <th>TRADES</th>
+              <th>WIN</th>
+              <th>LOSS</th>
+              <th>WIN %</th>
+              <th>NET PTS</th>
+              <th>AVG WIN</th>
+              <th>AVG LOSS</th>
+              <th>BEST</th>
+              <th>WORST</th>
+            </tr>
+          </thead>
+          <tbody id="layerPerfBody"></tbody>
+          <tfoot id="layerPerfFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="perf-block-title">BY BAND (ENTRY BAND)</div>
+      <div class="perf-wrap">
+        <table class="perf-table">
+          <thead>
+            <tr>
+              <th>BAND</th>
+              <th>TRADES</th>
+              <th>WIN</th>
+              <th>LOSS</th>
+              <th>WIN %</th>
+              <th>NET PTS</th>
+              <th>AVG WIN</th>
+              <th>AVG LOSS</th>
+              <th>BEST</th>
+              <th>WORST</th>
+            </tr>
+          </thead>
+          <tbody id="bandPerfBody"></tbody>
+          <tfoot id="bandPerfFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- TABLE -->
 <div class="table-section" id="tableSection" style="display:none">
@@ -1093,6 +1235,7 @@ function runBacktest() {
   document.getElementById('chartSection').style.display='none';
   document.getElementById('tableSection').style.display='none';
   document.getElementById('bandLegend').style.display='none';
+  document.getElementById('perfSection').style.display='none';
 
   setTimeout(() => {
     try {
@@ -1528,95 +1671,220 @@ function renderResults(numBands, comp) {
   document.getElementById('summaryBar').style.display='grid';
   document.getElementById('chartSection').style.display='block';
   document.getElementById('bandLegend').style.display='flex';
+  document.getElementById('perfSection').style.display='block';
   document.getElementById('tableSection').style.display='block';
+
+  // Performance breakdown tables
+  renderPerfTables(allTrades);
 }
 
 function drawChart(comp, numBands) {
-  const canvas=document.getElementById('priceChart');
-  const ctx=canvas.getContext('2d');
-  const W=canvas.offsetWidth, H=200;
-  canvas.width=W; canvas.height=H;
+  const canvas = document.getElementById('priceChart');
+  const ctx    = canvas.getContext('2d');
+  // Size canvas to actual pixel width
+  const W = canvas.parentElement.clientWidth - 48; // account for section padding
+  const H = 220;
+  canvas.width  = W;
+  canvas.height = H;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
 
-  const n=comp.length;
-  const prices=comp.map(c=>c.close);
-  const maxP=Math.max(...prices), minP=Math.min(...prices);
-  const range=maxP-minP||1;
-  const px=(v)=>Math.round(W-(v-minP)/range*W*0.9 - W*0.05);  // won't work — need xScale
-  const py=(v)=>Math.round(H-((v-minP)/range*(H*0.85)+H*0.07));
-  const px2=(i)=>Math.round(i/(n-1)*(W*0.95)+W*0.025);
+  const n      = comp.length;
+  const prices = comp.map(c => c.close);
+  const highs  = comp.map(c => c.high);
+  const lows   = comp.map(c => c.low);
 
-  ctx.clearRect(0,0,W,H);
+  // ── Price range with 5% vertical padding ──────────────────────────
+  const maxP = Math.max(...highs);
+  const minP = Math.min(...lows);
+  const pad  = (maxP - minP) * 0.05 || 50;
+  const yHi  = maxP + pad;
+  const yLo  = minP - pad;
+  const yRng = yHi - yLo;
 
-  // Background
-  ctx.fillStyle='#0d1520';
-  ctx.fillRect(0,0,W,H);
+  // Coordinate helpers
+  const px = i  => Math.round((i / (n - 1)) * (W - 60) + 4);   // leave 56px right margin for labels
+  const py = v  => Math.round(H - ((v - yLo) / yRng) * H);
 
-  // VA and REJ shading from last bar
-  const last=comp[n-1];
-  if (last.bands) {
-    const B=last.bands;
-    // VA
-    const vyH=py(B.vaHiP),vyL=py(B.vaLoP);
-    ctx.fillStyle='rgba(64,180,255,0.06)';
-    ctx.fillRect(0,Math.min(vyH,vyL),W,Math.abs(vyH-vyL));
-    ctx.strokeStyle='rgba(64,180,255,0.25)';
-    ctx.setLineDash([4,4]);
-    ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(0,vyH);ctx.lineTo(W,vyH);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(0,vyL);ctx.lineTo(W,vyL);ctx.stroke();
-    // REJ zones
-    for (const rz of [B.rejZ1,B.rejZ2]) {
-      const rH=py(B.lo+B.bw*(rz+1)),rL=py(B.lo+B.bw*rz);
-      ctx.fillStyle='rgba(255,77,106,0.05)';
-      ctx.fillRect(0,Math.min(rH,rL),W,Math.abs(rH-rL));
+  ctx.clearRect(0, 0, W, H);
+
+  // ── Background ─────────────────────────────────────────────────────
+  ctx.fillStyle = '#0d1520';
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Draw ALL band boundaries as thin horizontal lines over full chart ──
+  // Use last bar's band layout (lo, hi, bw are fixed for the lookback period)
+  const last = comp[n - 1];
+  if (last && last.bands) {
+    const B = last.bands;
+
+    // Draw each band as a filled stripe
+    for (let b = 0; b < numBands; b++) {
+      const bLo = B.lo + B.bw * b;
+      const bHi = B.lo + B.bw * (b + 1);
+      const isVA  = b >= B.vaLo && b <= B.vaHi;
+      const isRej = b === B.rejZ1 || b === B.rejZ2;
+      const yTop  = py(bHi);
+      const yBot  = py(bLo);
+      const bandH = Math.abs(yBot - yTop);
+
+      if (isVA) {
+        ctx.fillStyle = 'rgba(64,180,255,0.07)';
+      } else if (isRej) {
+        ctx.fillStyle = 'rgba(255,77,106,0.07)';
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.015)';
+      }
+      ctx.fillRect(0, Math.min(yTop, yBot), W - 56, bandH);
+
+      // Band boundary line
+      ctx.strokeStyle = isVA ? 'rgba(64,180,255,0.18)' : isRej ? 'rgba(255,77,106,0.18)' : 'rgba(30,51,84,0.5)';
+      ctx.lineWidth   = isVA || isRej ? 1 : 0.5;
+      ctx.setLineDash(isVA ? [4, 4] : []);
+      ctx.beginPath();
+      ctx.moveTo(0, yTop);
+      ctx.lineTo(W - 56, yTop);
+      ctx.stroke();
     }
+    // Bottom boundary of band 0
+    ctx.strokeStyle = 'rgba(30,51,84,0.5)';
+    ctx.lineWidth   = 0.5;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(0, py(B.lo));
+    ctx.lineTo(W - 56, py(B.lo));
+    ctx.stroke();
+
+    // VA mid-line
+    ctx.strokeStyle = 'rgba(64,180,255,0.35)';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([6, 3]);
+    ctx.beginPath();
+    ctx.moveTo(0, py(B.vaMidP));
+    ctx.lineTo(W - 56, py(B.vaMidP));
+    ctx.stroke();
     ctx.setLineDash([]);
   }
 
-  // Price line
-  ctx.strokeStyle='rgba(200,216,232,0.7)';
-  ctx.lineWidth=1.5;
-  ctx.beginPath();
-  comp.forEach((c,i)=>{
-    const x=px2(i),y=py(c.close);
-    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  // ── Grid lines + right-axis price labels ───────────────────────────
+  ctx.font      = '9px Share Tech Mono';
+  ctx.textAlign = 'left';
+  [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(f => {
+    const v = yLo + yRng * f;
+    const y = py(v);
+    ctx.strokeStyle = 'rgba(74,96,128,0.1)';
+    ctx.lineWidth   = 0.5;
+    ctx.setLineDash([2, 6]);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W - 56, y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#4a6080';
+    ctx.fillText(Math.round(v).toLocaleString('en-IN'), W - 54, y + 3);
   });
-  ctx.stroke();
 
-  // Trade markers
-  const colorMap={WIN:'#3ddc84',LOSS:'#ff4d6a',OPEN:'#ff8c00'};
-  allTrades.forEach(t=>{
-    const ei=t.entryIdx;
-    if(ei>=0&&ei<n){
-      const x=px2(ei),y=py(comp[ei].close);
-      ctx.fillStyle=colorMap[t.outcome]||'#ff8c00';
+  // ── Candlestick bars (or price line if too many bars) ─────────────
+  if (n <= 120) {
+    // Draw candles
+    const bw = Math.max(1, Math.floor((W - 60) / n) - 1);
+    comp.forEach((c, i) => {
+      const x   = px(i);
+      const bull = c.close >= c.open;
+      const col  = bull ? '#3ddc84' : '#ff4d6a';
+      ctx.strokeStyle = col;
+      ctx.fillStyle   = bull ? 'rgba(61,220,132,0.5)' : 'rgba(255,77,106,0.5)';
+      ctx.lineWidth   = 1;
+      // Wick
       ctx.beginPath();
-      ctx.arc(x,y,4,0,Math.PI*2);
+      ctx.moveTo(x, py(c.high));
+      ctx.lineTo(x, py(c.low));
+      ctx.stroke();
+      // Body
+      const bodyTop = py(Math.max(c.open, c.close));
+      const bodyBot = py(Math.min(c.open, c.close));
+      const bodyH   = Math.max(1, bodyBot - bodyTop);
+      ctx.fillRect(x - Math.floor(bw / 2), bodyTop, bw, bodyH);
+    });
+  } else {
+    // Line chart for dense data
+    ctx.strokeStyle = 'rgba(200,216,232,0.8)';
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath();
+    comp.forEach((c, i) => {
+      i === 0 ? ctx.moveTo(px(i), py(c.close)) : ctx.lineTo(px(i), py(c.close));
+    });
+    ctx.stroke();
+  }
+
+  // ── Trade markers ──────────────────────────────────────────────────
+  const colorMap = { WIN: '#3ddc84', LOSS: '#ff4d6a', OPEN: '#ff8c00' };
+  const shapeMap = { L1A: 's', L2: 'd', L3: 't', L4: 't2', TORT: 'c', PYTH: 'c' };
+
+  allTrades.forEach(t => {
+    const ei = t.entryIdx;
+    if (ei < 0 || ei >= n) return;
+    const x   = px(ei);
+    const y   = py(comp[ei].close);
+    const col = colorMap[t.outcome] || '#ff8c00';
+
+    // TP & SL horizontal lines from entry to exit (or end)
+    const exitI = t.exitDateIdx != null ? Math.min(t.exitDateIdx, n - 1) : n - 1;
+    const xExit = px(exitI);
+
+    // TP line (green dashed)
+    ctx.strokeStyle = 'rgba(61,220,132,0.25)';
+    ctx.lineWidth   = 0.8;
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x, py(t.tpLevel));
+    ctx.lineTo(xExit, py(t.tpLevel));
+    ctx.stroke();
+
+    // SL line (red dashed)
+    ctx.strokeStyle = 'rgba(255,77,106,0.25)';
+    ctx.beginPath();
+    ctx.moveTo(x, py(t.slLevel));
+    ctx.lineTo(xExit, py(t.slLevel));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Vertical entry marker line
+    ctx.strokeStyle = col + '50';
+    ctx.lineWidth   = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(x, py(t.tpLevel));
+    ctx.lineTo(x, py(t.slLevel));
+    ctx.stroke();
+
+    // Entry dot
+    ctx.fillStyle = col;
+    ctx.strokeStyle = '#0d1520';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Exit dot
+    if (t.exitDateIdx != null && t.outcome !== 'OPEN') {
+      const ey = py(comp[Math.min(t.exitDateIdx, n-1)].close);
+      ctx.fillStyle   = col + 'aa';
+      ctx.strokeStyle = '#0d1520';
+      ctx.lineWidth   = 1;
+      ctx.beginPath();
+      ctx.arc(xExit, ey, 3, 0, Math.PI * 2);
       ctx.fill();
-      // Entry line
-      ctx.strokeStyle=(colorMap[t.outcome]||'#ff8c00')+'60';
-      ctx.lineWidth=0.5;
-      ctx.setLineDash([2,4]);
-      const tpY=py(t.tpLevel),slY=py(t.slLevel);
-      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,tpY);ctx.stroke();
-      ctx.setLineDash([]);
+      ctx.stroke();
     }
   });
 
-  // Axis labels
-  ctx.fillStyle='#4a6080';
-  ctx.font='10px Share Tech Mono';
-  ctx.textAlign='right';
-  [0,0.25,0.5,0.75,1].forEach(f=>{
-    const v=Math.round(minP+range*f);
-    const y=py(v);
-    ctx.fillText(v.toLocaleString('en-IN'),W-4,y+4);
-    ctx.strokeStyle='rgba(74,96,128,0.15)';
-    ctx.lineWidth=0.5;
-    ctx.setLineDash([2,6]);
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W-45,y);ctx.stroke();
-    ctx.setLineDash([]);
-  });
+  // ── Date labels along bottom (every ~40 bars) ──────────────────────
+  ctx.fillStyle = '#3a5060';
+  ctx.font      = '8px Share Tech Mono';
+  ctx.textAlign = 'center';
+  const step = Math.max(1, Math.floor(n / 8));
+  for (let i = 0; i < n; i += step) {
+    const x = px(i);
+    ctx.fillText(comp[i].dateStr.slice(3), x, H - 2); // "Mon-YYYY"
+  }
 }
 
 function renderTable(data) {
@@ -1650,6 +1918,103 @@ function renderTable(data) {
       <td class="mono dim-text">${t.hvp}%</td>
       <td class="mono dim-text">${t.atr}</td>
     </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// PERFORMANCE BREAKDOWN TABLES
+// ═══════════════════════════════════════════════════════════
+function renderPerfTables(trades) {
+  // Only closed trades contribute to stats
+  const closed = trades.filter(t => t.outcome !== 'OPEN');
+
+  function calcStats(subset) {
+    const wins   = subset.filter(t => t.outcome === 'WIN');
+    const losses = subset.filter(t => t.outcome === 'LOSS');
+    const netPts = subset.reduce((s, t) => s + (t.pnlPts || 0), 0);
+    const winPts = wins.reduce((s, t) => s + (t.pnlPts || 0), 0);
+    const lsPts  = losses.reduce((s, t) => s + (t.pnlPts || 0), 0);
+    const wr     = subset.length ? Math.round(wins.length / subset.length * 100) : 0;
+    const avgW   = wins.length   ? Math.round(winPts / wins.length)   : 0;
+    const avgL   = losses.length ? Math.round(lsPts  / losses.length) : 0;
+    const best   = subset.length ? Math.max(...subset.map(t => t.pnlPts || 0)) : 0;
+    const worst  = subset.length ? Math.min(...subset.map(t => t.pnlPts || 0)) : 0;
+    return { total: subset.length, wins: wins.length, losses: losses.length,
+             wr, netPts, avgW, avgL, best, worst };
+  }
+
+  function buildRow(label, s, isBest, isWorst) {
+    const netCls = s.netPts >= 0 ? 'net-pos' : 'net-neg';
+    const wrCls  = s.wr >= 60 ? 'wr-hi' : s.wr < 40 ? 'wr-lo' : '';
+    const rowCls = isBest ? 'best-row' : isWorst ? 'worst-row' : '';
+    return `<tr class="${rowCls}">
+      <td>${label}</td>
+      <td>${s.total}</td>
+      <td style="color:var(--bull)">${s.wins}</td>
+      <td style="color:var(--bear)">${s.losses}</td>
+      <td class="${wrCls}">${s.wr}%</td>
+      <td class="${netCls}">${s.netPts >= 0 ? '+' : ''}${s.netPts}</td>
+      <td style="color:var(--bull)">${s.avgW > 0 ? '+' : ''}${s.avgW}</td>
+      <td style="color:var(--bear)">${s.avgL}</td>
+      <td style="color:var(--bull)">+${s.best}</td>
+      <td style="color:var(--bear)">${s.worst}</td>
+    </tr>`;
+  }
+
+  function buildFoot(s) {
+    const netCls = s.netPts >= 0 ? 'net-pos' : 'net-neg';
+    return `<tr>
+      <td>TOTAL</td>
+      <td>${s.total}</td>
+      <td style="color:var(--bull)">${s.wins}</td>
+      <td style="color:var(--bear)">${s.losses}</td>
+      <td>${s.wr}%</td>
+      <td class="${netCls}">${s.netPts >= 0 ? '+' : ''}${s.netPts}</td>
+      <td style="color:var(--bull)">${s.avgW > 0 ? '+' : ''}${s.avgW}</td>
+      <td style="color:var(--bear)">${s.avgL}</td>
+      <td style="color:var(--bull)">+${s.best}</td>
+      <td style="color:var(--bear)">${s.worst}</td>
+    </tr>`;
+  }
+
+  // ── BY LAYER ─────────────────────────────────────────────────────
+  const layerOrder = ['L1A','L2','L3','L4','TORT','PYTH'];
+  const layerLabel = { L1A:'L1A  IC/JRF', L2:'L2  DRL/JL', L3:'L3  JRC',
+                       L4:'L4  JTC', TORT:'TORTOISE', PYTH:'PYTHON' };
+  const layerStats = {};
+  for (const ly of layerOrder) {
+    layerStats[ly] = calcStats(closed.filter(t => t.layer === ly));
+  }
+  // Find best/worst net by layer (only rows with trades)
+  const activeLayers = layerOrder.filter(l => layerStats[l].total > 0);
+  const bestLayer  = activeLayers.reduce((a,b) => layerStats[a].netPts >= layerStats[b].netPts ? a : b, activeLayers[0]);
+  const worstLayer = activeLayers.reduce((a,b) => layerStats[a].netPts <= layerStats[b].netPts ? a : b, activeLayers[0]);
+
+  let layerHTML = '';
+  for (const ly of layerOrder) {
+    const s = layerStats[ly];
+    if (s.total === 0) continue;
+    layerHTML += buildRow(layerLabel[ly] || ly, s, ly === bestLayer, ly === worstLayer);
+  }
+  document.getElementById('layerPerfBody').innerHTML = layerHTML;
+  document.getElementById('layerPerfFoot').innerHTML = buildFoot(calcStats(closed));
+
+  // ── BY BAND ───────────────────────────────────────────────────────
+  // Collect all bands used
+  const bandsUsed = [...new Set(closed.map(t => t.band))].sort((a,b) => a - b);
+  const bandStats = {};
+  for (const b of bandsUsed) {
+    bandStats[b] = calcStats(closed.filter(t => t.band === b));
+  }
+  const bestBand  = bandsUsed.reduce((a,b) => bandStats[a].netPts >= bandStats[b].netPts ? a : b, bandsUsed[0]);
+  const worstBand = bandsUsed.reduce((a,b) => bandStats[a].netPts <= bandStats[b].netPts ? a : b, bandsUsed[0]);
+
+  let bandHTML = '';
+  for (const b of bandsUsed) {
+    const s = bandStats[b];
+    bandHTML += buildRow('B' + b, s, b === bestBand, b === worstBand);
+  }
+  document.getElementById('bandPerfBody').innerHTML = bandHTML;
+  document.getElementById('bandPerfFoot').innerHTML = buildFoot(calcStats(closed));
 }
 
 // ═══════════════════════════════════════════════════════════
